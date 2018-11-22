@@ -5,16 +5,16 @@
 import os
 
 # Set working directory
-path_wd = '/media/luolab/ZA1BT1ER/yanting/vM4_def'
+parent_wd = '/media/luolab/ZA1BT1ER/yanting/vM4_def'
 
 # Change working directory
-os.chdir(path_wd)
+os.chdir(parent_wd)
 
 # List all folders in wd
 folders = os.listdir()
 
 for folder in folders: # Iterate over wd, go into one folder each time
-    os.chdir(os.path.join(path_wd, folder))
+    os.chdir(os.path.join(parent_wd, folder))
     for filename in os.listdir():  # Iterate over all files in each folder
         if filename.endswith(".tsv.gz"):  # Find counts.tsv.gz
             cmd = 'gunzip -k '+filename  # Construct command line
