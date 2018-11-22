@@ -7,7 +7,7 @@ import pandas as pd
 def addsuffix(df, suffix):
     df.cell = df.cell + suffix
 
-# Set some default parameters, i.e. working directory and filename
+# Set up some default parameters, i.e. working directory and filename
 parent_wd = '/media/luolab/ZA1BT1ER/yanting/'
 data_wd = '/media/luolab/ZA1BT1ER/yanting/vM4_def/'
 
@@ -31,6 +31,8 @@ for folder in os.listdir(data_wd):
 
     filename = '_'.join(nameparts)
 
+    print('parsing ' + filename + ' ...')
+
     # Read counts data
     data = pd.read_csv(filename, sep="\t")
 
@@ -49,5 +51,6 @@ for folder in os.listdir(data_wd):
     out_filename = '_'.join(out_nameparts)
     data.to_csv(out_filename, sep="\t", index=False)
 
+    print('finished\n')
 # # Example code to import data
 # gene_cell_counts = pd.read_csv('YT101001_TKR181000273_HNGCTCCXY_L6_counts.tsv', sep="\t")
