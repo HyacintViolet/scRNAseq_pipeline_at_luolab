@@ -4,7 +4,7 @@ import pandas as pd
 
 # Generic function to add suffix to the 'cell' column in counts.tsv DataFrame.
 # suffix is equivalent to codename
-def addsuffix(df, suffix):
+def add_suffix(df, suffix):
     df.cell = df.cell + suffix
 
 # Set up some default parameters, i.e. working directory and filename
@@ -43,7 +43,7 @@ for folder in os.listdir(data_wd):
     suffix = '_' + codename.iloc[0]
 
     # Add suffix
-    addsuffix(data, suffix)
+    add_suffix(data, suffix)
 
     # Output XXXXXXXX_counts_suffix.tsv
     # *** The naming convention should absolutely be simplified in the future ***

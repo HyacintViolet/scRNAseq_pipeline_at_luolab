@@ -3,7 +3,7 @@ import pandas as pd
 
 # Generic function to add suffix to the 'cell' column in DataFrame.
 # suffix is equivalent to codename
-def addsuffix(df, suffix):
+def add_suffix(df, suffix):
     df.cell = df.cell + suffix
 
 # Set up some default parameters, i.e. working directory and filename
@@ -26,13 +26,11 @@ for folder in os.listdir(data_wd):
     match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)_vM4_def$', folder)
 
     # Import data
-    whitelist = pd.read_csv('whitelist.txt', sep="\t", header=None)
-    whitelist_Nuniquemap = pd.read_csv('whitelist.txt.mapped', sep="\t", header=None)
-
-    # Rename header
-    whitelist.colunms = ['cell','candidate','Nreads','Ncandidate']
-    whitelist_Nuniquemap.columns = ['Nuniquemap', 'cell']
-
+    whitelist = pd.read_csv('whitelist.txt', sep="\t", names = ['cell', 'candidate', 'Nreads', 'Ncandidate'])
+    whitelist_Nuniquemap = pd.read_csv('whitelist.txt.mapped', delim_whitespace=True, names=['Nuniquemap','cell'])
+    # CaiT pipeline uses 'id' as header
+    # whitelist = pd.read_csv('whitelist.txt', sep="\t", names=['id', 'candidate', 'Nreads', 'Ncandidate'])
+    # whitelist_Nuniquemap = pd.read_csv('whitelist.txt.mapped', delim_whitespace=True, names=['Nuniquemap', 'id'])
 
     # Find codename w.r.t. lib_prefix to use as suffix
     codename = exp_design.codename[exp_design.lib_prefix == match.group(1)]
@@ -41,8 +39,8 @@ for folder in os.listdir(data_wd):
     suffix = '_' + codename.iloc[0]
 
     # Add suffix
-    addsuffix(whitelist, suffix)
-    addsuffix(whitelist_Nuniquemap, suffix)
+    add_suffix(whitelist, suffix)
+    add_suffix(whitelist_Nuniquemap, suffix)
 
     # Construct mapping stat DataFrame
     frames = [whitelist.Nreads, whitelist_Nuniquemap.Nuniquemap, whitelist.cell]
