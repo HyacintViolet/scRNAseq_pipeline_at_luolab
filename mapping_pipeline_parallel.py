@@ -7,9 +7,9 @@ import pandas as pd
 # copy and paste into value.
 
 
-def wash_whitelist(folder):
-    print('Washing ' + folder)
-    os.chdir(os.path.join(path_to_mapping_directory, folder))
+def wash_whitelist(output_folder_path, barcode_ground_truth, match):
+    print('Washing ' + output_folder_path)
+    os.chdir(output_folder_path)
 
     # Read whitelist80
     whitelist80 = pd.read_csv('whitelist80.txt', sep="\t", names=['cell', 'candidate', 'Nreads', 'Ncandidate'])
@@ -53,6 +53,9 @@ def main():
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
 
+    # ------------------------------------------------------------------------------------------------------------------
+    # STEP 1: Identify correct cell barcodes.
+    # Command to use: umi_tools whitelist. Script to use: whitelist_wash.py
     # This is the parent directory for all output directories
     output_folder_list = os.listdir(path_to_mapping_directory)
     for output_folder in output_folder_list[1:3]:
@@ -65,10 +68,7 @@ def main():
         match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)_vM4_def$', output_folder)
         input_file_name_prefix = '_'.join([match.group(1), match.group(2), match.group(3), match.group(4)])
 
-# ----------------------------------------------------------------------------------------------------------------------
 
-    # STEP 1: Identify correct cell barcodes.
-    # Command to use: umi_tools whitelist. Script to use: whitelist_wash.py
         read1_file_name = '_'.join([input_file_name_prefix, '2.fq.gz'])
 
         # Construct command and execute
@@ -77,9 +77,10 @@ def main():
         subprocess.Popen(command_whitelist, shell=True)
 
         # Wash whitelist, output whitelist_washed.txt
-        wash_whitelist(output_folder)
+        output_folder_path = os.path.join(path_to_mapping_directory, output_folder)
+        wash_whitelist(output_folder_path, barcode_ground_truth, match)
 
-# ----------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
 
     # STEP 2: Extract barcodes and UMIs and add to read names
     # Command to use: umi_tools extract. Because this step takes considerable amount of time but takes only 1 thread
