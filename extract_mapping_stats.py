@@ -26,8 +26,8 @@ for folder in os.listdir(data_wd):
     match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)_vM4_def$', folder)
 
     # Import data
-    whitelist = pd.read_csv('whitelist.txt', sep="\t", names = ['cell', 'candidate', 'Nreads', 'Ncandidate'])
-    whitelist_Nuniquemap = pd.read_csv('whitelist.txt.mapped', delim_whitespace=True, names=['Nuniquemap','cell'])
+    whitelist = pd.read_csv('whitelist80_edited.txt', sep="\t", names = ['cell', 'candidate', 'Nreads', 'Ncandidate'])
+    whitelist_Nuniquemap = pd.read_csv('whitelist80.txt.mapped', delim_whitespace=True, names=['Nuniquemap','cell'])
     # CaiT pipeline uses 'id' as header
     # whitelist = pd.read_csv('whitelist.txt', sep="\t", names=['id', 'candidate', 'Nreads', 'Ncandidate'])
     # whitelist_Nuniquemap = pd.read_csv('whitelist.txt.mapped', delim_whitespace=True, names=['Nuniquemap', 'id'])

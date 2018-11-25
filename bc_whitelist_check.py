@@ -13,15 +13,16 @@ barcode_ground_truth_raw = pd.read_excel('barcode_ground_truth_checklist.xlsx')
 barcode_ground_truth = barcode_ground_truth_raw['Primer_sequence'].str.extract(r'TCAGACGTGTGCTCTTCCGATCT([ATCG]{8})', expand=False)
 
 # Iteratively load in whitelist80.txt, check barcodes.
-# Output: presence_in_eighty: found/miss; rank_in_whitlist: [1-80]/NaN; Nreads: /d
-for i in range(len(os.listdir(data_wd))):
-    os.chdir(os.path.join(data_wd,os.listdir(data_wd)[i]))
+# Output: presence_in_ground_truth: [0-47]/NaN; rank_in_whitlist: [1-80]; Nreads: /d
+for folder in os.listdir(data_wd):
+    os.chdir(os.path.join(data_wd,folder))
 
-    print('Parsing '+os.listdir(data_wd)[i])
+    print('Parsing '+folder)
 
-    match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)_vM4_def$', os.listdir(data_wd)[i])
+    # Get file id for output name
+    match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)_vM4_def$', folder)
 
-    # Read whitelist80, adjust column display position
+    # Read whitelist80
     whitelist80 = pd.read_csv('whitelist80.txt', sep="\t", names = ['cell', 'candidate', 'Nreads', 'Ncandidate'])
 
     # reordered_col = ['cell', 'Nreads', 'candidate', 'Ncandidate']
@@ -30,8 +31,21 @@ for i in range(len(os.listdir(data_wd))):
     # Sort by 'Nreads' in descending order
     sorted_whitelist80 = whitelist80.sort_values('Nreads', ascending=False)
     sorted_whitelist80 = sorted_whitelist80.reset_index(drop=True)
-    sorted_whitelist80['ranking'] = range(1,len(sorted_whitelist80)+1)
+    sorted_whitelist80['ranking'] = range(1, len(sorted_whitelist80)+1)
 
+    # # Compute Nreads + Ncandidate, write to a new column.
+    # # In fact this is not very useful, as the candidate barcodes 1 Hamming Distance away from whitelist barcodes
+    # # is automatically parsed into the 'umi_tools counts' function. And for sequencing QC, Nuniquemapped/Nreads is
+    # # good enough.
+    # sorted_whitelist80['Nreads_plus_candidate'] = 0
+    # for j in range(len(sorted_whitelist80)):
+    #     row = sorted_whitelist80.Ncandidate.iloc[j]
+    #     row = row.split(',')
+    #     row = list(map(int, row))
+    #     # print(row)
+    #     sorted_whitelist80['Nreads_plus_candidate'].loc[j] = sum(row) + sorted_whitelist80['Nreads'].loc[j]
+
+    # Swap column
     reindexed_barcode_ground_truth = pd.Series(barcode_ground_truth.index.values, index=barcode_ground_truth)
 
     ground_truth_dict = reindexed_barcode_ground_truth.to_dict()
@@ -42,7 +56,11 @@ for i in range(len(os.listdir(data_wd))):
 
     output = sorted_whitelist80[['cell', 'presence_in_ground_truth', 'ranking', 'Nreads']]
 
+    if len(output.presence_in_ground_truth.dropna()) != 48:
+        print('Something is missing. Longer whitelist may be needed.\n')
+
+
     # Output
-    out_nameparts = [match.group(1), 'barcode_checklist.txt']
+    out_nameparts = [match.group(1), match.group(2), match.group(3), match.group(4), 'barcode_checklist.txt']
     out_filename = '_'.join(out_nameparts)
     output.to_csv(out_filename, sep="\t", index=False)
