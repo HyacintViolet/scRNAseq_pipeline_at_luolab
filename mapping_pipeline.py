@@ -80,7 +80,7 @@ for input_folder in input_folder_list:
 # ----------------------------------------------------------------------------------------------------------------------
 
     # STEP 2: Extract barcodes and UMIs and add to read names
-    # Command to use: umi_tools extract
+    # Command to use: umi_tools extract   *** this should be paralleled ***
     # Construct output file name
     out_name_extract = '_'.join([out_file_name_prefix, 'extracted.fq.gz'])
 
@@ -100,7 +100,7 @@ for input_folder in input_folder_list:
                            ' --readFilesIn ' + out_name_extract + \
                            ' --readFilesCommand zcat --outFilterMultimapNmax 1 --outFilterType BySJout' + \
                            ' --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonical' + \
-                           ' --outSAMtype BAM SortedByCoordinate --outFileNamePrefix ' + out_file_name_prefix
+                           ' --outSAMtype BAM SortedByCoordinate --outFileNamePrefix ' + out_file_name_prefix + '_'
     os.system(command_STAR_mapping)
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -122,6 +122,11 @@ for input_folder in input_folder_list:
 
     command_samtools_index = 'samtools index ' + out_name_samtools
     os.system(command_samtools_index)
+
+    # Extract uniquely mapped reads *** this can be paralleled with other commands ***
+    out_Nuniqmapped = '_'.join([out_file_name_prefix, 'Nuniqmapped.txt'])
+    command_Nuniqmapped = 'samtools view -F4 ' + in_name_Aligned + ' | cut -f 2 -d \'_\' |sort|uniq -c > ' + out_Nuniqmapped
+    os.system(command_Nuniqmapped)
 
 # ----------------------------------------------------------------------------------------------------------------------
 
