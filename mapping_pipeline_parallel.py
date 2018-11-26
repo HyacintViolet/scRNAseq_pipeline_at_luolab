@@ -101,6 +101,8 @@ def main():
             os.wait()
             processes_whitelist.difference_update([p for p in processes_whitelist if p.poll() is not None])
 
+        print('umi_tools whitelist: finished.')
+
 # ----------------------------------------------------------------------------------------------------------------------
 # CHUNK 1 ENDS
 # ----------------------------------------------------------------------------------------------------------------------
@@ -117,6 +119,8 @@ def main():
         output_folder_path = os.path.join(path_to_mapping_directory, output_folder)
         wash_whitelist(output_folder_path, barcode_ground_truth, match)
 
+    print('Wash whitelist: finished.')
+
 # ----------------------------------------------------------------------------------------------------------------------
 # CHUNK 2 ENDS
 # ----------------------------------------------------------------------------------------------------------------------
@@ -129,7 +133,9 @@ def main():
 
     processes_extract = set()
     max_processes_extract = 8
-    for output_folder in output_folder_list:
+    for input_folder in input_folder_list:
+
+        output_folder = input_folder + '_vM4_def'
 
         # Change directory to output folder
         os.chdir(os.path.join(path_to_mapping_directory, output_folder))
@@ -149,9 +155,9 @@ def main():
 
         # Construct command: umi_tools extract
         command_extract = 'umi_tools extract --bc-pattern=CCCCCCCCNNNNNNNN --stdin ' + os.path.join(path_to_seq_data,
-                                                                                                    output_folder,
+                                                                                                    input_folder,
                                                                                                     read1_file_name) + \
-                          ' --read2-in ' + os.path.join(path_to_seq_data, output_folder, read2_file_name) + \
+                          ' --read2-in ' + os.path.join(path_to_seq_data, input_folder, read2_file_name) + \
                           ' --stdout ' + out_name_extract + \
                           ' --read2-stdout --filter-cell-barcode --error-correct-cell' \
                           ' --whitelist=' + out_file_name_prefix + '_whitelist_washed.txt'
@@ -161,6 +167,8 @@ def main():
         if len(processes_extract) >= max_processes_extract:
             os.wait()
             processes_extract.difference_update([p for p in processes_extract if p.poll() is not None])
+
+    print('umi_tools extract: finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
 # CHUNK 3 ENDS
@@ -182,7 +190,7 @@ def main():
         out_file_name_prefix = match.group(1)
         out_name_extract = '_'.join([out_file_name_prefix, 'extracted.fq.gz'])
 
-        command_star_mapping = 'STAR --runThreadN 32 --genomeDir ' + path_to_genome_index + \
+        command_star_mapping = 'STAR --runThreadN 42 --genomeDir ' + path_to_genome_index + \
                                ' --readFilesIn ' + out_name_extract + \
                                ' --readFilesCommand zcat --outFilterMultimapNmax 1 --outFilterType BySJout' + \
                                ' --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonical' + \
@@ -197,6 +205,8 @@ def main():
         command_feature_counts = 'featureCounts -a ' + path_to_genome_anno + ' -o ' + out_name_feature_counts + \
                                  ' -R BAM ' + in_name_aligned + ' -T 32'
         os.system(command_feature_counts)
+
+    print('STAR & featureCounts: finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
 # CHUNK 4 ENDS
@@ -232,6 +242,8 @@ def main():
             os.wait()
             processes_sort.difference_update([p for p in processes_sort if p.poll() is not None])
 
+    print('samtools sort: finished.')
+
 # ----------------------------------------------------------------------------------------------------------------------
 # CHUNK 5 ENDS
 # ----------------------------------------------------------------------------------------------------------------------
@@ -262,6 +274,8 @@ def main():
         if len(processes_index) >= max_processes_index:
             os.wait()
             processes_index.difference_update([p for p in processes_index if p.poll() is not None])
+
+    print('samtools index: finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
 # CHUNK 6 ENDS
@@ -297,11 +311,14 @@ def main():
             os.wait()
             processes_count.difference_update([p for p in processes_count if p.poll() is not None])
 
+        print('umi_tools count: finished.')
+
 # ----------------------------------------------------------------------------------------------------------------------
 # CHUNK 7 ENDS
 # ----------------------------------------------------------------------------------------------------------------------
 # CHUNK 8 STARTS HERE
 # ----------------------------------------------------------------------------------------------------------------------
+
     processes_uniqmapped = set()
     max_processes_uniqmapped = 16
     for output_folder in output_folder_list:
@@ -318,7 +335,8 @@ def main():
 
         # Extract uniquely mapped reads *** this can be paralleled with other commands ***
         out_nuniqmapped = '_'.join([out_file_name_prefix, 'Nuniqmapped.txt'])
-        command_nuniqmapped = 'samtools view -F4 ' + in_name_aligned + ' | cut -f 2 -d \'_\' |sort|uniq -c > ' + out_nuniqmapped
+        command_nuniqmapped = 'samtools view -F4 ' + in_name_aligned + ' | cut -f 2 -d \'_\' |sort|uniq -c > ' +\
+                              out_nuniqmapped
 
         # Nuniqmapped extract parallelized
         processes_uniqmapped.add(subprocess.Popen(command_nuniqmapped, shell=True))
@@ -326,9 +344,12 @@ def main():
             os.wait()
             processes_uniqmapped.difference_update([p for p in processes_uniqmapped if p.poll() is not None])
 
+    print('samtools extract Nuniqmapped: finished.')
+
 # ----------------------------------------------------------------------------------------------------------------------
 # CHUNK 8 ENDS
 # ----------------------------------------------------------------------------------------------------------------------
+
 
 if __name__ == '__main__':
     main()
