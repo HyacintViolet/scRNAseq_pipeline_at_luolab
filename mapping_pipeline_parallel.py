@@ -184,6 +184,8 @@ def main():
         # Change directory to output folder
         os.chdir(os.path.join(path_to_mapping_directory, output_folder))
 
+        print('Mapping ' + output_folder)
+
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
         match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)_vM4_def$', output_folder)
@@ -194,8 +196,9 @@ def main():
                                ' --readFilesIn ' + out_name_extract + \
                                ' --readFilesCommand zcat --outFilterMultimapNmax 1 --outFilterType BySJout' + \
                                ' --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonical' + \
-                               ' --outSAMtype BAM SortedByCoordinate --outFileNamePrefix ' + out_file_name_prefix
-        os.system(command_star_mapping)
+                               ' --outSAMtype BAM SortedByCoordinate --outFileNamePrefix ' + out_file_name_prefix + '_'
+        p = subprocess.Popen(command_star_mapping, shell=True)
+        p.wait()
 
         # STEP 4: Assign reads to genes
         # Command to use: featureCounts, samtools sort, samtools index
@@ -204,7 +207,8 @@ def main():
         in_name_aligned = '_'.join([out_file_name_prefix, 'Aligned.sortedByCoord.out.bam'])
         command_feature_counts = 'featureCounts -a ' + path_to_genome_anno + ' -o ' + out_name_feature_counts + \
                                  ' -R BAM ' + in_name_aligned + ' -T 32'
-        os.system(command_feature_counts)
+        p = subprocess.Popen(command_feature_counts, shell=True)
+        p.wait()
 
     print('STAR & featureCounts: finished.')
 
@@ -242,7 +246,7 @@ def main():
             os.wait()
             processes_sort.difference_update([p for p in processes_sort if p.poll() is not None])
 
-    print('samtools sort: finished.')
+    # print('samtools sort: finished.') # This doesn't work. Alert appears before job finishing.
 
 # ----------------------------------------------------------------------------------------------------------------------
 # CHUNK 5 ENDS
@@ -311,7 +315,7 @@ def main():
             os.wait()
             processes_count.difference_update([p for p in processes_count if p.poll() is not None])
 
-        print('umi_tools count: finished.')
+    print('umi_tools count: finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
 # CHUNK 7 ENDS
