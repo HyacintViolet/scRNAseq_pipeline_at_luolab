@@ -18,7 +18,7 @@ for folder in os.listdir(path_to_mapping_directory):
     os.chdir(os.path.join(path_to_mapping_directory, folder))
 
     # Grab folder name
-    match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)_vM4_def$', folder)
+    match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', folder)
 
     # Read whitelist80
     whitelist80 = pd.read_csv('whitelist80.txt', sep="\t", names=['cell', 'candidate', 'Nreads', 'Ncandidate'])

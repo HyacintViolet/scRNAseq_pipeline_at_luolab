@@ -9,7 +9,7 @@ def add_suffix(df, suffix):
 
 # Set up some default parameters, i.e. working directory and filename
 parent_wd = '/media/luolab/ZA1BT1ER/yanting/'
-data_wd = '/media/luolab/ZA1BT1ER/yanting/vM4_def/'
+data_wd = '/media/luolab/ZA1BT1ER/yanting/vM4_def_2/'
 
 # Change working directory
 os.chdir(parent_wd)
@@ -25,9 +25,9 @@ for folder in os.listdir(data_wd):
     os.chdir(library_wd)
 
     # Extract names from folder
-    match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)_vM4_def$', folder)
+    match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', folder)
 
-    nameparts = [match.group(1), match.group(2), match.group(3), match.group(4), 'counts.tsv']
+    nameparts = [match.group(1), 'counts.tsv']
 
     filename = '_'.join(nameparts)
 
@@ -47,7 +47,7 @@ for folder in os.listdir(data_wd):
 
     # Output XXXXXXXX_counts_suffix.tsv
     # *** The naming convention should absolutely be simplified in the future ***
-    out_nameparts = [match.group(1), match.group(2), match.group(3), match.group(4), 'counts', 'suffix.tsv']
+    out_nameparts = [match.group(1), 'counts', 'suffix.tsv']
     out_filename = '_'.join(out_nameparts)
     data.to_csv(out_filename, sep="\t", index=False)
 

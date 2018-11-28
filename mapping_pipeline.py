@@ -56,7 +56,7 @@ for input_folder in input_folder_list:
 
     # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming convention
     # is reversed.
-    match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)_vM4_def$', output_folder)
+    match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', output_folder)
     input_file_name_prefix = '_'.join([match.group(1), match.group(2), match.group(3), match.group(4)])
     out_file_name_prefix = match.group(1)
 

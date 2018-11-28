@@ -83,7 +83,7 @@ def main():
 
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)_vM4_def$', output_folder)
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', output_folder)
         input_file_name_prefix = '_'.join([match.group(1), match.group(2), match.group(3), match.group(4)])
 
         read1_file_name = '_'.join([input_file_name_prefix, '2.fq.gz'])
@@ -113,7 +113,7 @@ def main():
 
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)_vM4_def$', output_folder)
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', output_folder)
 
         # Wash whitelist, output whitelist_washed.txt
         output_folder_path = os.path.join(path_to_mapping_directory, output_folder)
@@ -142,7 +142,7 @@ def main():
 
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)_vM4_def$', output_folder)
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', output_folder)
         input_file_name_prefix = '_'.join([match.group(1), match.group(2), match.group(3), match.group(4)])
         out_file_name_prefix = match.group(1)
 
@@ -188,7 +188,7 @@ def main():
 
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)_vM4_def$', output_folder)
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', output_folder)
         out_file_name_prefix = match.group(1)
         out_name_extract = '_'.join([out_file_name_prefix, 'extracted.fq.gz'])
 
@@ -228,7 +228,7 @@ def main():
 
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)_vM4_def$', output_folder)
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', output_folder)
         out_file_name_prefix = match.group(1)
 
         # Input file name for samtools sort
@@ -264,7 +264,7 @@ def main():
 
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)_vM4_def$', output_folder)
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', output_folder)
         out_file_name_prefix = match.group(1)
 
         # Input & output file name for samtools index
@@ -298,7 +298,7 @@ def main():
 
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)_vM4_def$', output_folder)
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', output_folder)
         out_file_name_prefix = match.group(1)
 
         # Input file name for umi_tools count
@@ -332,7 +332,7 @@ def main():
 
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)_vM4_def$', output_folder)
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', output_folder)
         out_file_name_prefix = match.group(1)
 
         in_name_aligned = '_'.join([out_file_name_prefix, 'Aligned.sortedByCoord.out.bam'])

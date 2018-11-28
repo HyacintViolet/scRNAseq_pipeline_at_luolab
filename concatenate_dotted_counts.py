@@ -14,7 +14,7 @@ for i in range(len(folder_list)):
 
         match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', folder_list[0])
 
-        count_filename_parts = [match.group(1), 'suffix', 'renamed.tsv']
+        count_filename_parts = [match.group(1), 'counts', 'suffix.tsv']
 
         count_filename = '_'.join(count_filename_parts)
 
@@ -23,7 +23,7 @@ for i in range(len(folder_list)):
     else:
         match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', folder_list[i])
 
-        count_filename_parts = [match.group(1), 'suffix', 'renamed.tsv']
+        count_filename_parts = [match.group(1), 'counts', 'suffix.tsv']
 
         count_filename = '_'.join(count_filename_parts)
 
@@ -32,5 +32,5 @@ for i in range(len(folder_list)):
         counts = counts.append(this_count)
 
 # Output
-out_filename = 'counts.txt'
+out_filename = 'counts_dotted.txt'
 counts.to_csv(out_filename, sep="\t", index=False)
