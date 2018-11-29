@@ -1,21 +1,23 @@
-import os, re
+import os
+import re
 import pandas as pd
 
 # Setup working directory
 parent_wd = '/media/luolab/ZA1BT1ER/yanting/'
 os.chdir(parent_wd)
-data_wd = '/media/luolab/ZA1BT1ER/yanting/vM4_def/'
+data_wd = '/media/luolab/ZA1BT1ER/yanting/vM4_CaiT/first_time/'
 
 # Read ground truth barcode list
-barcode_ground_truth_raw = pd.read_excel('barcode_ground_truth_checklist.xlsx')
+bc_ground_truth_raw = pd.read_excel('barcode_ground_truth_checklist.xlsx')
 
 # Extract ground truth barcodes
-barcode_ground_truth = barcode_ground_truth_raw['Primer_sequence'].str.extract(r'TCAGACGTGTGCTCTTCCGATCT([ATCG]{8})', expand=False)
+bc_ground_truth = bc_ground_truth_raw['Primer_sequence'].str.extract(r'TCAGACGTGTGCTCTTCCGATCT([ATCG]{8})',
+                                                                     expand=False)
 
 # Iteratively load in whitelist80.txt, check barcodes.
 # Output: presence_in_ground_truth: [0-47]/NaN; rank_in_whitlist: [1-80]; Nreads: /d
 for folder in os.listdir(data_wd):
-    os.chdir(os.path.join(data_wd,folder))
+    os.chdir(os.path.join(data_wd, folder))
 
     print('Parsing '+folder)
 
@@ -23,7 +25,7 @@ for folder in os.listdir(data_wd):
     match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', folder)
 
     # Read whitelist80
-    whitelist80 = pd.read_csv('whitelist80.txt', sep="\t", names = ['cell', 'candidate', 'Nreads', 'Ncandidate'])
+    whitelist80 = pd.read_csv('whitelist80.txt', sep="\t", names=['cell', 'candidate', 'Nreads', 'Ncandidate'])
 
     # reordered_col = ['cell', 'Nreads', 'candidate', 'Ncandidate']
     # whitelist80 = whitelist80.reindex(columns=reordered_col)
@@ -46,7 +48,7 @@ for folder in os.listdir(data_wd):
     #     sorted_whitelist80['Nreads_plus_candidate'].loc[j] = sum(row) + sorted_whitelist80['Nreads'].loc[j]
 
     # Swap column
-    reindexed_barcode_ground_truth = pd.Series(barcode_ground_truth.index.values, index=barcode_ground_truth)
+    reindexed_barcode_ground_truth = pd.Series(bc_ground_truth.index.values, index=bc_ground_truth)
 
     ground_truth_dict = reindexed_barcode_ground_truth.to_dict()
 
@@ -59,8 +61,7 @@ for folder in os.listdir(data_wd):
     if len(output.presence_in_ground_truth.dropna()) != 48:
         print('Something is missing. Longer whitelist may be needed.\n')
 
-
     # Output
-    out_nameparts = [match.group(1), match.group(2), match.group(3), match.group(4), 'barcode_checklist.txt']
-    out_filename = '_'.join(out_nameparts)
+    out_name_parts = [match.group(1), 'barcode_checklist.txt']
+    out_filename = '_'.join(out_name_parts)
     output.to_csv(out_filename, sep="\t", index=False)

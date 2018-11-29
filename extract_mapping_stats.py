@@ -8,55 +8,53 @@ def add_suffix(df, suffix):
     df.cell = df.cell + suffix
 
 
-# Set up some default parameters, i.e. working directory and filename
-parent_wd = '/media/luolab/ZA1BT1ER/yanting/'
-data_wd = '/media/luolab/ZA1BT1ER/yanting/vM4_def_2/'
+if __name__ == '__main__':
 
-# Change working directory
-os.chdir(parent_wd)
+    # Set up some default parameters, i.e. working directory and filename
+    parent_wd = '/media/luolab/ZA1BT1ER/yanting/'
+    data_wd = '/media/luolab/ZA1BT1ER/yanting/vM4/vM4_CaiT/'
 
-# Import experimental design, which stores library name, index, codename & experiment setup.
-exp_design = pd.read_excel('experimental_design_181023.xlsx')
+    # Change working directory
+    os.chdir(parent_wd)
 
-# Iteratively enter each library
-for folder in os.listdir(data_wd):
+    # Import experimental design, which stores library name, index, codename & experiment setup.
+    exp_design = pd.read_excel('experimental_design_previous.xlsx')
 
-    library_wd = os.path.join(data_wd, folder)
-    os.chdir(library_wd)
+    # Iteratively enter each library
+    for folder in os.listdir(data_wd):
 
-    print('parsing ' + folder + ' ...')
+        library_wd = os.path.join(data_wd, folder)
+        os.chdir(library_wd)
 
-    # Extract names from folder
-    match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', folder)
+        print('parsing ' + folder + ' ...')
 
-    # Import data
-    whitelist = pd.read_csv('_'.join([match.group(1), 'whitelist_washed.txt']), sep="\t",
-                            names = ['cell', 'candidate', 'Nreads', 'Ncandidate'])
-    whitelist_Nuniquemap = pd.read_csv('_'.join([match.group(1), 'Nuniqmapped.txt']),
-                                       delim_whitespace=True, names=['Nuniquemap','cell'])
-    # CaiT pipeline uses 'id' as header
-    # whitelist = pd.read_csv('whitelist.txt', sep="\t", names=['id', 'candidate', 'Nreads', 'Ncandidate'])
-    # whitelist_Nuniquemap = pd.read_csv('whitelist.txt.mapped', delim_whitespace=True, names=['Nuniquemap', 'id'])
+        # Extract names from folder
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', folder)
 
-    # Find codename w.r.t. lib_prefix to use as suffix
-    codename = exp_design.codename[exp_design.lib_prefix == match.group(1)]
+        # Import data
+        whitelist = pd.read_csv('_'.join([match.group(1), 'whitelist_washed.txt']), sep="\t",
+                                names=['cell', 'candidate', 'Nreads', 'Ncandidate'])
+        whitelist_Nuniquemap = pd.read_csv('_'.join([match.group(1), 'Nuniqmapped.txt']),
+                                           delim_whitespace=True, names=['Nuniquemap', 'cell'])
+        # CaiT pipeline uses 'id' as header
+        # whitelist = pd.read_csv('whitelist.txt', sep="\t", names=['id', 'candidate', 'Nreads', 'Ncandidate'])
+        # whitelist_Nuniquemap = pd.read_csv('whitelist.txt.mapped', delim_whitespace=True, names=['Nuniquemap', 'id'])
 
-    # Use iloc to access by position rather than label (awesome!)
-    suffix = '_' + codename.iloc[0]
+        # Find codename w.r.t. lib_prefix to use as suffix
+        codename = exp_design.codename[exp_design.lib_prefix == match.group(1)]
 
-    # Add suffix
-    add_suffix(whitelist, suffix)
-    add_suffix(whitelist_Nuniquemap, suffix)
+        # Use iloc to access by position rather than label (awesome!)
+        suffix = '_' + codename.iloc[0]
 
-    # Construct mapping stat DataFrame
-    frames = [whitelist.Nreads, whitelist_Nuniquemap.Nuniquemap, whitelist.cell]
-    mapping_stat = pd.concat(frames, axis=1)
+        # Add suffix
+        add_suffix(whitelist, suffix)
+        add_suffix(whitelist_Nuniquemap, suffix)
 
-    # Output
-    out_nameparts = [match.group(1), 'mapping_stats.txt']
-    out_filename = '_'.join(out_nameparts)
-    mapping_stat.to_csv(out_filename, sep="\t", index=False)
+        # Construct mapping stat DataFrame
+        frames = [whitelist.Nreads, whitelist_Nuniquemap.Nuniquemap, whitelist.cell]
+        mapping_stat = pd.concat(frames, axis=1)
 
-
-# Not sure how to use this yet. Deal later.
-# def if __name__ == '__main__':
+        # Output
+        out_nameparts = [match.group(1), 'mapping_stats.txt']
+        out_filename = '_'.join(out_nameparts)
+        mapping_stat.to_csv(out_filename, sep="\t", index=False)

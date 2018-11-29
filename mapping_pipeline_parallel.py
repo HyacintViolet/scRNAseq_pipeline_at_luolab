@@ -16,82 +16,103 @@
 
 import os
 import re
+import logging
 import subprocess
 import pandas as pd
 
 
-def wash_whitelist(output_folder_path, barcode_ground_truth, match):
-    print('Washing ' + output_folder_path)
-    os.chdir(output_folder_path)
+def wash_whitelist(out_dir, bc_ground_truth, match):
+    print('Washing ' + out_dir)
+    os.chdir(out_dir)
 
     # Read whitelist80
     whitelist80 = pd.read_csv('whitelist80.txt', sep="\t", names=['cell', 'candidate', 'Nreads', 'Ncandidate'])
 
     # Remove rows whose 'cell' value is not found in barcode_ground_truth
-    whitelist_washed = whitelist80[whitelist80['cell'].isin(barcode_ground_truth)]
+    whitelist_washed = whitelist80[whitelist80['cell'].isin(bc_ground_truth)]
 
     # Reset index
     whitelist_washed = whitelist_washed.reset_index(drop=True)
 
     # Output
-    out_nameparts = [match.group(1), 'whitelist_washed.txt']
-    out_filename = '_'.join(out_nameparts)
-    whitelist_washed.to_csv(out_filename, sep="\t", index=False, header=False)
+    out_name_parts = [match.group(1), 'whitelist_washed.txt']
+    filename = '_'.join(out_name_parts)
+    whitelist_washed.to_csv(filename, sep="\t", index=False, header=False)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 
 def main():
 
-    # Setup input data path
-    path_to_seq_data = '/media/luolab/ZA1BT1ER/scRNAseq/yanting_all/data/yanting_181023/'
-    input_folder_list = os.listdir(path_to_seq_data)
+    # Source dir: sequencing reads data
+    src = '/media/luolab/ZA1BT1ER/scRNAseq/yanting_all/data/yanting_previous/'
+    folder_name_list = os.listdir(src)
 
-    # Output (mapping) parent path
-    path_to_mapping_directory = '/media/luolab/ZA1BT1ER/yanting/vM4_def_2/'
+    # Destination dir: mapping results
+    dst = '/media/luolab/ZA1BT1ER/yanting/vM19/yanting_previous/'
 
     # Path to genome annotation and index
-    path_to_genome_anno = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/gencode.vM4.annotation.gtf'
-    path_to_genome_index = '/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM4_def/'
+    genome_anno = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/gencode.vM19.chr_patch_hapl_scaff.annotation.gtf'
+    genome_index = '/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM19/'
 
-    # Read ground truth barcode list
+    # Parent working dir: to write aggregate results
     parent_wd = '/media/luolab/ZA1BT1ER/yanting/'
+
+    # Read barcode ground truth list
     barcode_ground_truth_raw = pd.read_excel(os.path.join(parent_wd, 'barcode_ground_truth_checklist.xlsx'))
     barcode_ground_truth = barcode_ground_truth_raw['Primer_sequence'].str.extract(
         r'TCAGACGTGTGCTCTTCCGATCT([ATCG]{8})', expand=False)
 
     # Create output directory if not exist.
-    os.chdir(path_to_mapping_directory)
-    for output_folder in input_folder_list:
-        output_folder = output_folder + '_vM4_def'
-        if not os.path.exists(output_folder):
-            os.makedirs(output_folder)
+    os.chdir(dst)
+    for out_dir in folder_name_list:
+        if not os.path.exists(os.path.join(dst, out_dir)):
+            os.makedirs(os.path.join(dst, out_dir))
+
+    # ------------------------------------------------------------------------------------------------------------------
+
+    # # logging
+    # log = parent_wd + 'pipeline_running.log'
+    # logging.basicConfig(filename=log, level=logging.DEBUG)
+    #
+    # # console handler
+    # console = logging.StreamHandler()
+    # console.setLevel(logging.ERROR)
+    # logging.getLogger("").addHandler(console)
 
     # ------------------------------------------------------------------------------------------------------------------
     # STEP 1: Identify correct cell barcodes.
     # Command to use: umi_tools whitelist. Script to use: whitelist_wash.py
     # This is the parent directory for all output directories
-    output_folder_list = os.listdir(path_to_mapping_directory)
     processes_whitelist = set()
-    max_processes_whietlist = 8
-    for input_folder in input_folder_list:
+    max_processes_whietlist = 16
+    for s in os.listdir(src):
 
-        output_folder = input_folder + '_vM4_def'
+        # Setting up input/output directory
+        input_dir = os.path.join(src, s)
+        out_dir = os.path.join(dst, s)
 
         # Change directory to output folder
-        os.chdir(os.path.join(path_to_mapping_directory, output_folder))
+        os.chdir(out_dir)
 
-        # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
-        # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', output_folder)
-        input_file_name_prefix = '_'.join([match.group(1), match.group(2), match.group(3), match.group(4)])
+        # # Grab folder name and construct input file names. Read 1 = _2.fq.gz, read 2 = _1.fq.gz
+        # match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out_dir)
 
-        read1_file_name = '_'.join([input_file_name_prefix, '2.fq.gz'])
+        for item in os.listdir(input_dir):
+            if item.endswith('2.fq.gz'):
+                read1_file_name = item
+            elif item.endswith('1.fq.gz'):
+                read2_file_name = item
+
+        # # LOGGING NOT WORKING. Fix later.
+        # try:
+        #     read1_file_name
+        # except NameError:
+        #     logging.debug('Library ' + s + ' not parsed. Read 1 Missing.')
+
 
         # Construct command and execute
-        command_whitelist = 'umi_tools whitelist --stdin ' + os.path.join(path_to_seq_data,
-                                                                          input_folder,
-                                                                          read1_file_name) +\
+        command_whitelist = 'umi_tools whitelist --stdin ' + os.path.join(input_dir, read1_file_name) +\
                             ' --bc-pattern=CCCCCCCCNNNNNNNN --set-cell-number=80 --plot-prefix=cell_num_80 -v 1' \
                             ' --log2stderr > whitelist80.txt'
 
@@ -101,7 +122,7 @@ def main():
             os.wait()
             processes_whitelist.difference_update([p for p in processes_whitelist if p.poll() is not None])
 
-        print('umi_tools whitelist: finished.')
+    print('umi_tools whitelist: finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
 # CHUNK 1 ENDS
@@ -109,15 +130,15 @@ def main():
 # CHUNK 2 STARTS HERE
 # ----------------------------------------------------------------------------------------------------------------------
 
-    for output_folder in output_folder_list:
+    for out in os.listdir(dst):
 
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', output_folder)
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
 
         # Wash whitelist, output whitelist_washed.txt
-        output_folder_path = os.path.join(path_to_mapping_directory, output_folder)
-        wash_whitelist(output_folder_path, barcode_ground_truth, match)
+        out_dir = os.path.join(dst, out)
+        wash_whitelist(out_dir, barcode_ground_truth, match)
 
     print('Wash whitelist: finished.')
 
@@ -132,35 +153,37 @@ def main():
     # to run, we parallel it in 4 batches. (8 library each parallel run, 4 runs)
 
     processes_extract = set()
-    max_processes_extract = 8
-    for input_folder in input_folder_list:
+    max_processes_extract = 3
+    for s in os.listdir(src):
 
-        output_folder = input_folder + '_vM4_def'
+        # Setting up input/output directory
+        input_dir = os.path.join(src, s)
+        out_dir = os.path.join(dst, s)
 
         # Change directory to output folder
-        os.chdir(os.path.join(path_to_mapping_directory, output_folder))
+        os.chdir(out_dir)
 
-        # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
-        # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', output_folder)
-        input_file_name_prefix = '_'.join([match.group(1), match.group(2), match.group(3), match.group(4)])
-        out_file_name_prefix = match.group(1)
+        # Grab folder name prefix
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', s)
+        out_prefix = match.group(1)
 
-        read1_file_name = '_'.join([input_file_name_prefix, '2.fq.gz'])
-
-        read2_file_name = '_'.join([input_file_name_prefix, '1.fq.gz'])
+        # Fetch file name. Read 1 suffix: _2.fq.gz, read 2 suffix: _1.fq.gz.
+        for item in os.listdir(input_dir):
+            if item.endswith('2.fq.gz'):
+                read1_file_name = item
+            elif item.endswith('1.fq.gz'):
+                read2_file_name = item
 
         # Construct output file name
-        out_name_extract = '_'.join([out_file_name_prefix, 'extracted.fq.gz'])
+        out_name_extract = '_'.join([out_prefix, 'extracted.fq.gz'])
 
         # Construct command: umi_tools extract
-        command_extract = 'umi_tools extract --bc-pattern=CCCCCCCCNNNNNNNN --stdin ' + os.path.join(path_to_seq_data,
-                                                                                                    input_folder,
-                                                                                                    read1_file_name) + \
-                          ' --read2-in ' + os.path.join(path_to_seq_data, input_folder, read2_file_name) + \
+        command_extract = 'umi_tools extract --bc-pattern=CCCCCCCCNNNNNNNN' \
+                          ' --stdin ' + os.path.join(input_dir, read1_file_name) + \
+                          ' --read2-in ' + os.path.join(src, input_dir, read2_file_name) + \
                           ' --stdout ' + out_name_extract + \
                           ' --read2-stdout --filter-cell-barcode --error-correct-cell' \
-                          ' --whitelist=' + out_file_name_prefix + '_whitelist_washed.txt'
+                          ' --whitelist=' + out_prefix + '_whitelist_washed.txt'
 
         # Parallel running umi_tools extract
         processes_extract.add(subprocess.Popen(command_extract, shell=True))
@@ -179,33 +202,33 @@ def main():
     # STEP 3: Map reads
     # Command to use: STAR
     # Construct command and execute. DON'T PARALLELIZE.
-    for output_folder in output_folder_list:
+    for out_dir in os.listdir(dst):
 
         # Change directory to output folder
-        os.chdir(os.path.join(path_to_mapping_directory, output_folder))
+        os.chdir(os.path.join(dst, out_dir))
 
-        print('Mapping ' + output_folder)
+        print('Mapping ' + out_dir)
 
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', output_folder)
-        out_file_name_prefix = match.group(1)
-        out_name_extract = '_'.join([out_file_name_prefix, 'extracted.fq.gz'])
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out_dir)
+        out_prefix = match.group(1)
+        out_name_extract = '_'.join([out_prefix, 'extracted.fq.gz'])
 
-        command_star_mapping = 'STAR --runThreadN 42 --genomeDir ' + path_to_genome_index + \
+        command_star_mapping = 'STAR --runThreadN 42 --genomeDir ' + genome_index + \
                                ' --readFilesIn ' + out_name_extract + \
                                ' --readFilesCommand zcat --outFilterMultimapNmax 1 --outFilterType BySJout' + \
                                ' --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonical' + \
-                               ' --outSAMtype BAM SortedByCoordinate --outFileNamePrefix ' + out_file_name_prefix + '_'
+                               ' --outSAMtype BAM SortedByCoordinate --outFileNamePrefix ' + out_prefix + '_'
         p = subprocess.Popen(command_star_mapping, shell=True)
         p.wait()
 
         # STEP 4: Assign reads to genes
         # Command to use: featureCounts, samtools sort, samtools index
         # Construct commands for featureCounts. DON'T PARALLELIZE.
-        out_name_feature_counts = '_'.join([out_file_name_prefix, 'gene_assigned'])
-        in_name_aligned = '_'.join([out_file_name_prefix, 'Aligned.sortedByCoord.out.bam'])
-        command_feature_counts = 'featureCounts -a ' + path_to_genome_anno + ' -o ' + out_name_feature_counts + \
+        out_name_feature_counts = '_'.join([out_prefix, 'gene_assigned'])
+        in_name_aligned = '_'.join([out_prefix, 'Aligned.sortedByCoord.out.bam'])
+        command_feature_counts = 'featureCounts -a ' + genome_anno + ' -o ' + out_name_feature_counts + \
                                  ' -R BAM ' + in_name_aligned + ' -T 32'
         p = subprocess.Popen(command_feature_counts, shell=True)
         p.wait()
@@ -221,21 +244,21 @@ def main():
     # samtools sort parallelized
     processes_sort = set()
     max_processes_sort = 8
-    for output_folder in output_folder_list:
+    for out_dir in os.listdir(dst):
 
         # Change directory to output folder
-        os.chdir(os.path.join(path_to_mapping_directory, output_folder))
+        os.chdir(os.path.join(dst, out_dir))
 
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', output_folder)
-        out_file_name_prefix = match.group(1)
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out_dir)
+        out_prefix = match.group(1)
 
         # Input file name for samtools sort
-        in_name_feature_counted = '_'.join([out_file_name_prefix, 'Aligned.sortedByCoord.out.bam.featureCounts.bam'])
+        in_name_feature_counted = '_'.join([out_prefix, 'Aligned.sortedByCoord.out.bam.featureCounts.bam'])
 
         # Output file name
-        out_name_samtools = '_'.join([out_file_name_prefix, 'assigned_sorted.bam'])
+        out_name_samtools = '_'.join([out_prefix, 'assigned_sorted.bam'])
 
         # Construct commands
         command_samtools_sort = 'samtools sort ' + in_name_feature_counted + ' -o ' + out_name_samtools
@@ -257,18 +280,18 @@ def main():
     # samtools index parallelized
     processes_index = set()
     max_processes_index = 16
-    for output_folder in output_folder_list:
+    for out_dir in os.listdir(dst):
 
         # Change directory to output folder
-        os.chdir(os.path.join(path_to_mapping_directory, output_folder))
+        os.chdir(os.path.join(dst, out_dir))
 
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', output_folder)
-        out_file_name_prefix = match.group(1)
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out_dir)
+        out_prefix = match.group(1)
 
         # Input & output file name for samtools index
-        out_name_samtools = '_'.join([out_file_name_prefix, 'assigned_sorted.bam'])
+        out_name_samtools = '_'.join([out_prefix, 'assigned_sorted.bam'])
 
         # Construct command
         command_samtools_index = 'samtools index ' + out_name_samtools
@@ -286,26 +309,27 @@ def main():
 # ----------------------------------------------------------------------------------------------------------------------
 # CHUNK 7 STARTS HERE
 # ----------------------------------------------------------------------------------------------------------------------
+# SOMETHING IS WRONG WITH THIS PARALLELIZATION.
 
     # STEP 5: Count UMIs per gene per cell
     # Command to use: umi_tools count. Parallelized
     processes_count = set()
     max_processes_count = 16
-    for output_folder in output_folder_list:
+    for out_dir in os.listdir(dst):
 
         # Change directory to output folder
-        os.chdir(os.path.join(path_to_mapping_directory, output_folder))
+        os.chdir(os.path.join(dst, out_dir))
 
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', output_folder)
-        out_file_name_prefix = match.group(1)
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out_dir)
+        out_prefix = match.group(1)
 
         # Input file name for umi_tools count
-        out_name_samtools = '_'.join([out_file_name_prefix, 'assigned_sorted.bam'])
+        out_name_samtools = '_'.join([out_prefix, 'assigned_sorted.bam'])
 
         # Output file name
-        out_name_count = '_'.join([out_file_name_prefix, 'counts.tsv.gz'])
+        out_name_count = '_'.join([out_prefix, 'counts.tsv.gz'])
 
         # Construct command
         command_count = 'umi_tools count --per-gene --gene-tag=XT --per-cell -I ' + out_name_samtools + ' -S ' + \
@@ -325,20 +349,20 @@ def main():
 
     processes_uniqmapped = set()
     max_processes_uniqmapped = 16
-    for output_folder in output_folder_list:
+    for out_dir in os.listdir(dst):
 
         # Change directory to output folder
-        os.chdir(os.path.join(path_to_mapping_directory, output_folder))
+        os.chdir(os.path.join(dst, out_dir))
 
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', output_folder)
-        out_file_name_prefix = match.group(1)
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out_dir)
+        out_prefix = match.group(1)
 
-        in_name_aligned = '_'.join([out_file_name_prefix, 'Aligned.sortedByCoord.out.bam'])
+        in_name_aligned = '_'.join([out_prefix, 'Aligned.sortedByCoord.out.bam'])
 
         # Extract uniquely mapped reads *** this can be paralleled with other commands ***
-        out_nuniqmapped = '_'.join([out_file_name_prefix, 'Nuniqmapped.txt'])
+        out_nuniqmapped = '_'.join([out_prefix, 'Nuniqmapped.txt'])
         command_nuniqmapped = 'samtools view -F4 ' + in_name_aligned + ' | cut -f 2 -d \'_\' |sort|uniq -c > ' +\
                               out_nuniqmapped
 

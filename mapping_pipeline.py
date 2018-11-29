@@ -7,12 +7,12 @@ import pandas as pd
 # copy and paste into value.
 
 # Setup input data path
-path_to_seq_data = '/media/luolab/ZA1BT1ER/scRNAseq/yanting_all/data/yanting_181023/'
+path_to_seq_data = '/media/luolab/ZA1BT1ER/scRNAseq/yanting_all/data/yanting_previous/first_time/'
 input_folder_list = os.listdir(path_to_seq_data)
 parent_wd = '/media/luolab/ZA1BT1ER/yanting/'
 
 # Output (mapping) parent path
-path_to_mapping_directory = '/media/luolab/ZA1BT1ER/yanting/vM4_def_2/'
+path_to_mapping_directory = '/media/luolab/ZA1BT1ER/yanting/vM4_CaiT/first_time/'
 
 # Path to genome annotation and index
 path_to_genome_anno = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/gencode.vM4.annotation.gtf'
@@ -49,7 +49,7 @@ for input_folder in input_folder_list:
     os.chdir(os.path.join(path_to_mapping_directory))
 
     # Create output directory if not exist. Enter directory.
-    output_folder = input_folder + '_vM4_def'
+    output_folder = input_folder
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
     os.chdir(output_folder)
@@ -70,12 +70,14 @@ for input_folder in input_folder_list:
 
     # Construct command and execute
     command_whitelist = 'umi_tools whitelist --stdin '+os.path.join(path_to_seq_data, input_folder, read1_file_name) +\
-                        ' --bc-pattern=CCCCCCCCNNNNNNNN --set-cell-number=80 --plot-prefix=cell_num_80 -v 1 --log2stderr > whitelist80.txt'
-    os.system(command_whitelist)
+                        ' --bc-pattern=CCCCCCCCNNNNNNNN --set-cell-number=80 --plot-prefix=cell_num_80 -v 1' \
+                        ' --log2stderr > whitelist80.txt'
+
+    if not os.path.exists(os.path.join('whitelist80.txt')):
+        os.system(command_whitelist)
 
     # Wash whitelist, output whitelist_washed.txt
     wash_whitelist(output_folder)
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -85,10 +87,13 @@ for input_folder in input_folder_list:
     out_name_extract = '_'.join([out_file_name_prefix, 'extracted.fq.gz'])
 
     # Construct command and execute: umi_tools extract
-    command_extract = 'umi_tools extract --bc-pattern=CCCCCCCCNNNNNNNN --stdin ' + os.path.join(path_to_seq_data, input_folder, read1_file_name) + \
+    command_extract = 'umi_tools extract --bc-pattern=CCCCCCCCNNNNNNNN --stdin ' + os.path.join(path_to_seq_data,
+                                                                                                input_folder,
+                                                                                                read1_file_name) + \
                       ' --read2-in ' + os.path.join(path_to_seq_data, input_folder, read2_file_name) + \
                       ' --stdout ' + out_name_extract + \
-                      ' --read2-stdout --filter-cell-barcode --whitelist='+ out_file_name_prefix +'_whitelist_washed.txt'
+                      ' --read2-stdout --filter-cell-barcode --error-correct-cell ' \
+                      '--whitelist=' + out_file_name_prefix + '_whitelist_washed.txt'
     os.system(command_extract)
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -96,7 +101,7 @@ for input_folder in input_folder_list:
     # STEP 3: Map reads
     # Command to use: STAR
     # Construct command and execute
-    command_STAR_mapping = 'STAR --runThreadN 32 --genomeDir ' + path_to_genome_index + \
+    command_STAR_mapping = 'STAR --runThreadN 42 --genomeDir ' + path_to_genome_index + \
                            ' --readFilesIn ' + out_name_extract + \
                            ' --readFilesCommand zcat --outFilterMultimapNmax 1 --outFilterType BySJout' + \
                            ' --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonical' + \
