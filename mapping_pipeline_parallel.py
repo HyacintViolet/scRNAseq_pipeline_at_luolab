@@ -320,15 +320,18 @@ def main():
     # STEP 5: Count UMIs per gene per cell
     # Command to use: umi_tools count. Parallelized
     processes_count = set()
-    max_processes_count = 16
-    for out_dir in os.listdir(dst):
+    max_processes_count = 2
+    for out in os.listdir(dst)[0:4]:
+
+        # Setup output directory
+        out_dir = os.path.join(dst, out)
 
         # Change directory to output folder
-        os.chdir(os.path.join(dst, out_dir))
+        os.chdir(out_dir)
 
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out_dir)
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
         out_prefix = match.group(1)
 
         # Input file name for umi_tools count
