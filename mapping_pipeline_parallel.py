@@ -16,7 +16,7 @@
 
 import os
 import re
-import logging
+# import logging
 import subprocess
 import pandas as pd
 
@@ -95,9 +95,7 @@ def main():
         # Change directory to output folder
         os.chdir(out_dir)
 
-        # # Grab folder name and construct input file names. Read 1 = _2.fq.gz, read 2 = _1.fq.gz
-        # match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out_dir)
-
+        # Fetch file name. Read 1 suffix: _2.fq.gz, read 2 suffix: _1.fq.gz.
         for item in os.listdir(input_dir):
             if item.endswith('2.fq.gz'):
                 read1_file_name = item
@@ -109,7 +107,6 @@ def main():
         #     read1_file_name
         # except NameError:
         #     logging.debug('Library ' + s + ' not parsed. Read 1 Missing.')
-
 
         # Construct command and execute
         command_whitelist = 'umi_tools whitelist --stdin ' + os.path.join(input_dir, read1_file_name) +\
@@ -153,7 +150,7 @@ def main():
     # to run, we parallel it in 4 batches. (8 library each parallel run, 4 runs)
 
     processes_extract = set()
-    max_processes_extract = 3
+    max_processes_extract = 12
     for s in os.listdir(src):
 
         # Setting up input/output directory
@@ -202,20 +199,23 @@ def main():
     # STEP 3: Map reads
     # Command to use: STAR
     # Construct command and execute. DON'T PARALLELIZE.
-    for out_dir in os.listdir(dst):
+    for out in os.listdir(dst):
+
+        # Setup output directory
+        out_dir = os.path.join(dst, out)
 
         # Change directory to output folder
-        os.chdir(os.path.join(dst, out_dir))
+        os.chdir(out_dir)
 
         print('Mapping ' + out_dir)
 
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out_dir)
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
         out_prefix = match.group(1)
         out_name_extract = '_'.join([out_prefix, 'extracted.fq.gz'])
 
-        command_star_mapping = 'STAR --runThreadN 42 --genomeDir ' + genome_index + \
+        command_star_mapping = 'STAR --runThreadN 32 --genomeDir ' + genome_index + \
                                ' --readFilesIn ' + out_name_extract + \
                                ' --readFilesCommand zcat --outFilterMultimapNmax 1 --outFilterType BySJout' + \
                                ' --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonical' + \
@@ -244,14 +244,17 @@ def main():
     # samtools sort parallelized
     processes_sort = set()
     max_processes_sort = 8
-    for out_dir in os.listdir(dst):
+    for out in os.listdir(dst):
+
+        # Setup output directory
+        out_dir = os.path.join(dst, out)
 
         # Change directory to output folder
-        os.chdir(os.path.join(dst, out_dir))
+        os.chdir(out_dir)
 
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out_dir)
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
         out_prefix = match.group(1)
 
         # Input file name for samtools sort
@@ -280,14 +283,17 @@ def main():
     # samtools index parallelized
     processes_index = set()
     max_processes_index = 16
-    for out_dir in os.listdir(dst):
+    for out in os.listdir(dst):
+
+        # Setup output directory
+        out_dir = os.path.join(dst, out)
 
         # Change directory to output folder
-        os.chdir(os.path.join(dst, out_dir))
+        os.chdir(out_dir)
 
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out_dir)
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
         out_prefix = match.group(1)
 
         # Input & output file name for samtools index

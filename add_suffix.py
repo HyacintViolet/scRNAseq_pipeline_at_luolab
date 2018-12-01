@@ -19,11 +19,6 @@ os.chdir(parent_wd)
 # Import experimental design, which stores library name, index, codename & experiment setup.
 exp_design = pd.read_excel('experimental_design_previous.xlsx')
 
-# This is for easier typing in R
-# exp_design = pd.read_excel('experimental_design_all.xlsx')
-# exp_design.codename.str.cat(sep="\",\"")
-
-
 for folder in os.listdir(data_wd):
 
     # Iteratively enter each library
