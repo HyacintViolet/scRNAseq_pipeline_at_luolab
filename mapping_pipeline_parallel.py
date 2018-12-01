@@ -46,6 +46,7 @@ def work(cmd):
 
 # ----------------------------------------------------------------------------------------------------------------------
 
+
 def main():
 
     # Source dir: sequencing reads data
@@ -105,8 +106,8 @@ def main():
 
         # Construct commands
         cmd_this_whitelist = 'umi_tools whitelist --stdin ' + os.path.join(input_dir, read1_file_name) +\
-                            ' --bc-pattern=CCCCCCCCNNNNNNNN --set-cell-number=80 --plot-prefix=cell_num_80 -v 1' \
-                            ' --log2stderr > ' + out_dir + 'whitelist80.txt'
+                             ' --bc-pattern=CCCCCCCCNNNNNNNN --set-cell-number=80 --plot-prefix=cell_num_80 -v 1' \
+                             ' --log2stderr > ' + out_dir + 'whitelist80.txt'
         cmd_whitelist.append(cmd_this_whitelist)
 
     pool = mp.Pool(12)
@@ -169,7 +170,7 @@ def main():
                            ' --read2-in ' + os.path.join(input_dir, read2_file_name) + \
                            ' --stdout ' + extract_out + \
                            ' --read2-stdout --filter-cell-barcode --error-correct-cell' \
-                           ' --whitelist=' + prefix + '_whitelist_washed.txt'
+                           ' --whitelist=' + out_dir + prefix + '_whitelist_washed.txt'
         cmd_extract.append(cmd_this_extract)
 
     # Parallel run by Pool
@@ -332,32 +333,30 @@ def main():
 # CHUNK 8 STARTS HERE
 # ----------------------------------------------------------------------------------------------------------------------
 
-    processes_uniqmapped = set()
-    max_processes_uniqmapped = 16
-    for out_dir in os.listdir(dst):
+    # Construct commands
+    cmd_nuniquemap = []
+    for out in os.listdir(dst):
 
-        # Change directory to output folder
-        os.chdir(os.path.join(dst, out_dir))
+        # Setup output dirctory
+        out_dir = os.path.join(dst, out)
 
-        # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
-        # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out_dir)
+        # Grab folder name
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
         prefix = match.group(1)
 
         aligned_out = '_'.join([prefix, 'Aligned.sortedByCoord.out.bam'])
+        nuniquemap_in = os.path.join(out_dir, aligned_out)
+        out_name_nuniquemap = '_'.join([prefix, 'Nuniqmapped.txt'])
+        nuniquemap_out = os.path.join(out_dir, out_name_nuniquemap)
 
-        # Extract uniquely mapped reads *** this can be paralleled with other commands ***
-        out_nuniqmapped = '_'.join([prefix, 'Nuniqmapped.txt'])
-        command_nuniqmapped = 'samtools view -F4 ' + aligned_out + ' | cut -f 2 -d \'_\' |sort|uniq -c > ' +\
-                              out_nuniqmapped
+        cmd_this_nuniquemap = 'samtools view -F4 ' + nuniquemap_in + ' | cut -f 2 -d \'_\' |sort|uniq -c > ' + \
+                              nuniquemap_out
+        cmd_nuniquemap.append(cmd_this_nuniquemap)
 
-        # Nuniqmapped extract parallelized
-        processes_uniqmapped.add(subprocess.Popen(command_nuniqmapped, shell=True))
-        if len(processes_uniqmapped) >= max_processes_uniqmapped:
-            os.wait()
-            processes_uniqmapped.difference_update([p for p in processes_uniqmapped if p.poll() is not None])
-
-    print('samtools extract Nuniqmapped: finished.')
+    # Parallel run by Pool
+    pool = mp.Pool(12)
+    pool.map(work, cmd_nuniquemap)
+    print('samtools view extract Nuniqmapped: finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
 # CHUNK 8 ENDS
