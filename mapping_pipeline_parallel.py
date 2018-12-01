@@ -1,14 +1,8 @@
 # It turns out pycharm has a bug that prevents the script from searching into default PATH. Need to manually set
 # environment variable PATH.
-# Here's how: Run -> Edit Configurations -> Environment Variables -> Manually add PATH entry; from terminal: echo PATH,
+# Here's how: Run -> Edit Configurations -> Environment Variables -> manually add PATH entry; from terminal: echo PATH,
 # copy and paste into value.
 
-# ----------------------------------------------------------------------------------------------------------------------
-# THE FULL PARALLEL DOESN'T WORK YET. THE SECOND PARALLEL COMMAND WAS STARTED, BEFORE THE FIRST PARALLEL COMMAND WAS
-# FINISHED. NEED TO FIX WAITING ISSUE.
-#
-# CURRENT SOLUTION: RUN PIPE CHUNK BY CHUNK.
-# ----------------------------------------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------------------------------------
 # CHUNK 1 STARTS HERE
@@ -337,7 +331,7 @@ def main():
     cmd_nuniquemap = []
     for out in os.listdir(dst):
 
-        # Setup output dirctory
+        # Setup output directory
         out_dir = os.path.join(dst, out)
 
         # Grab folder name
@@ -354,7 +348,7 @@ def main():
         cmd_nuniquemap.append(cmd_this_nuniquemap)
 
     # Parallel run by Pool
-    pool = mp.Pool(12)
+    pool = mp.Pool(32)
     pool.map(work, cmd_nuniquemap)
     print('samtools view extract Nuniqmapped: finished.')
 
