@@ -107,7 +107,7 @@ def main():
         # Construct commands
         cmd_this_whitelist = 'umi_tools whitelist --stdin ' + os.path.join(input_dir, read1_file_name) +\
                              ' --bc-pattern=CCCCCCCCNNNNNNNN --set-cell-number=80 --plot-prefix=cell_num_80 -v 1' \
-                             ' --log2stderr > ' + out_dir + 'whitelist80.txt'
+                             ' --log2stderr > ' + os.path.join(out_dir, 'whitelist80.txt')
         cmd_whitelist.append(cmd_this_whitelist)
 
     pool = mp.Pool(12)
