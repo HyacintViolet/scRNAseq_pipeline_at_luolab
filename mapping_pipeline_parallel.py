@@ -17,6 +17,7 @@
 import os
 import re
 # import logging
+import multiprocessing as mp
 import subprocess
 import pandas as pd
 
@@ -39,6 +40,9 @@ def wash_whitelist(out_dir, bc_ground_truth, match):
     filename = '_'.join(out_name_parts)
     whitelist_washed.to_csv(filename, sep="\t", index=False, header=False)
 
+
+def work(cmd):
+    return subprocess.call(cmd, shell=True)
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -315,40 +319,68 @@ def main():
 # ----------------------------------------------------------------------------------------------------------------------
 # CHUNK 7 STARTS HERE
 # ----------------------------------------------------------------------------------------------------------------------
-# SOMETHING IS WRONG WITH THIS PARALLELIZATION.
 
-    # STEP 5: Count UMIs per gene per cell
-    # Command to use: umi_tools count. Parallelized
-    processes_count = set()
-    max_processes_count = 2
-    for out in os.listdir(dst)[0:4]:
+    # STEP 5: Count UMIs per gene per cell. Command to use: umi_tools count.
+    # Generate list of strings as commands.
+    cmd_count = []
+    for out in os.listdir(dst)[8:]:
 
         # Setup output directory
         out_dir = os.path.join(dst, out)
 
-        # Change directory to output folder
-        os.chdir(out_dir)
-
-        # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
-        # convention is reversed.
+        # Grab folder name
         match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
         out_prefix = match.group(1)
 
         # Input file name for umi_tools count
         out_name_samtools = '_'.join([out_prefix, 'assigned_sorted.bam'])
+        samtools_in = os.path.join(out_dir, out_name_samtools)
 
         # Output file name
         out_name_count = '_'.join([out_prefix, 'counts.tsv.gz'])
+        samtools_out = os.path.join(out_dir, out_name_count)
 
-        # Construct command
-        command_count = 'umi_tools count --per-gene --gene-tag=XT --per-cell -I ' + out_name_samtools + ' -S ' + \
-                        out_name_count
-        processes_count.add(subprocess.Popen(command_count, shell=True))
-        if len(processes_count) >= max_processes_count:
-            os.wait()
-            processes_count.difference_update([p for p in processes_count if p.poll() is not None])
+        cmd_this_count = 'umi_tools count --per-gene --gene-tag=XT --per-cell -I ' + samtools_in + ' -S ' + \
+                        samtools_out
 
+        cmd_count.append(cmd_this_count)
+
+    # Run commands in pool.
+    pool_count = mp.Pool(12)
+    pool_count.map(work, cmd_count)
     print('umi_tools count: finished.')
+
+    # # The following codes calling 'umi_tools counts' with subprocess didn't work properly. Use multiprocessing.Pool
+    # # instead.
+    # processes_count = set()
+    # max_processes_count = 2
+    # for out in os.listdir(dst)[0:4]:
+    #
+    #     # Setup output directory
+    #     out_dir = os.path.join(dst, out)
+    #
+    #     # Change directory to output folder
+    #     os.chdir(out_dir)
+    #
+    #     # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
+    #     # convention is reversed.
+    #     match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
+    #     out_prefix = match.group(1)
+    #
+    #     # Input file name for umi_tools count
+    #     out_name_samtools = '_'.join([out_prefix, 'assigned_sorted.bam'])
+    #
+    #     # Output file name
+    #     out_name_count = '_'.join([out_prefix, 'counts.tsv.gz'])
+    #
+    #     # Construct command
+    #     command_count = 'umi_tools count --per-gene --gene-tag=XT --per-cell -I ' + out_name_samtools + ' -S ' + \
+    #                     out_name_count
+    #     processes_count.add(subprocess.Popen(command_count, shell=True))
+    #     if len(processes_count) >= max_processes_count:
+    #         os.wait()
+    #         processes_count.difference_update([p for p in processes_count if p.poll() is not None])
+    #
 
 # ----------------------------------------------------------------------------------------------------------------------
 # CHUNK 7 ENDS
