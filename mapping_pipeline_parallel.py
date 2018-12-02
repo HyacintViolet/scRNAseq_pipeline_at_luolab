@@ -98,7 +98,7 @@ def main():
             elif item.endswith('1.fq.gz'):
                 read2_file_name = item
 
-        if not os.path.exists(out_dir, 'whitelist80.txt'):
+        if not os.path.exists(os.path.join(out_dir, 'whitelist80.txt')):
             # Construct commands
             cmd_this_whitelist = 'umi_tools whitelist --stdin ' + os.path.join(input_dir, read1_file_name) +\
                                  ' --bc-pattern=CCCCCCCCNNNNNNNN --set-cell-number=80 --plot-prefix=cell_num_80 -v 1' \
