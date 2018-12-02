@@ -110,7 +110,7 @@ def main():
                                  ' --bc-pattern=CCCCCCCCNNNNNNNN --set-cell-number=80 --plot-prefix=cell_num_80 -v 1' \
                                  ' --log2stderr > ' + os.path.join(out_dir, 'whitelist80.txt')
             cmd_whitelist.append(cmd_this_whitelist)
-s
+
     pool = mp.Pool(12)
     if cmd_whitelist:
         pool.map(work, cmd_whitelist)
