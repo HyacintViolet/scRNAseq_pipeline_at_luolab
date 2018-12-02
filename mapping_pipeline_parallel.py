@@ -119,12 +119,13 @@ def main():
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
         match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
+        prefix = match.group(1)
 
         # Wash whitelist, output whitelist_washed.txt
         out_dir = os.path.join(dst, out)
 
         # Output dir
-        out_name_wash = '_'.join([match.group(1),'whitelist_washed.txt'])
+        out_name_wash = '_'.join([prefix,'whitelist_washed.txt'])
         wash_out = os.path.join(out_dir, out_name_wash)
 
         if not os.path.exists(wash_out):
@@ -153,12 +154,14 @@ def main():
         match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', s)
         prefix = match.group(1)
 
-        # Fetch file name. Read 1 suffix: _2.fq.gz, read 2 suffix: _1.fq.gz.
+        # Fetch input file name. Read 1 suffix: _2.fq.gz, read 2 suffix: _1.fq.gz.
         for item in os.listdir(input_dir):
             if item.endswith('2.fq.gz'):
                 read1_file_name = item
             elif item.endswith('1.fq.gz'):
                 read2_file_name = item
+        out_name_wash = '_'.join([prefix, 'whitelist_washed.txt'])
+        wash_out = os.path.join(out_dir, out_name_wash)
 
         # Construct output file name
         out_name_extract = '_'.join([prefix, 'extracted.fq.gz'])
@@ -171,7 +174,7 @@ def main():
                                ' --read2-in ' + os.path.join(input_dir, read2_file_name) + \
                                ' --stdout ' + extract_out + \
                                ' --read2-stdout --filter-cell-barcode --error-correct-cell' \
-                               ' --whitelist=' + out_dir + prefix + '_whitelist_washed.txt'
+                               ' --whitelist=' + wash_out
             cmd_extract.append(cmd_this_extract)
 
     # Parallel run by Pool
