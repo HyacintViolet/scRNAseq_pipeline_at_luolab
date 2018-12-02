@@ -30,8 +30,7 @@ def wash_whitelist(out_dir, bc_ground_truth, match):
     whitelist_washed = whitelist_washed.reset_index(drop=True)
 
     # Output
-    out_name_parts = [match.group(1), 'whitelist_washed.txt']
-    filename = '_'.join(out_name_parts)
+    filename = '_'.join([match.group(1), 'whitelist_washed.txt'])
     whitelist_washed.to_csv(filename, sep="\t", index=False, header=False)
 
 
@@ -106,8 +105,7 @@ def main():
             cmd_whitelist.append(cmd_this_whitelist)
 
     pool = mp.Pool(12)
-    if cmd_whitelist:
-        pool.map(work, cmd_whitelist)
+    pool.map(work, cmd_whitelist)
     print('umi_tools whitelist: finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -124,7 +122,13 @@ def main():
 
         # Wash whitelist, output whitelist_washed.txt
         out_dir = os.path.join(dst, out)
-        wash_whitelist(out_dir, barcode_ground_truth, match)
+
+        # Output dir
+        out_name_wash = '_'.join([match.group(1),'whitelist_washed.txt'])
+        wash_out = os.path.join(out_dir, out_name_wash)
+
+        if not os.path.exists(wash_out):
+            wash_whitelist(out_dir, barcode_ground_truth, match)
 
     print('Wash whitelist: finished.')
 
@@ -160,17 +164,18 @@ def main():
         out_name_extract = '_'.join([prefix, 'extracted.fq.gz'])
         extract_out = os.path.join(out_dir, out_name_extract)
 
-        # Construct command
-        cmd_this_extract = 'umi_tools extract --bc-pattern=CCCCCCCCNNNNNNNN' \
-                           ' --stdin ' + os.path.join(input_dir, read1_file_name) + \
-                           ' --read2-in ' + os.path.join(input_dir, read2_file_name) + \
-                           ' --stdout ' + extract_out + \
-                           ' --read2-stdout --filter-cell-barcode --error-correct-cell' \
-                           ' --whitelist=' + out_dir + prefix + '_whitelist_washed.txt'
-        cmd_extract.append(cmd_this_extract)
+        if not os.path.exists(extract_out):
+            # Construct command
+            cmd_this_extract = 'umi_tools extract --bc-pattern=CCCCCCCCNNNNNNNN' \
+                               ' --stdin ' + os.path.join(input_dir, read1_file_name) + \
+                               ' --read2-in ' + os.path.join(input_dir, read2_file_name) + \
+                               ' --stdout ' + extract_out + \
+                               ' --read2-stdout --filter-cell-barcode --error-correct-cell' \
+                               ' --whitelist=' + out_dir + prefix + '_whitelist_washed.txt'
+            cmd_extract.append(cmd_this_extract)
 
     # Parallel run by Pool
-    pool = mp.Pool(12)
+    pool = mp.Pool(16)
     pool.map(work, cmd_extract)
     print('umi_tools extract: finished.')
 
@@ -191,31 +196,35 @@ def main():
         # Change directory to output folder
         os.chdir(out_dir)
 
-        print('Mapping ' + out_dir)
-
-        # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
-        # convention is reversed.
+        # Grab folder name
         match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
         prefix = match.group(1)
         out_name_extract = '_'.join([prefix, 'extracted.fq.gz'])
 
-        command_star_mapping = 'STAR --runThreadN 32 --genomeDir ' + genome_index + \
-                               ' --readFilesIn ' + out_name_extract + \
-                               ' --readFilesCommand zcat --outFilterMultimapNmax 1 --outFilterType BySJout' + \
-                               ' --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonical' + \
-                               ' --outSAMtype BAM SortedByCoordinate --outFileNamePrefix ' + prefix + '_'
-        p = subprocess.Popen(command_star_mapping, shell=True)
-        p.wait()
+        # STAR map output file name
+        aligned_out = '_'.join([prefix, 'Aligned.sortedByCoord.out.bam'])
+
+        if not os.path.exists(aligned_out):
+            command_star_mapping = 'STAR --runThreadN 32 --genomeDir ' + genome_index + \
+                                   ' --readFilesIn ' + out_name_extract + \
+                                   ' --readFilesCommand zcat --outFilterMultimapNmax 1 --outFilterType BySJout' + \
+                                   ' --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonical' + \
+                                   ' --outSAMtype BAM SortedByCoordinate --outFileNamePrefix ' + prefix + '_'
+            p = subprocess.Popen(command_star_mapping, shell=True)
+            p.wait()
 
         # STEP 4: Assign reads to genes
         # Command to use: featureCounts, samtools sort, samtools index
         # Construct commands for featureCounts. DON'T PARALLELIZE.
-        aligned_out = '_'.join([prefix, 'Aligned.sortedByCoord.out.bam'])
+
+        # featureCounts output file name
         featurecounts_out = '_'.join([prefix, 'gene_assigned'])
-        cmd_featurecounts = 'featureCounts -a ' + genome_anno + ' -o ' + featurecounts_out + \
-                            ' -R BAM ' + aligned_out + ' -T 32'
-        p = subprocess.Popen(cmd_featurecounts, shell=True)
-        p.wait()
+
+        if not os.path.exists(featurecounts_out):
+            cmd_featurecounts = 'featureCounts -a ' + genome_anno + ' -o ' + featurecounts_out + \
+                                ' -R BAM ' + aligned_out + ' -T 32'
+            p = subprocess.Popen(cmd_featurecounts, shell=True)
+            p.wait()
 
     print('STAR & featureCounts: finished.')
 
@@ -245,12 +254,13 @@ def main():
         out_name_samtools = '_'.join([prefix, 'assigned_sorted.bam'])
         sort_out = os.path.join(out_dir, out_name_samtools)
 
-        # Construct commands
-        cmd_this_sort = 'samtools sort ' + sort_in + ' -o ' + sort_out
-        cmd_sort.append(cmd_this_sort)
+        if not os.path.exists(sort_out):
+            # Construct commands
+            cmd_this_sort = 'samtools sort ' + sort_in + ' -o ' + sort_out
+            cmd_sort.append(cmd_this_sort)
 
     # Parallel run by Pool
-    pool = mp.Pool(12)
+    pool = mp.Pool(16)
     pool.map(work, cmd_sort)
     print('samtools sort: finished.')
 
@@ -284,7 +294,7 @@ def main():
         cmd_index.append(cmd_this_index)
 
     # Parallel run by Pool
-    pool = mp.Pool(12)
+    pool = mp.Pool(16)
     pool.map(work, cmd_index)
     print('samtools index: finished.')
 
@@ -314,12 +324,13 @@ def main():
         out_name_count = '_'.join([prefix, 'counts.tsv.gz'])
         count_out = os.path.join(out_dir, out_name_count)
 
-        # Construct commands
-        cmd_this_count = 'umi_tools count --per-gene --gene-tag=XT --per-cell -I ' + samtools_in + ' -S ' + count_out
-        cmd_count.append(cmd_this_count)
+        if not os.path.exists(count_out):
+            # Construct commands
+            cmd_this_count = 'umi_tools count --per-gene --gene-tag=XT --per-cell -I ' + samtools_in + ' -S ' + count_out
+            cmd_count.append(cmd_this_count)
 
     # Parallel run by Pool
-    pool = mp.Pool(12)
+    pool = mp.Pool(16)
     pool.map(work, cmd_count)
     print('umi_tools count: finished.')
 
@@ -345,9 +356,10 @@ def main():
         out_name_nuniquemap = '_'.join([prefix, 'Nuniqmapped.txt'])
         nuniquemap_out = os.path.join(out_dir, out_name_nuniquemap)
 
-        cmd_this_nuniquemap = 'samtools view -F4 ' + nuniquemap_in + ' | cut -f 2 -d \'_\' |sort|uniq -c > ' + \
-                              nuniquemap_out
-        cmd_nuniquemap.append(cmd_this_nuniquemap)
+        if not os.path.exists(nuniquemap_out):
+            cmd_this_nuniquemap = 'samtools view -F4 ' + nuniquemap_in + ' | cut -f 2 -d \'_\' |sort|uniq -c > ' + \
+                                  nuniquemap_out
+            cmd_nuniquemap.append(cmd_this_nuniquemap)
 
     # Parallel run by Pool
     pool = mp.Pool(32)
