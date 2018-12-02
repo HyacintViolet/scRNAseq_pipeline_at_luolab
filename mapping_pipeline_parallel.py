@@ -111,8 +111,7 @@ def main():
             cmd_whitelist.append(cmd_this_whitelist)
 
     pool = mp.Pool(12)
-    if cmd_whitelist:
-        pool.map(work, cmd_whitelist)
+    pool.map(work, cmd_whitelist)
     print('umi_tools whitelist: finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -183,8 +182,7 @@ def main():
 
     # Parallel run by Pool
     pool = mp.Pool(16)
-    if cmd_extract:
-        pool.map(work, cmd_extract)
+    pool.map(work, cmd_extract)
     print('umi_tools extract: finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -269,8 +267,7 @@ def main():
 
     # Parallel run by Pool
     pool = mp.Pool(16)
-    if cmd_sort:
-        pool.map(work, cmd_sort)
+    pool.map(work, cmd_sort)
     print('samtools sort: finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -340,8 +337,7 @@ def main():
 
     # Parallel run by Pool
     pool = mp.Pool(16)
-    if cmd_count:
-        pool.map(work, cmd_count)
+    pool.map(work, cmd_count)
     print('umi_tools count: finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -372,9 +368,8 @@ def main():
             cmd_nuniquemap.append(cmd_this_nuniquemap)
 
     # Parallel run by Pool
-    pool = mp.Pool(16)
-    if cmd_nuniquemap:
-        pool.map(work, cmd_nuniquemap)
+    pool = mp.Pool(32)
+    pool.map(work, cmd_nuniquemap)
     print('samtools view extract Nuniqmapped: finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
