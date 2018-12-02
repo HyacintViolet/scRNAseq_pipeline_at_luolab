@@ -50,11 +50,11 @@ def work(cmd):
 def main():
 
     # Source dir: sequencing reads data
-    src = '/media/luolab/ZA1BT1ER/scRNAseq/yanting_all/data/yanting_previous/'
+    src = '/media/luolab/ZA1BT1ER/scRNAseq/yanting_all/data/yanting_181023/'
     folder_name_list = os.listdir(src)
 
     # Destination dir: mapping results
-    dst = '/media/luolab/ZA1BT1ER/yanting/vM19/yanting_previous/'
+    dst = '/media/luolab/ZA1BT1ER/yanting/vM19/yanting_181023/'
 
     # Path to genome annotation and index
     genome_anno = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/gencode.vM19.chr_patch_hapl_scaff.annotation.gtf'
@@ -68,7 +68,7 @@ def main():
     barcode_ground_truth = barcode_ground_truth_raw['Primer_sequence'].str.extract(
         r'TCAGACGTGTGCTCTTCCGATCT([ATCG]{8})', expand=False)
 
-    # Create output directory if not exist.
+    # Create output directory if not exist.barcode_ground_truth
     os.chdir(dst)
     for out in folder_name_list:
         if not os.path.exists(os.path.join(dst, out)):
@@ -104,14 +104,16 @@ def main():
             elif item.endswith('1.fq.gz'):
                 read2_file_name = item
 
-        # Construct commands
-        cmd_this_whitelist = 'umi_tools whitelist --stdin ' + os.path.join(input_dir, read1_file_name) +\
-                             ' --bc-pattern=CCCCCCCCNNNNNNNN --set-cell-number=80 --plot-prefix=cell_num_80 -v 1' \
-                             ' --log2stderr > ' + os.path.join(out_dir, 'whitelist80.txt')
-        cmd_whitelist.append(cmd_this_whitelist)
-
+        if not os.path.exists(out_dir, 'whitelist80.txt'):
+            # Construct commands
+            cmd_this_whitelist = 'umi_tools whitelist --stdin ' + os.path.join(input_dir, read1_file_name) +\
+                                 ' --bc-pattern=CCCCCCCCNNNNNNNN --set-cell-number=80 --plot-prefix=cell_num_80 -v 1' \
+                                 ' --log2stderr > ' + os.path.join(out_dir, 'whitelist80.txt')
+            cmd_whitelist.append(cmd_this_whitelist)
+s
     pool = mp.Pool(12)
-    pool.map(work, cmd_whitelist)
+    if cmd_whitelist:
+        pool.map(work, cmd_whitelist)
     print('umi_tools whitelist: finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
