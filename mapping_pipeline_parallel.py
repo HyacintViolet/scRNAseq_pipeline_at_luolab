@@ -99,9 +99,9 @@ def main():
 
         if not os.path.exists(os.path.join(out_dir, 'whitelist80.txt')):
             # Construct commands
-            cmd_this_whitelist = 'umi_tools whitelist --stdin ' + os.path.join(input_dir, read1_file_name) +\
-                                 ' --bc-pattern=CCCCCCCCNNNNNNNN --set-cell-number=80 --plot-prefix=cell_num_80 -v 1' \
-                                 ' --log2stderr > ' + os.path.join(out_dir, 'whitelist80.txt')
+            cmd_this_whitelist = 'umi_tools whitelist --stdin ' + os.path.join(input_dir, read1_file_name) + \
+                                 ' --bc-pattern=CCCCCCCCNNNNNNNN --set-cell-number=80 --plot-prefix=' + out_dir + \
+                                 'cell_num_80 -v 1 --log2stderr > ' + os.path.join(out_dir, 'whitelist80.txt')
             cmd_whitelist.append(cmd_this_whitelist)
 
     pool = mp.Pool(12)
@@ -191,45 +191,70 @@ def main():
     # STEP 3: Map reads
     # Command to use: STAR
     # Construct command and execute. DON'T PARALLELIZE.
+    # The iterative subprocess.Popen strategy will cause some runs to fail. Abandoned. Shifting everything to mp.Pool.
+    cmd_star_mapping = []
     for out in os.listdir(dst):
 
         # Setup output directory
         out_dir = os.path.join(dst, out)
 
-        # Change directory to output folder
-        os.chdir(out_dir)
+        # Grab folder name
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
+        prefix = match.group(1)
+
+        # Input dir
+        out_name_extract = '_'.join([prefix, 'extracted.fq.gz'])
+        extract_out = os.path.join(out_dir, out_name_extract)
+
+        # STAR map output file dir
+        out_name_map = '_'.join([prefix, 'Aligned.sortedByCoord.out.bam'])
+        map_out = os.path.join(out_dir, out_name_map)
+
+        # Construct commands
+        if not os.path.exists(map_out):
+            cmd_this_mapping = 'STAR --runThreadN 32 --genomeDir ' + genome_index + \
+                                   ' --readFilesIn ' + extract_out + \
+                                   ' --readFilesCommand zcat --outFilterMultimapNmax 1 --outFilterType BySJout' + \
+                                   ' --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonical' + \
+                                   ' --outSAMtype BAM SortedByCoordinate --outFileNamePrefix ' + \
+                                   os.path.join(out_dir, prefix) + '_'
+            cmd_star_mapping.append(cmd_this_mapping)
+
+    # Parallel run by Pool
+    pool = mp.Pool(1) # DO NOT CHANGE THIS
+    pool.map(work, cmd_star_mapping)
+    print('STAR maping: finished.')
+
+    # STEP 4: Assign reads to genes
+    # Command to use: featureCounts, samtools sort, samtools index
+    # Construct commands for featureCounts. DON'T PARALLELIZE.
+    cmd_featurecounts = []
+    for out in os.listdir(dst):
+
+        # Setup output directory
+        out_dir = os.path.join(dst, out)
 
         # Grab folder name
         match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
         prefix = match.group(1)
-        out_name_extract = '_'.join([prefix, 'extracted.fq.gz'])
 
-        # STAR map output file name
-        aligned_out = '_'.join([prefix, 'Aligned.sortedByCoord.out.bam'])
-
-        if not os.path.exists(aligned_out):
-            command_star_mapping = 'STAR --runThreadN 32 --genomeDir ' + genome_index + \
-                                   ' --readFilesIn ' + out_name_extract + \
-                                   ' --readFilesCommand zcat --outFilterMultimapNmax 1 --outFilterType BySJout' + \
-                                   ' --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonical' + \
-                                   ' --outSAMtype BAM SortedByCoordinate --outFileNamePrefix ' + prefix + '_'
-            p = subprocess.Popen(command_star_mapping, shell=True)
-            p.wait()
-
-        # STEP 4: Assign reads to genes
-        # Command to use: featureCounts, samtools sort, samtools index
-        # Construct commands for featureCounts. DON'T PARALLELIZE.
+        # Input dir
+        out_name_map = '_'.join([prefix, 'Aligned.sortedByCoord.out.bam'])
+        map_out = os.path.join(out_dir, out_name_map)
 
         # featureCounts output file name
-        featurecounts_out = '_'.join([prefix, 'gene_assigned'])
+        out_name_featurecounts = '_'.join([prefix, 'gene_assigned'])
+        featurecounts_out = os.path.join(out_dir, out_name_featurecounts)
 
         if not os.path.exists(featurecounts_out):
-            cmd_featurecounts = 'featureCounts -a ' + genome_anno + ' -o ' + featurecounts_out + \
-                                ' -R BAM ' + aligned_out + ' -T 32'
-            p = subprocess.Popen(cmd_featurecounts, shell=True)
-            p.wait()
+            cmd_this_featurecounts = 'featureCounts -a ' + genome_anno + ' -o ' + featurecounts_out + \
+                                ' -R BAM ' + map_out + ' -T 32'
+            cmd_featurecounts.append(cmd_this_featurecounts)
 
-    print('STAR & featureCounts: finished.')
+    # Parallel run by Pool
+    pool = mp.Pool(1) # DO NOT CHANGE THIS
+    pool.map(work, cmd_featurecounts)
+    print('featureCounts: finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
 # CHUNK 4 ENDS
