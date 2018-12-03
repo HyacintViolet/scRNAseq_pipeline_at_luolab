@@ -99,5 +99,14 @@ for i, row in exp_design_new.iterrows():
     elif '1d' in row.experiment:
         exp_design_new.at[i, 'period'] = '1d'
 
+# The following codes addes Ncell_after_QC (from R pipe, n2) to exp_table_aug.xlsx
+codename = exp_design.codename
+tmp_table = pd.read_csv('Ncell_after_QC')
+tmp_dict = tmp_table.set_index('Var1')['Freq'].T.to_dict()
+Ncell_after_QC = codename.map(tmp_dict)
+Ncell_after_QC = Ncell_after_QC.fillna(0)
+exp_design['Ncell_after_QC'] = Ncell_after_QC
+exp_design_new = exp_design
+
 exp_design_new.to_csv('exp_table_aug.xlsx', sep="\t",index=False)
 
