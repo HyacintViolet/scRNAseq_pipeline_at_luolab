@@ -25,6 +25,7 @@ for i in range(len(folder_list)):
 
         counts = pd.read_csv(os.path.join(data_wd, folder_list[0], count_filename), sep='\t')
 
+
     else:
         match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', folder_list[i])
 
