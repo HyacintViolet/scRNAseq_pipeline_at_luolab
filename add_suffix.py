@@ -2,21 +2,22 @@ import os
 import re
 import pandas as pd
 
+
 # Generic function to add suffix to the 'cell' column in counts.tsv DataFrame.
 # suffix is equivalent to codename
 def add_suffix(df, suffix):
     df.cell = df.cell + suffix
 
+
 # Set up some default parameters, i.e. working directory and filename
 parent_wd = '/media/luolab/ZA1BT1ER/yanting/'
-data_wd = '/media/luolab/ZA1BT1ER/yanting/vM4_def_2/'
+data_wd = '/media/luolab/ZA1BT1ER/yanting/vM4_CaiT/'
 
 # Change working directory
 os.chdir(parent_wd)
 
 # Import experimental design, which stores library name, index, codename & experiment setup.
-exp_design = pd.read_excel('experimental_design_181023.xlsx')
-
+exp_design = pd.read_excel('experimental_design_previous.xlsx')
 
 for folder in os.listdir(data_wd):
 

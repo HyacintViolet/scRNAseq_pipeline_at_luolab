@@ -1,4 +1,9 @@
-import os, re
+"""
+Obsolete.
+"""
+
+import os
+import re
 import pandas as pd
 
 # Set up working directories
@@ -18,7 +23,8 @@ for i in range(len(folder_list)):
 
         count_filename = '_'.join(count_filename_parts)
 
-        counts = pd.read_csv(os.path.join(data_wd,folder_list[0],count_filename),sep='\t')
+        counts = pd.read_csv(os.path.join(data_wd, folder_list[0], count_filename), sep='\t')
+
 
     else:
         match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', folder_list[i])
@@ -27,7 +33,7 @@ for i in range(len(folder_list)):
 
         count_filename = '_'.join(count_filename_parts)
 
-        this_count = pd.read_csv(os.path.join(data_wd,folder_list[i],count_filename),sep='\t')
+        this_count = pd.read_csv(os.path.join(data_wd, folder_list[i], count_filename), sep='\t')
 
         counts = counts.append(this_count)
 
