@@ -221,7 +221,7 @@ def main():
             cmd_star_mapping.append(cmd_this_mapping)
 
     # Parallel run by Pool
-    pool = mp.Pool(1) # DO NOT CHANGE THIS
+    pool = mp.Pool(1)  # DO NOT CHANGE THIS
     pool.map(work, cmd_star_mapping)
     print('STAR maping: finished.')
 
@@ -252,7 +252,7 @@ def main():
             cmd_featurecounts.append(cmd_this_featurecounts)
 
     # Parallel run by Pool
-    pool = mp.Pool(1) # DO NOT CHANGE THIS
+    pool = mp.Pool(1)  # DO NOT CHANGE THIS
     pool.map(work, cmd_featurecounts)
     print('featureCounts: finished.')
 
@@ -354,7 +354,8 @@ def main():
 
         if not os.path.exists(count_out):
             # Construct commands
-            cmd_this_count = 'umi_tools count --per-gene --gene-tag=XT --per-cell -I ' + samtools_in + ' -S ' + count_out
+            cmd_this_count = 'umi_tools count --per-gene --gene-tag=XT --per-cell -I ' + samtools_in + ' -S ' \
+                             + count_out
             cmd_count.append(cmd_this_count)
 
     # Parallel run by Pool
