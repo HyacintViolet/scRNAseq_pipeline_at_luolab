@@ -3,9 +3,9 @@ import re
 import pandas as pd
 
 # Setup working directory
-parent_wd = '/media/luolab/ZA1BT1ER/yanting/'
+parent_wd = '/media/luolab/ZA1BT1ER/linrui/'
 os.chdir(parent_wd)
-data_wd = '/media/luolab/ZA1BT1ER/yanting/vM19/yanting_previous/'
+data_wd = '/media/luolab/ZA1BT1ER/linrui/vM19_2/'
 
 # Read ground truth barcode list
 bc_ground_truth_raw = pd.read_excel('barcode_ground_truth_checklist.xlsx')

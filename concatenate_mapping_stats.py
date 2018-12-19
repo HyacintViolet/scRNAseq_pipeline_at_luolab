@@ -8,8 +8,8 @@ import os
 import pandas as pd
 
 # Set up working directories
-parent_wd = '/media/luolab/ZA1BT1ER/yanting/'
-data_wd = '/media/luolab/ZA1BT1ER/yanting/vM4/'
+parent_wd = '/media/luolab/ZA1BT1ER/linrui/'
+data_wd = '/media/luolab/ZA1BT1ER/linrui/vM19_2/'
 os.chdir(parent_wd)
 mapping_stats_new = pd.DataFrame(columns=['Nreads', 'Nuniquemap', 'cell'])
 

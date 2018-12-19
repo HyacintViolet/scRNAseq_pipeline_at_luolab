@@ -18,13 +18,13 @@ def has_duplicates(list_of_values):
 
 
 # Set up working directories
-parent_wd = '/media/luolab/ZA1BT1ER/yanting/'
-data_wd = '/media/luolab/ZA1BT1ER/yanting/vM4/'
+parent_wd = '/media/luolab/ZA1BT1ER/linrui/'
+data_wd = '/media/luolab/ZA1BT1ER/linrui/vM19_2/'
 os.chdir(parent_wd)
 
 # Load name table [ENSEMBL STABLE ID, gene name]
-nametable = pd.read_table(os.path.join(parent_wd, 'gencode.vM4.annotation.tab'), sep="\t")
-nametable = nametable.rename(columns={'Unnamed: 0': 'stable_id', 'Unnamed: 1': 'gene_name'})
+nametable = pd.read_table(os.path.join(parent_wd, 'gencode.vM19.annotation.tab'), sep="\t", names=['stable_id', 'gene_name'])
+# nametable = nametable.rename(columns={'Unnamed: 0': 'stable_id', 'Unnamed: 1': 'gene_name'})
 
 # Note that not all the elements in gene_name is unique. If not fixed, the FindVariableGenes pipe will return error.
 has_duplicates(nametable.stable_id)

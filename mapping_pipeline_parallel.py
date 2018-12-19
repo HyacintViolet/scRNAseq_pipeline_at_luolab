@@ -43,18 +43,18 @@ def work(cmd):
 def main():
 
     # Source dir: sequencing reads data
-    src = '/media/luolab/ZA1BT1ER/scRNAseq/yanting_all/data/yanting_181023/'
+    src = '/media/luolab/ZA1BT1ER/linrui/data_P101SC18070367-01-B60-21/2.cleandata/'
     folder_name_list = os.listdir(src)
 
     # Destination dir: mapping results
-    dst = '/media/luolab/ZA1BT1ER/yanting/vM19/yanting_181023/'
+    dst = '/media/luolab/ZA1BT1ER/linrui/vM19_2/'
 
     # Path to genome annotation and index
     genome_anno = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/gencode.vM19.chr_patch_hapl_scaff.annotation.gtf'
     genome_index = '/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM19/'
 
     # Parent working dir: to write aggregate results
-    parent_wd = '/media/luolab/ZA1BT1ER/yanting/'
+    parent_wd = '/media/luolab/ZA1BT1ER/linrui/'
 
     # Read barcode ground truth list
     barcode_ground_truth_raw = pd.read_excel(os.path.join(parent_wd, 'barcode_ground_truth_checklist.xlsx'))
@@ -92,9 +92,9 @@ def main():
 
         # Fetch file name. Read 1 suffix: _2.fq.gz, read 2 suffix: _1.fq.gz.
         for item in os.listdir(input_dir):
-            if item.endswith('2.fq.gz'):
+            if item.endswith('2.clean.fq.gz'):
                 read1_file_name = item
-            elif item.endswith('1.fq.gz'):
+            elif item.endswith('1.clean.fq.gz'):
                 read2_file_name = item
 
         if not os.path.exists(os.path.join(out_dir, 'whitelist80.txt')):
@@ -104,7 +104,7 @@ def main():
                                  'cell_num_80 -v 1 --log2stderr > ' + os.path.join(out_dir, 'whitelist80.txt')
             cmd_whitelist.append(cmd_this_whitelist)
 
-    pool = mp.Pool(12)
+    pool = mp.Pool(1)
     pool.map(work, cmd_whitelist)
     print('umi_tools whitelist: finished.')
 
@@ -125,7 +125,7 @@ def main():
         out_dir = os.path.join(dst, out)
 
         # Output dir
-        out_name_wash = '_'.join([prefix,'whitelist_washed.txt'])
+        out_name_wash = '_'.join([prefix, 'whitelist_washed.txt'])
         wash_out = os.path.join(out_dir, out_name_wash)
 
         if not os.path.exists(wash_out):
@@ -156,9 +156,9 @@ def main():
 
         # Fetch input file name. Read 1 suffix: _2.fq.gz, read 2 suffix: _1.fq.gz.
         for item in os.listdir(input_dir):
-            if item.endswith('2.fq.gz'):
+            if item.endswith('2.clean.fq.gz'):
                 read1_file_name = item
-            elif item.endswith('1.fq.gz'):
+            elif item.endswith('1.clean.fq.gz'):
                 read2_file_name = item
         out_name_wash = '_'.join([prefix, 'whitelist_washed.txt'])
         wash_out = os.path.join(out_dir, out_name_wash)
@@ -178,7 +178,7 @@ def main():
             cmd_extract.append(cmd_this_extract)
 
     # Parallel run by Pool
-    pool = mp.Pool(16)
+    pool = mp.Pool(1)
     pool.map(work, cmd_extract)
     print('umi_tools extract: finished.')
 
@@ -288,7 +288,7 @@ def main():
             cmd_sort.append(cmd_this_sort)
 
     # Parallel run by Pool
-    pool = mp.Pool(16)
+    pool = mp.Pool(1)
     pool.map(work, cmd_sort)
     print('samtools sort: finished.')
 
@@ -322,7 +322,7 @@ def main():
         cmd_index.append(cmd_this_index)
 
     # Parallel run by Pool
-    pool = mp.Pool(16)
+    pool = mp.Pool(1)
     pool.map(work, cmd_index)
     print('samtools index: finished.')
 
@@ -335,7 +335,7 @@ def main():
     # STEP 5: Count UMIs per gene per cell. Command to use: umi_tools count.
     # Generate list of strings as commands.
     cmd_count = []
-    for out in os.listdir(dst)[8:]:
+    for out in os.listdir(dst):
 
         # Setup output directory
         out_dir = os.path.join(dst, out)
@@ -359,7 +359,7 @@ def main():
             cmd_count.append(cmd_this_count)
 
     # Parallel run by Pool
-    pool = mp.Pool(16)
+    pool = mp.Pool(1)
     pool.map(work, cmd_count)
     print('umi_tools count: finished.')
 

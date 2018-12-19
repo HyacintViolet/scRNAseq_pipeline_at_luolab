@@ -10,14 +10,14 @@ def add_suffix(df, suffix):
 
 
 # Set up some default parameters, i.e. working directory and filename
-parent_wd = '/media/luolab/ZA1BT1ER/yanting/'
-data_wd = '/media/luolab/ZA1BT1ER/yanting/vM4_CaiT/'
+parent_wd = '/media/luolab/ZA1BT1ER/linrui/'
+data_wd = '/media/luolab/ZA1BT1ER/linrui/vM19_2/'
 
 # Change working directory
 os.chdir(parent_wd)
 
 # Import experimental design, which stores library name, index, codename & experiment setup.
-exp_design = pd.read_excel('experimental_design_previous.xlsx')
+exp_design = pd.read_excel('experimental_design.xlsx')
 
 for folder in os.listdir(data_wd):
 
