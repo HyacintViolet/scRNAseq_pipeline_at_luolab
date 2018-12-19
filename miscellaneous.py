@@ -2,8 +2,8 @@ import os
 import re
 import pandas as pd
 
-parent_wd = '/media/luolab/ZA1BT1ER/yanting/'
-data_wd = '/media/luolab/ZA1BT1ER/yanting/vM4_CaiT/'
+parent_wd = '/media/luolab/ZA1BT1ER/linrui/DR_DAT/'
+data_wd = '/media/luolab/ZA1BT1ER/yanting/DR_DAT/vM19/'
 
 # Change working directory
 os.chdir(parent_wd)

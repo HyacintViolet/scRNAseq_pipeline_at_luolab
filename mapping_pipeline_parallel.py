@@ -43,18 +43,18 @@ def work(cmd):
 def main():
 
     # Source dir: sequencing reads data
-    src = '/media/luolab/ZA1BT1ER/linrui/data_P101SC18070367-01-B60-21/2.cleandata/'
+    src = '/media/luolab/ZA1BT1ER/linrui/DR_DAT/RAW_data/data_P101SC18070367-01-B60-21/2.cleandata/'
     folder_name_list = os.listdir(src)
 
     # Destination dir: mapping results
-    dst = '/media/luolab/ZA1BT1ER/linrui/vM19_2/'
+    dst = '/media/luolab/ZA1BT1ER/linrui/DR_DAT/vM19/'
 
     # Path to genome annotation and index
     genome_anno = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/gencode.vM19.chr_patch_hapl_scaff.annotation.gtf'
     genome_index = '/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM19/'
 
-    # Parent working dir: to write aggregate results
-    parent_wd = '/media/luolab/ZA1BT1ER/linrui/'
+    # Parent working dir: output results here
+    parent_wd = '/media/luolab/ZA1BT1ER/linrui/DR_DAT/'
 
     # Read barcode ground truth list
     barcode_ground_truth_raw = pd.read_excel(os.path.join(parent_wd, 'barcode_ground_truth_checklist.xlsx'))
@@ -218,6 +218,7 @@ def main():
                                    ' --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonical' + \
                                    ' --outSAMtype BAM SortedByCoordinate --outFileNamePrefix ' + \
                                    os.path.join(out_dir, prefix) + '_'
+            # Optional: '--outReadsUnmapped Fastx'
             cmd_star_mapping.append(cmd_this_mapping)
 
     # Parallel run by Pool
