@@ -11,8 +11,8 @@ def add_suffix(df, suffix):
 if __name__ == '__main__':
 
     # Set up some default parameters, i.e. working directory and filename
-    parent_wd = '/media/luolab/ZA1BT1ER/linrui/'
-    data_wd = '/media/luolab/ZA1BT1ER/linrui/vM19_2/'
+    parent_wd = '/media/luolab/ZA1BT1ER/linrui/DR_DAT/'
+    data_wd = '/media/luolab/ZA1BT1ER/linrui/DR_DAT/vM19/'
 
     # Change working directory
     os.chdir(parent_wd)
