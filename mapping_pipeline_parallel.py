@@ -125,7 +125,7 @@ def main():
         out_dir = os.path.join(dst, out)
 
         # Output dir
-        out_name_wash = '_'.join([prefix,'whitelist_washed.txt'])
+        out_name_wash = '_'.join([prefix, 'whitelist_washed.txt'])
         wash_out = os.path.join(out_dir, out_name_wash)
 
         if not os.path.exists(wash_out):
@@ -213,11 +213,11 @@ def main():
         # Construct commands
         if not os.path.exists(map_out):
             cmd_this_mapping = 'STAR --runThreadN 32 --genomeDir ' + genome_index + \
-                                   ' --readFilesIn ' + extract_out + \
-                                   ' --readFilesCommand zcat --outFilterMultimapNmax 1 --outFilterType BySJout' + \
-                                   ' --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonical' + \
-                                   ' --outSAMtype BAM SortedByCoordinate --outFileNamePrefix ' + \
-                                   os.path.join(out_dir, prefix) + '_'
+                               ' --readFilesIn ' + extract_out + \
+                               ' --readFilesCommand zcat --outFilterMultimapNmax 1 --outFilterType BySJout' + \
+                               ' --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonical' + \
+                               ' --outSAMtype BAM SortedByCoordinate --outFileNamePrefix ' + \
+                               os.path.join(out_dir, prefix) + '_ --outReadsUnmapped Fastx'
             cmd_star_mapping.append(cmd_this_mapping)
 
     # Parallel run by Pool
