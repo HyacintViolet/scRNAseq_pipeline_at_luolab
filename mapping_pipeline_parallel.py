@@ -125,7 +125,7 @@ def main():
         out_dir = os.path.join(dst, out)
 
         # Output dir
-        out_name_wash = '_'.join([prefix,'whitelist_washed.txt'])
+        out_name_wash = '_'.join([prefix, 'whitelist_washed.txt'])
         wash_out = os.path.join(out_dir, out_name_wash)
 
         if not os.path.exists(wash_out):
