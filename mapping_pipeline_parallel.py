@@ -105,7 +105,7 @@ def main():
                                  os.path.join(out_dir, 'whitelist80.txt')
             cmd_whitelist.append(cmd_this_whitelist)
 
-    pool = mp.Pool(12)
+    pool = mp.Pool(16)
     pool.map(work, cmd_whitelist)
     print('umi_tools whitelist: finished.')
 
@@ -392,7 +392,7 @@ def main():
             cmd_nuniquemap.append(cmd_this_nuniquemap)
 
     # Parallel run by Pool
-    pool = mp.Pool(32)
+    pool = mp.Pool(16)
     pool.map(work, cmd_nuniquemap)
     print('samtools view extract Nuniqmapped: finished.')
 
