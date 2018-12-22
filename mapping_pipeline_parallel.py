@@ -43,11 +43,11 @@ def work(cmd):
 def main():
 
     # Source dir: sequencing reads data
-    src = '/media/luolab/ZA1BT1ER/scRNAseq/yanting_all/data/yanting_previous/'
+    src = '/media/luolab/ZA1BT1ER/scRNAseq/yanting_all/data/yanting_missing/'
     folder_name_list = os.listdir(src)
 
     # Destination dir: mapping results
-    dst = '/media/luolab/ZA1BT1ER/yanting/vM19/yanting_previous/'
+    dst = '/media/luolab/ZA1BT1ER/yanting/vM19/yanting_missing/'
 
     # Path to genome annotation and index
     genome_anno = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/gencode.vM19.chr_patch_hapl_scaff.annotation.gtf'
@@ -92,16 +92,17 @@ def main():
 
         # Fetch file name. Read 1 suffix: _2.fq.gz, read 2 suffix: _1.fq.gz.
         for item in os.listdir(input_dir):
-            if item.endswith('2.fq.gz'):
+            if item.endswith('2.fq.gz') or item.endswith('2.clean.fq.gz'):
                 read1_file_name = item
-            elif item.endswith('1.fq.gz'):
+            elif item.endswith('1.fq.gz') or item.endswith('1.clean.fq.gz'):
                 read2_file_name = item
 
         if not os.path.exists(os.path.join(out_dir, 'whitelist80.txt')):
             # Construct commands
             cmd_this_whitelist = 'umi_tools whitelist --stdin ' + os.path.join(input_dir, read1_file_name) + \
-                                 ' --bc-pattern=CCCCCCCCNNNNNNNN --set-cell-number=80 --plot-prefix=' + out_dir + \
-                                 'cell_num_80 -v 1 --log2stderr > ' + os.path.join(out_dir, 'whitelist80.txt')
+                                 ' --bc-pattern=CCCCCCCCNNNNNNNN --set-cell-number=80 --plot-prefix=' + \
+                                 os.path.join(out_dir, 'cell_num_80') + ' -v 1 --log2stderr > ' + \
+                                 os.path.join(out_dir, 'whitelist80.txt')
             cmd_whitelist.append(cmd_this_whitelist)
 
     pool = mp.Pool(12)
@@ -156,9 +157,9 @@ def main():
 
         # Fetch input file name. Read 1 suffix: _2.fq.gz, read 2 suffix: _1.fq.gz.
         for item in os.listdir(input_dir):
-            if item.endswith('2.fq.gz'):
+            if item.endswith('2.fq.gz') or item.endswith('2.clean.fq.gz'):
                 read1_file_name = item
-            elif item.endswith('1.fq.gz'):
+            elif item.endswith('1.fq.gz') or item.endswith('1.clean.fq.gz'):
                 read2_file_name = item
         out_name_wash = '_'.join([prefix, 'whitelist_washed.txt'])
         wash_out = os.path.join(out_dir, out_name_wash)
