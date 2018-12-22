@@ -100,10 +100,10 @@ def main():
         if not os.path.exists(os.path.join(out_dir, 'whitelist80.txt')):
             # Construct commands
             cmd_this_whitelist = 'umi_tools whitelist --stdin ' + os.path.join(input_dir, read1_file_name) + \
-                                 ' --bc-pattern=CCCCCCCCNNNNNNNN --set-cell-number=80 --plot-prefix=' + out_dir + \
-                                 'cell_num_80 -v 1 --log2stderr > ' + os.path.join(out_dir, 'whitelist80.txt')
+                                 ' --bc-pattern=CCCCCCCCNNNNNNNN --set-cell-number=80 --plot-prefix=' + \
+                                 os.path.join(out_dir, 'cell_num_80') + ' -v 1 --log2stderr > ' + \
+                                 os.path.join(out_dir, 'whitelist80.txt')
             cmd_whitelist.append(cmd_this_whitelist)
-
     pool = mp.Pool(1)
     pool.map(work, cmd_whitelist)
     print('umi_tools whitelist: finished.')
