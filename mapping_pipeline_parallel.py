@@ -43,11 +43,11 @@ def work(cmd):
 def main():
 
     # Source dir: sequencing reads data
-    src = '/media/luolab/ZA1BT1ER/scRNAseq/yanting_all/data/yanting_missing/'
+    src = '/media/luolab/ZA1BT1ER/scRNAseq/yanting_all/data/yanting_190301/'
     folder_name_list = os.listdir(src)
 
     # Destination dir: mapping results
-    dst = '/media/luolab/ZA1BT1ER/yanting/vM19/yanting_missing/'
+    dst = '/media/luolab/ZA1BT1ER/yanting/vM19/yanting_190301/'
 
     # Path to genome annotation and index
     genome_anno = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/gencode.vM19.chr_patch_hapl_scaff.annotation.gtf'
@@ -119,7 +119,7 @@ def main():
 
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
+        match = re.search('^([^_]*)_([^_]*)$', out)
         prefix = match.group(1)
 
         # Wash whitelist, output whitelist_washed.txt
@@ -152,7 +152,7 @@ def main():
         out_dir = os.path.join(dst, s)
 
         # Grab folder name prefix
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', s)
+        match = re.search('^([^_]*)_([^_]*)$', s)
         prefix = match.group(1)
 
         # Fetch input file name. Read 1 suffix: _2.fq.gz, read 2 suffix: _1.fq.gz.
@@ -200,7 +200,7 @@ def main():
         out_dir = os.path.join(dst, out)
 
         # Grab folder name
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
+        match = re.search('^([^_]*)_([^_]*)$', out)
         prefix = match.group(1)
 
         # Input dir
@@ -236,7 +236,7 @@ def main():
         out_dir = os.path.join(dst, out)
 
         # Grab folder name
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
+        match = re.search('^([^_]*)_([^_]*)$', out)
         prefix = match.group(1)
 
         # Input dir
@@ -272,7 +272,7 @@ def main():
         out_dir = os.path.join(dst, out)
 
         # Grab folder name
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
+        match = re.search('^([^_]*)_([^_]*)$', out)
         prefix = match.group(1)
 
         # Input file name for samtools sort
@@ -311,7 +311,7 @@ def main():
         os.chdir(out_dir)
 
         # Grab folder name
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
+        match = re.search('^([^_]*)_([^_]*)$', out)
         prefix = match.group(1)
 
         # Input file name for samtools index
@@ -342,7 +342,7 @@ def main():
         out_dir = os.path.join(dst, out)
 
         # Grab folder name
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
+        match = re.search('^([^_]*)_([^_]*)$', out)
         prefix = match.group(1)
 
         # Input file name for umi_tools count
@@ -378,7 +378,7 @@ def main():
         out_dir = os.path.join(dst, out)
 
         # Grab folder name
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
+        match = re.search('^([^_]*)_([^_]*)$', out)
         prefix = match.group(1)
 
         aligned_out = '_'.join([prefix, 'Aligned.sortedByCoord.out.bam'])
