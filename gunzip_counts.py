@@ -5,7 +5,7 @@
 import os
 
 # Set working directory
-parent_wd = '/media/luolab/ZA1BT1ER/yanting/vM4_CaiT'
+parent_wd = '/media/luolab/ZA1BT1ER/yanting/vM19'
 
 # Change working directory
 os.chdir(parent_wd)
@@ -13,7 +13,7 @@ os.chdir(parent_wd)
 # List all folders in wd
 folders = os.listdir()
 
-for folder in folders: # Iterate over wd, go into one folder each time
+for folder in folders:  # Iterate over wd, go into one folder each time
     print('Extracting'+folder)
     os.chdir(os.path.join(parent_wd, folder))
     for filename in os.listdir():  # Iterate over all files in each folder
