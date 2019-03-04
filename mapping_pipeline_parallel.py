@@ -336,7 +336,7 @@ def main():
     # STEP 5: Count UMIs per gene per cell. Command to use: umi_tools count.
     # Generate list of strings as commands.
     cmd_count = []
-    for out in os.listdir(dst)[:]:
+    for out in os.listdir(dst):
 
         # Setup output directory
         out_dir = os.path.join(dst, out)
