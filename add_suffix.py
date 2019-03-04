@@ -11,7 +11,7 @@ def add_suffix(df, suffix):
 
 # Set up some default parameters, i.e. working directory and filename
 parent_wd = '/media/luolab/ZA1BT1ER/yanting/'
-data_wd = '/media/luolab/ZA1BT1ER/yanting/vM4_CaiT/'
+data_wd = '/media/luolab/ZA1BT1ER/yanting/vM19/yanting_190301/'
 
 # Change working directory
 os.chdir(parent_wd)
@@ -26,7 +26,7 @@ for folder in os.listdir(data_wd):
     os.chdir(library_wd)
 
     # Extract names from folder
-    match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', folder)
+    match = re.search('^([^_]*)_([^_]*)$', folder)
 
     nameparts = [match.group(1), 'counts.tsv']
 
