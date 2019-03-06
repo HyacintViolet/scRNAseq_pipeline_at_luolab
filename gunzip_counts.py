@@ -19,7 +19,7 @@ for folder in folders:  # Iterate over wd, go into one folder each time
     os.chdir(os.path.join(parent_wd, folder))
 
     # Grab folder name
-    match = re.search('^([^_]*)_([^_]*)$', folder)
+    match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', folder)
     prefix = match.group(1)
 
     if not os.path.exists(os.path.join(parent_wd, folder, '_'.join([prefix, 'counts.tsv']))):
