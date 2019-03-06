@@ -12,13 +12,13 @@ if __name__ == '__main__':
 
     # Set up some default parameters, i.e. working directory and filename
     parent_wd = '/media/luolab/ZA1BT1ER/yanting/'
-    data_wd = '/media/luolab/ZA1BT1ER/yanting/vM4/vM4_CaiT/'
+    data_wd = '/media/luolab/ZA1BT1ER/yanting/vM19/yanting_190301/'
 
     # Change working directory
     os.chdir(parent_wd)
 
     # Import experimental design, which stores library name, index, codename & experiment setup.
-    exp_design = pd.read_excel('experimental_design_previous.xlsx')
+    exp_design = pd.read_excel('experimental_design_190301.xlsx')
 
     # Iteratively enter each library
     for folder in os.listdir(data_wd):

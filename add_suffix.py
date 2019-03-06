@@ -17,7 +17,7 @@ data_wd = '/media/luolab/ZA1BT1ER/yanting/vM19/yanting_190301/'
 os.chdir(parent_wd)
 
 # Import experimental design, which stores library name, index, codename & experiment setup.
-exp_design = pd.read_excel('experimental_design_previous.xlsx')
+exp_design = pd.read_excel('experimental_design_190301.xlsx')
 
 for folder in os.listdir(data_wd):
 
@@ -26,7 +26,7 @@ for folder in os.listdir(data_wd):
     os.chdir(library_wd)
 
     # Extract names from folder
-    match = re.search('^([^_]*)_([^_]*)$', folder)
+    match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', folder)
 
     nameparts = [match.group(1), 'counts.tsv']
 
