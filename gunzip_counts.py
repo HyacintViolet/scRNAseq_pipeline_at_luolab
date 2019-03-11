@@ -6,23 +6,23 @@ import os
 import re
 
 # Set working directory
-parent_wd = '/media/luolab/ZA1BT1ER/yanting/vM19/yanting_190301/'
+data_wd = '/media/luolab/ZA1BT1ER/yanting/vM19/mapping/'
 
 # Change working directory
-os.chdir(parent_wd)
+os.chdir(data_wd)
 
 # List all folders in wd
 folders = os.listdir()
 
 for folder in folders:  # Iterate over wd, go into one folder each time
 
-    os.chdir(os.path.join(parent_wd, folder))
+    os.chdir(os.path.join(data_wd, folder))
 
     # Grab folder name
     match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', folder)
     prefix = match.group(1)
 
-    if not os.path.exists(os.path.join(parent_wd, folder, '_'.join([prefix, 'counts.tsv']))):
+    if not os.path.exists(os.path.join(data_wd, folder, '_'.join([prefix, 'counts.tsv']))):
         print('Extracting ' + prefix + 'counts.tsv.gz')
         for filename in os.listdir():  # Iterate over all files in each folder
             if filename.endswith(".tsv.gz"):  # Find counts.tsv.gz
