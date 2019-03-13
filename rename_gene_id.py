@@ -23,7 +23,7 @@ data_wd = '/media/luolab/ZA1BT1ER/yanting/vM19/mapping/'
 os.chdir(parent_wd)
 
 # Load name table [ENSEMBL STABLE ID, gene name]
-nametable = pd.read_table(os.path.join(parent_wd, 'gencode.vM4.annotation.tab'), sep="\t")
+nametable = pd.read_table(os.path.join(parent_wd, 'gencode.vM19.annotation.tab'), sep="\t")
 nametable = nametable.rename(columns={'Unnamed: 0': 'stable_id', 'Unnamed: 1': 'gene_name'})
 
 # Note that not all the elements in gene_name is unique. If not fixed, the FindVariableGenes pipe will return error.
