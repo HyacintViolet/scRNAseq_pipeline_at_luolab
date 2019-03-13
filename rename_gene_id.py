@@ -37,8 +37,17 @@ counts = Counter(names)
 for s, num in counts.items():
     if num > 1:
         for suffix in range(1, num+1):
-            names[names.index(s)] = s + str(suffix)
+            # *** For some unknown reason, the following line doesn't workwithout '_'
+            names[names.index(s)] = s + '_' + str(suffix)
 nametable_new = pd.concat([nametable.stable_id, pd.Series(names, name='gene_name')], axis=1)
+
+# # Debugging above snippet.
+# test_list = ['x','x','x1','x1','x1','y','y','z']
+# counts_test = Counter(test_list)
+# for s, num in counts_test.items():
+#     if num>1:
+#         for suf in range(1, num+1):
+#             test_list[test_list.index(s)] = s + str(suf)
 
 # Confirm again
 has_duplicates(nametable_new.stable_id)
