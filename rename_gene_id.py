@@ -23,8 +23,9 @@ data_wd = '/media/luolab/ZA1BT1ER/yanting/vM19/mapping/'
 os.chdir(parent_wd)
 
 # Load name table [ENSEMBL STABLE ID, gene name]
-nametable = pd.read_table(os.path.join(parent_wd, 'gencode.vM19.annotation.tab'), sep="\t")
-nametable = nametable.rename(columns={'Unnamed: 0': 'stable_id', 'Unnamed: 1': 'gene_name'})
+nametable = pd.read_table(os.path.join(parent_wd, 'gencode.vM19.annotation.tab'), sep="\t", names=["stable_id",
+                                                                                                   "gene_name"])
+# nametable = nametable.rename(columns={'Unnamed: 0': 'stable_id', 'Unnamed: 1': 'gene_name'})
 
 # Note that not all the elements in gene_name is unique. If not fixed, the FindVariableGenes pipe will return error.
 has_duplicates(nametable.stable_id)
@@ -38,6 +39,10 @@ for s, num in counts.items():
         for suffix in range(1, num+1):
             names[names.index(s)] = s + str(suffix)
 nametable_new = pd.concat([nametable.stable_id, pd.Series(names, name='gene_name')], axis=1)
+
+# Confirm again
+has_duplicates(nametable_new.stable_id)
+has_duplicates(nametable_new.gene_name)
 
 # Remove dots (version id)
 ensmusg = nametable_new.stable_id.str.split(".", n=1, expand=True)
