@@ -67,6 +67,7 @@ print(expression_mat.shape)
 expression_mat.id = expression_mat.id.map(dictionary)
 
 expression_mat.to_csv('counts_QC1_renamed.txt', sep=' ', index=False)
+print('Finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
 # The following codes are obsolete due to pipeline adjustment.
