@@ -38,7 +38,8 @@ for s, num in counts.items():
     if num > 1:
         for suffix in range(1, num+1):
             # *** For some unknown reason, the following line doesn't workwithout '_'
-            names[names.index(s)] = s + '_' + str(suffix)
+            # Can't use '_' as delimiter, seems it messes up with R package Seurat 'CreateSeuratObject' 2019.3.26
+            names[names.index(s)] = s + '.' + str(suffix)
 nametable_new = pd.concat([nametable.stable_id, pd.Series(names, name='gene_name')], axis=1)
 
 # # Debugging above snippet.
@@ -61,12 +62,12 @@ nametable_new.stable_id = ensmusg[0]
 dictionary = nametable_new.set_index('stable_id')['gene_name'].T.to_dict()
 
 # Load expression matrix (QC2)
-expression_mat = pd.read_csv('counts_stbid_QC1.txt', sep=' ')
+expression_mat = pd.read_csv('counts_yutao_3T3_stbid_QC1.txt', sep=' ')
 print(expression_mat.shape)
 
 expression_mat.id = expression_mat.id.map(dictionary)
 
-expression_mat.to_csv('counts_QC1_renamed.txt', sep=' ', index=False)
+expression_mat.to_csv('counts_yutao_3T3_QC1_renamed.txt', sep=' ', index=False)
 print('Finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
