@@ -37,8 +37,8 @@ counts = Counter(names)
 for s, num in counts.items():
     if num > 1:
         for suffix in range(1, num+1):
-            # *** For some unknown reason, the following line doesn't workwithout '_'
-            names[names.index(s)] = s + '_' + str(suffix)
+            # *** Debugged. Must use - as separator as in R, Seurat doesn't recognize '_' in feature names
+            names[names.index(s)] = s + '-' + str(suffix)
 nametable_new = pd.concat([nametable.stable_id, pd.Series(names, name='gene_name')], axis=1)
 
 # # Debugging above snippet.
