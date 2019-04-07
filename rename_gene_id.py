@@ -18,8 +18,8 @@ def has_duplicates(list_of_values):
 
 
 # Set up working directories
-parent_wd = '/media/luolab/ZA1BT1ER/linrui/DR_DAT/'
-data_wd = '/media/luolab/ZA1BT1ER/linrui/DR_DAT/vM19/'
+parent_wd = '/media/luolab/ZA1BT1ER/yanting/dat_gfp/'
+data_wd = '/media/luolab/ZA1BT1ER/yanting/dat_gfp/mapping/'
 os.chdir(parent_wd)
 
 # Load name table [ENSEMBL STABLE ID, gene name]
