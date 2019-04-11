@@ -9,7 +9,7 @@ import pandas as pd
 
 # Set up working directories
 parent_wd = '/media/luolab/ZA1BT1ER/yanting/vM19/'
-data_wd = '/media/luolab/ZA1BT1ER/yanting/vM19/mapping2/'
+data_wd = '/media/luolab/ZA1BT1ER/yanting/vM19/mapping/'
 os.chdir(parent_wd)
 mapping_stats_new = pd.DataFrame(columns=['Nreads', 'Nuniquemap', 'cell'])
 
@@ -30,7 +30,7 @@ def navigate_and_concatenate_mapping_stats(src, mapping_stats):
 
 mapping_stats_concatenated = navigate_and_concatenate_mapping_stats(data_wd, mapping_stats_new)
 
-mapping_stats_concatenated.to_csv('mapping_stats_all_2.txt', sep='\t', index=False)
+mapping_stats_concatenated.to_csv('mapping_stats_all.txt', sep='\t', index=False)
 #
 # # --------------------------------------------------------------------------------------------------------------------
 # # Strategy 2: by iteration

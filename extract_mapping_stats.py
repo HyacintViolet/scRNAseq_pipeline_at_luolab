@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     # Set up some default parameters, i.e. working directory and filename
     parent_wd = '/media/luolab/ZA1BT1ER/yanting/vM19/'
-    data_wd = '/media/luolab/ZA1BT1ER/yanting/vM19/mapping2/'
+    data_wd = '/media/luolab/ZA1BT1ER/yanting/vM19/mapping/'
 
     # Change working directory
     os.chdir(parent_wd)
