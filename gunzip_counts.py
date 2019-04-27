@@ -5,7 +5,7 @@
 import os
 
 # Set working directory
-parent_wd = '/media/luolab/ZA1BT1ER/linrui/DR_DAT/vM19/'
+parent_wd = '/media/luolab/ZA1BT1ER/yanting/dat_gfp/mapping/'
 
 # Change working directory
 os.chdir(parent_wd)
