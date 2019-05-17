@@ -54,7 +54,7 @@ def main():
     genome_index = '/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM21_withgfp/'
 
     # Parent working dir: output results here
-    parent_wd = '/media/luolab/ZA1BT1ER/linrui/DR_DAT/'
+    parent_wd = '/media/luolab/ZA1BT1ER/yanting/'
 
     # Read barcode ground truth list
     barcode_ground_truth_raw = pd.read_excel(os.path.join(parent_wd, 'barcode_ground_truth_checklist.xlsx'))
