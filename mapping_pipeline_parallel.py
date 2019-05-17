@@ -43,15 +43,15 @@ def work(cmd):
 def main():
 
     # Source dir: sequencing reads data
-    src = '/media/luolab/ZA1BT1ER/scRNAseq/yanting_all/data/yanting_190423/2.cleandata/'
+    src = '/media/luolab/ZA1BT1ER/linrui/DR_DAT/RAW_data/data_P101SC18070367-01-B60-21/2.cleandata/'
     folder_name_list = os.listdir(src)
 
     # Destination dir: mapping results
     dst = '/media/luolab/ZA1BT1ER/yanting/dat_gfp/mapping/'
 
     # Path to genome annotation and index
-    genome_anno = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/gencode.vM19.chr_patch_hapl_scaff.annotation.gtf'
-    genome_index = '/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM19/'
+    genome_anno = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/gencode.vM21.chr_patch_hapl_scaff.annotation.gtf'
+    genome_index = '/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM21_withgfp/'
 
     # Parent working dir: output results here
     parent_wd = '/media/luolab/ZA1BT1ER/linrui/DR_DAT/'
@@ -92,9 +92,9 @@ def main():
 
         # Fetch file name. Read 1 suffix: _2.fq.gz, read 2 suffix: _1.fq.gz.
         for item in os.listdir(input_dir):
-            if item.endswith('2.clean.fq.gz'):
+            if item.endswith('2.fq.gz') or item.endswith('2.clean.fq.gz'):
                 read1_file_name = item
-            elif item.endswith('1.clean.fq.gz'):
+            elif item.endswith('1.fq.gz') or item.endswith('1.clean.fq.gz'):
                 read2_file_name = item
 
         if not os.path.exists(os.path.join(out_dir, 'whitelist80.txt')):
@@ -104,7 +104,8 @@ def main():
                                  os.path.join(out_dir, 'cell_num_80') + ' -v 1 --log2stderr > ' + \
                                  os.path.join(out_dir, 'whitelist80.txt')
             cmd_whitelist.append(cmd_this_whitelist)
-    pool = mp.Pool(2)
+
+    pool = mp.Pool(6)
     pool.map(work, cmd_whitelist)
     print('umi_tools whitelist: finished.')
 
@@ -156,9 +157,9 @@ def main():
 
         # Fetch input file name. Read 1 suffix: _2.fq.gz, read 2 suffix: _1.fq.gz.
         for item in os.listdir(input_dir):
-            if item.endswith('2.clean.fq.gz'):
+            if item.endswith('2.fq.gz') or item.endswith('2.clean.fq.gz'):
                 read1_file_name = item
-            elif item.endswith('1.clean.fq.gz'):
+            elif item.endswith('1.fq.gz') or item.endswith('1.clean.fq.gz'):
                 read2_file_name = item
         out_name_wash = '_'.join([prefix, 'whitelist_washed.txt'])
         wash_out = os.path.join(out_dir, out_name_wash)
@@ -178,7 +179,7 @@ def main():
             cmd_extract.append(cmd_this_extract)
 
     # Parallel run by Pool
-    pool = mp.Pool(2)
+    pool = mp.Pool(6)
     pool.map(work, cmd_extract)
     print('umi_tools extract: finished.')
 
@@ -213,11 +214,11 @@ def main():
         # Construct commands
         if not os.path.exists(map_out):
             cmd_this_mapping = 'STAR --runThreadN 32 --genomeDir ' + genome_index + \
-                                   ' --readFilesIn ' + extract_out + \
-                                   ' --readFilesCommand zcat --outFilterMultimapNmax 1 --outFilterType BySJout' + \
-                                   ' --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonical' + \
-                                   ' --outSAMtype BAM SortedByCoordinate --outFileNamePrefix ' + \
-                                   os.path.join(out_dir, prefix) + '_'
+                               ' --readFilesIn ' + extract_out + \
+                               ' --readFilesCommand zcat --outFilterMultimapNmax 1 --outFilterType BySJout' + \
+                               ' --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonical' + \
+                               ' --outSAMtype BAM SortedByCoordinate --outFileNamePrefix ' + \
+                               os.path.join(out_dir, prefix) + '_ --outReadsUnmapped Fastx'
             # Optional: '--outReadsUnmapped Fastx'
             cmd_star_mapping.append(cmd_this_mapping)
 
@@ -289,7 +290,7 @@ def main():
             cmd_sort.append(cmd_this_sort)
 
     # Parallel run by Pool
-    pool = mp.Pool(2)
+    pool = mp.Pool(6)
     pool.map(work, cmd_sort)
     print('samtools sort: finished.')
 
@@ -323,7 +324,7 @@ def main():
         cmd_index.append(cmd_this_index)
 
     # Parallel run by Pool
-    pool = mp.Pool(2)
+    pool = mp.Pool(6)
     pool.map(work, cmd_index)
     print('samtools index: finished.')
 
@@ -360,7 +361,7 @@ def main():
             cmd_count.append(cmd_this_count)
 
     # Parallel run by Pool
-    pool = mp.Pool(2)
+    pool = mp.Pool(6)
     pool.map(work, cmd_count)
     print('umi_tools count: finished.')
 
@@ -392,7 +393,7 @@ def main():
             cmd_nuniquemap.append(cmd_this_nuniquemap)
 
     # Parallel run by Pool
-    pool = mp.Pool(2)
+    pool = mp.Pool(6)
     pool.map(work, cmd_nuniquemap)
     print('samtools view extract Nuniqmapped: finished.')
 
