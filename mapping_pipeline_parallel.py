@@ -47,14 +47,14 @@ def main():
     folder_name_list = os.listdir(src)
 
     # Destination dir: mapping results
-    dst = '/media/luolab/ZA1BT1ER/yanting/vM19/mapping/'
+    dst = '/media/luolab/ZA1BT1ER/yanting/vM21/mapping/'
 
     # Path to genome annotation and index
-    genome_anno = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/gencode.vM19.chr_patch_hapl_scaff.annotation.gtf'
-    genome_index = '/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM19/'
+    genome_anno = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/gencode.vM21.chr_patch_hapl_scaff.annotation.gtf'
+    genome_index = '/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM21/'
 
     # Parent working dir: to write aggregate results
-    parent_wd = '/media/luolab/ZA1BT1ER/yanting/vM19/'
+    parent_wd = '/media/luolab/ZA1BT1ER/yanting/vM21/'
 
     # Read barcode ground truth list
     barcode_ground_truth_raw = pd.read_excel(os.path.join(parent_wd, 'barcode_ground_truth_checklist.xlsx'))
