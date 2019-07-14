@@ -34,23 +34,27 @@ for folder in os.listdir(data_wd):
 
     print('parsing ' + filename + ' ...')
 
-    # Read counts data
-    data = pd.read_csv(filename, sep="\t")
+    if not os.path.exists(os.path.join(data_wd, folder, '_'.join([match.group(1), 'counts', 'suffix.tsv']))):
+        # Read counts data
+        data = pd.read_csv(filename, sep="\t")
 
-    # Find codename w.r.t. lib_prefix to use as suffix
-    codename = exp_design.codename[exp_design.lib_prefix == match.group(1)]
+        # Find codename w.r.t. lib_prefix to use as suffix
+        codename = exp_design.codename[exp_design.lib_prefix == match.group(1)]
 
-    # Use iloc to access by position rather than label (awesome!)
-    suffix = '_' + codename.iloc[0]
+        # Use iloc to access by position rather than label (awesome!)
+        suffix = '_' + codename.iloc[0]
 
-    # Add suffix
-    add_suffix(data, suffix)
+        # Add suffix
+        add_suffix(data, suffix)
 
-    # Output XXXXXXXX_counts_suffix.tsv
-    # *** The naming convention should absolutely be simplified in the future ***
-    out_nameparts = [match.group(1), 'counts', 'suffix.tsv']
-    out_filename = '_'.join(out_nameparts)
-    data.to_csv(out_filename, sep="\t", index=False)
+        # Output XXXXXXXX_counts_suffix.tsv
+        # *** The naming convention should absolutely be simplified in the future ***
+        out_nameparts = [match.group(1), 'counts', 'suffix.tsv']
+        out_filename = '_'.join(out_nameparts)
+        data.to_csv(out_filename, sep="\t", index=False)
+
+    else:
+        print(match.group(1) + 'counts_suffix.tsv already exists. Skipping.')
 
     print('finished\n')
 # # Example code to import data

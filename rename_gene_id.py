@@ -61,12 +61,12 @@ nametable_new.stable_id = ensmusg[0]
 dictionary = nametable_new.set_index('stable_id')['gene_name'].T.to_dict()
 
 # Load expression matrix (QC2)
-expression_mat = pd.read_csv('counts_stbid_Nreads_0_Nuniq_0.txt', sep=' ')
+expression_mat = pd.read_csv('counts_stbid_Nreads_100000_Nuniq_.5.txt', sep=' ')
 print(expression_mat.shape)
 
 expression_mat.id = expression_mat.id.map(dictionary)
 
-expression_mat.to_csv('counts_0_0_QC1_renamed.txt', sep=' ', index=False)
+expression_mat.to_csv('counts_100000_.5_QC1_renamed.txt', sep=' ', index=False)
 print('Finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
