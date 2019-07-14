@@ -20,7 +20,7 @@ def wash_whitelist(out_dir, bc_ground_truth, match):
     print('Washing ' + out_dir)
     os.chdir(out_dir)
 
-    # Read whitelist80
+    # Read whitelist8
     whitelist80 = pd.read_csv('whitelist80.txt', sep="\t", names=['cell', 'candidate', 'Nreads', 'Ncandidate'])
 
     # Remove rows whose 'cell' value is not found in barcode_ground_truth

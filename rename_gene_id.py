@@ -18,12 +18,12 @@ def has_duplicates(list_of_values):
 
 
 # Set up working directories
-parent_wd = '/media/luolab/ZA1BT1ER/yanting/vM19/'
-data_wd = '/media/luolab/ZA1BT1ER/yanting/vM19/mapping/'
+parent_wd = '/media/luolab/ZA1BT1ER/yanting/vM21/'
+data_wd = '/media/luolab/ZA1BT1ER/yanting/vM21/mapping/'
 os.chdir(parent_wd)
 
 # Load name table [ENSEMBL STABLE ID, gene name]
-nametable = pd.read_table(os.path.join(parent_wd, 'gencode.vM19.annotation.tab'), sep="\t", names=["stable_id",
+nametable = pd.read_table(os.path.join(parent_wd, 'gencode.vM21.annotation.tab'), sep="\t", names=["stable_id",
                                                                                                    "gene_name"])
 # nametable = nametable.rename(columns={'Unnamed: 0': 'stable_id', 'Unnamed: 1': 'gene_name'})
 
@@ -61,12 +61,12 @@ nametable_new.stable_id = ensmusg[0]
 dictionary = nametable_new.set_index('stable_id')['gene_name'].T.to_dict()
 
 # Load expression matrix (QC2)
-expression_mat = pd.read_csv('counts_stbid_QC1.txt', sep=' ')
+expression_mat = pd.read_csv('counts_stbid_Nreads_0_Nuniq_0.txt', sep=' ')
 print(expression_mat.shape)
 
 expression_mat.id = expression_mat.id.map(dictionary)
 
-expression_mat.to_csv('counts_QC1_renamed.txt', sep=' ', index=False)
+expression_mat.to_csv('counts_0_0_QC1_renamed.txt', sep=' ', index=False)
 print('Finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
