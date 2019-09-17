@@ -1,6 +1,6 @@
 import os
 import re
-# import multiprocessing as mp
+import multiprocessing as mp
 import subprocess
 
 
@@ -18,16 +18,29 @@ def fetch_qc_file_list(wd, file_list):
     return file_list
 
 
+def work(cmd):
+    return subprocess.call(cmd, shell=True)
+
+
 def main():
     wd = '/media/luolab/ZA1BT1ER/scRNAseq/yanting_all/data/yanting/'
     file_list = []
 
     file_list = fetch_qc_file_list(wd, file_list)
 
-    # fastqc has build-in parallel functionality, multiprocessing and pool are not required
-    num_threads = 24
-    cmd = 'fastqc -t ' + str(num_threads) + ' ' + ' '.join(file_list)
-    subprocess.call(cmd, shell=True)
+    cmd_fastqc = []
+    for file in file_list:
+        cmd_fastqc.append('fastqc ' + file)
+
+    # Parallel run by Pool
+    pool = mp.Pool(16)
+    pool.map(work, cmd_fastqc)
+
+    # The build-in parallel functionality of fastQC runs very slowly, abandoned
+    # num_threads = 24
+    # cmd = 'fastqc -t ' + str(num_threads) + ' ' + ' '.join(file_list)
+    # subprocess.call(cmd, shell=True)
+
     print('fastqc parallel: finished.')
 
 
