@@ -2,6 +2,8 @@
   <dictionary name="luolab">
     <words>
       <w>barcodes</w>
+      <w>fastq</w>
+      <w>fastqc</w>
       <w>nuniqmapped</w>
       <w>samtools</w>
       <w>whietlist</w>
