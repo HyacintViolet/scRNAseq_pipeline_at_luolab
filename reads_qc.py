@@ -29,3 +29,7 @@ def main():
     cmd = 'fastqc -t ' + str(num_threads) + ' ' + ' '.join(file_list)
     subprocess.call(cmd, shell=True)
     print('fastqc parallel: finished.')
+
+
+if __name__ == '__main__':
+    main()
