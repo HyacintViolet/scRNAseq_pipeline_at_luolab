@@ -248,7 +248,7 @@ def main():
         featurecounts_out = os.path.join(out_dir, out_name_featurecounts)
 
         if not os.path.exists(featurecounts_out):
-            cmd_this_featurecounts = 'featureCounts -a ' + genome_anno + ' -o ' + featurecounts_out + \
+            cmd_this_featurecounts = 'featureCounts -s 1 -a ' + genome_anno + ' -o ' + featurecounts_out + \
                                 ' -R BAM ' + map_out + ' -T 32'
             cmd_featurecounts.append(cmd_this_featurecounts)
 

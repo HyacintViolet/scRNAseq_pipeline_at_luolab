@@ -23,7 +23,7 @@ def work(cmd):
 
 
 def main():
-    wd = '/media/luolab/ZA1BT1ER/scRNAseq/yanting_all/data/yanting/'
+    wd = '/media/luolab/ZA1BT1ER/SRA/sra/'
     file_list = []
 
     file_list = fetch_qc_file_list(wd, file_list)
