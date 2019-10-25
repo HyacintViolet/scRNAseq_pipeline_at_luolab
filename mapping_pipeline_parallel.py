@@ -47,14 +47,14 @@ def main():
     folder_name_list = os.listdir(src)
 
     # Destination dir: mapping results
-    dst = '/media/luolab/ZA1BT1ER/yanting/vM21/mapping/'
+    dst = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
 
     # Path to genome annotation and index
-    genome_anno = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/gencode.vM21.chr_patch_hapl_scaff.annotation.gtf'
-    genome_index = '/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM21/'
+    genome_anno = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_scaff.annotation.gtf'
+    genome_index = '/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM23/'
 
     # Parent working dir: to write aggregate results
-    parent_wd = '/media/luolab/ZA1BT1ER/yanting/vM21/'
+    parent_wd = '/media/luolab/ZA1BT1ER/yanting/vM23/'
 
     # Read barcode ground truth list
     barcode_ground_truth_raw = pd.read_excel(os.path.join(parent_wd, 'barcode_ground_truth_checklist.xlsx'))
@@ -217,7 +217,7 @@ def main():
                                ' --readFilesIn ' + extract_out + \
                                ' --readFilesCommand zcat --outFilterMultimapNmax 1 --outFilterType BySJout' + \
                                ' --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonical' + \
-                               ' --outSAMtype BAM SortedByCoordinate --outFileNamePrefix ' + \
+                               ' --outFilterMismatchNmax 6 --outSAMtype BAM SortedByCoordinate --outFileNamePrefix ' + \
                                os.path.join(out_dir, prefix) + '_ --outReadsUnmapped Fastx'
             cmd_star_mapping.append(cmd_this_mapping)
 
@@ -263,6 +263,7 @@ def main():
 # CHUNK 5 STARTS HERE
 # ----------------------------------------------------------------------------------------------------------------------
 
+    # STEP 5: Sort featureCounts assigned BAM files (Aligned.sortedByCoord.out.bam.featureCounts.bam)
     # samtools sort parallelized
     # Generate list of strings as commands.
     cmd_sort = []
@@ -299,6 +300,7 @@ def main():
 # CHUNK 6 STARTS HERE
 # ----------------------------------------------------------------------------------------------------------------------
 
+    # STEP 6: Generate index
     # samtools index parallelized
     # Generate list of strings as commands.
     cmd_index = []
@@ -333,7 +335,7 @@ def main():
 # CHUNK 7 STARTS HERE
 # ----------------------------------------------------------------------------------------------------------------------
 
-    # STEP 5: Count UMIs per gene per cell. Command to use: umi_tools count.
+    # STEP 7: Count UMIs per gene per cell. Command to use: umi_tools count.
     # Generate list of strings as commands.
     cmd_count = []
     for out in os.listdir(dst):
@@ -370,6 +372,7 @@ def main():
 # CHUNK 8 STARTS HERE
 # ----------------------------------------------------------------------------------------------------------------------
 
+    # STEP 8: Geneate mapping stats (Nuniqmapped)
     # Construct commands
     cmd_nuniquemap = []
     for out in os.listdir(dst):
