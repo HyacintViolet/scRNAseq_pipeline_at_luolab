@@ -37,7 +37,8 @@ for s in os.listdir(parent_dir):
     # Check if output already exists. If not, construct command.
     if not os.path.exists(path_to_intersect_out):
         # Construct command
-        cmd_this_intersect = 'bedtools -v -a ' + path_to_file_A + ' -b ' + gtf + ' > ' + path_to_intersect_out
+        cmd_this_intersect = 'bedtools intersect -v -a ' + path_to_file_A + ' -b ' + \
+                             gtf + ' > ' + path_to_intersect_out
         cmd_intersect.append(cmd_this_intersect)
 
 
