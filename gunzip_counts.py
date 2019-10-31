@@ -6,7 +6,7 @@ import os
 import re
 
 # Set working directory
-data_wd = '/media/luolab/ZA1BT1ER/yanting/vM21/mapping/'
+data_wd = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
 
 # Change working directory
 os.chdir(data_wd)
