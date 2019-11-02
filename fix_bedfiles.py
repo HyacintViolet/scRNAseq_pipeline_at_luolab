@@ -44,7 +44,7 @@ for l in libs:
         cmd_all_head.append(cmd_this_head)
 
 # Parallel run by Pool
-pool = mp.Pool(32)
+pool = mp.Pool(8)
 pool.map(work, cmd_all_head)
 print('Correct YT..._closest.bed tail lines: finished.')
 
