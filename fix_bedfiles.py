@@ -7,6 +7,9 @@ import subprocess
 
 
 def work(cmd):
+    lib_name = re.search('(YT[0-9]*)', cmd).group(1)
+    # Display progress
+    print('Fixing: head -n -... library:' + lib_name)
     return subprocess.call(cmd, shell=True)
 
 
@@ -24,8 +27,6 @@ for l in libs:
     # Grab folder name prefix
     match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', l)
     prefix = match.group(1)
-    # Display progress
-    print('Parsing lib: ' + prefix)
 
     # File to correct
     filename_closest_bed = '_'.join([prefix, 'closest.bed'])
