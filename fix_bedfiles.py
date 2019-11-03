@@ -73,11 +73,14 @@ for l in libs:
         if process.poll() is not None:
             break
     num_line_closest_bed = stdout.decode().split()[0]
+    num_line_stranded_nonoverlap = num_lines_table.at[prefix, 'num_line_stranded_nonoverlap']
 
-    if num_line_closest_bed == num_lines_table.at[prefix, 'num_line_stranded_nonoverlap']:
-        print(prefix + '_fixed_closest.bed: ' + str(num_line_closest_bed) + ' lines: OK')
+    if num_line_closest_bed == num_line_stranded_nonoverlap:
+        print(prefix + '_fixed_closest.bed: ' + str(num_line_closest_bed) + ' lines, _stranded_nonoverlap.bam ' +
+              str(num_line_stranded_nonoverlap) + ' lines: OK')
     else:
-        print(prefix + '_fixed_closest.bed: ' + str(num_line_closest_bed) + ' lines: Something is wrong')
+        print(prefix + '_fixed_closest.bed: ' + str(num_line_closest_bed) + ' lines, _stranded_nonoverlap.bam ' +
+              str(num_line_stranded_nonoverlap) + ' lines: Something is wrong')
 
 # parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
 # gtf = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr.annotation.gtf'
