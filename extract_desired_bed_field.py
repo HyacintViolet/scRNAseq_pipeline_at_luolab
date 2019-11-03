@@ -36,7 +36,7 @@ def awk_extract(libs, parent_dir, num_lines_table):
         # Check if output already exists. If not, construct command.
         if not os.path.exists(path_to_output):
             # Construct command
-            cmd_this_awk = 'awk \'BEGIN{FS=\"\\t\"; OFS=\"\\t\"}{print $1,$2,$3,$4,$14,$15,$16,$23}\' ' + \
+            cmd_this_awk = 'awk \'BEGIN{FS=\"\\t\"; OFS=\"\\t\"}{print $1,$2,$3,$4,$14,$15,$16,$18,$23}\' ' + \
                            path_to_input + ' > ' + path_to_output
             cmd_awk_all.append(cmd_this_awk)
 
