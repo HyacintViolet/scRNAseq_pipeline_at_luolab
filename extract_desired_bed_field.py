@@ -40,8 +40,45 @@ def awk_extract(libs, parent_dir):
 
     # Parallel run by Pool
     pool = mp.Pool(1)
-    pool.map(work, cmd_awk_all)
+    if len(cmd_awk_all) is not 0:
+        pool.map(work, cmd_awk_all)
     print('awk extract desired fields: finished.')
+
+    cmd_awk_extract_paste_all = []
+    for l in libs:
+
+        # Setting up input/output directory
+        wd = os.path.join(parent_dir, l)
+
+        # Grab folder name prefix
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', l)
+        prefix = match.group(1)
+
+        # Input file name
+        filename_fixed_bed = '_'.join([prefix, 'fixed', 'closest.bed'])
+        path_to_input = os.path.join(wd, filename_fixed_bed)
+        filename_extracted_part = '_'.join([prefix, 'extracted', 'part.bed'])
+        path_to_pasted_file = os.path.join(wd, filename_extracted_part)
+        path_to_temp = os.path.join(wd, "tmp")
+
+        # Output file name
+        filename_output = '_'.join([prefix, 'extracted.bed'])
+        path_to_output = os.path.join(wd, filename_output)
+
+        # Check if output already exists. If not, construct command.
+        if not os.path.exists(path_to_output):
+            # Construct command
+            cmd_this_extract_paste = 'awk \'BEGIN{FS="gene_name";OFS=\"\\t\"}{print $2}\' ' + path_to_input + \
+                            ' | awk \'BEGIN{FS=";";OFS="\\t"}{print $1,"' + prefix + '"}\' | tr -d \'"\' | paste ' + \
+                            path_to_pasted_file + ' - > ' + path_to_temp + ' && mv ' + path_to_temp + ' ' + \
+                            path_to_output
+            cmd_awk_extract_paste_all.append(cmd_this_extract_paste)
+
+    # Parallel run by Pool
+    pool = mp.Pool(1)
+    if len(cmd_awk_extract_paste_all) is not 0:
+        pool.map(work, cmd_awk_extract_paste_all)
+    print('awk extract gene_name: finished.')
 
 
 def main():
