@@ -46,7 +46,7 @@ for l in libs:
 
 # Parallel run by Pool
 pool = mp.Pool(1)
-if len(cmd) is not 0:
+if len(cmd_all_head) is not 0:
     pool.map(work, cmd_all_head)
 print('Correct YT..._closest.bed tail lines: finished.')
 
