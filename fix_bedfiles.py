@@ -72,8 +72,8 @@ for l in libs:
         stdout, stderr = process.communicate()
         if process.poll() is not None:
             break
-    num_line_closest_bed = stdout.decode().split()[0]
-    num_line_stranded_nonoverlap = num_lines_table.at[prefix, 'num_line_stranded_nonoverlap']
+    num_line_closest_bed = int(stdout.decode().split()[0])
+    num_line_stranded_nonoverlap = int(num_lines_table.at[prefix, 'num_line_stranded_nonoverlap'])
 
     if num_line_closest_bed == num_line_stranded_nonoverlap:
         print(prefix + '_fixed_closest.bed: ' + str(num_line_closest_bed) + ' lines, _stranded_nonoverlap.bam ' +
