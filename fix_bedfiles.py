@@ -1,5 +1,6 @@
 import os
 import re
+import shlex
 # import numpy as np
 import pandas as pd
 import multiprocessing as mp
@@ -45,34 +46,38 @@ for l in libs:
 
 # Parallel run by Pool
 pool = mp.Pool(1)
-pool.map(work, cmd_all_head)
+if len(cmd) is not 0:
+    pool.map(work, cmd_all_head)
 print('Correct YT..._closest.bed tail lines: finished.')
 
-# # Check line numbers are okay: THIS DOESN'T WORK
-# for l in libs:
-#     # Setting up input/output directory
-#     wd = os.path.join(mapping_dir, l)
-#
-#     # Grab folder name prefix
-#     match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', l)
-#     prefix = match.group(1)
-#
-#     # File to check
-#     filename_fixed_bed = '_'.join([prefix, 'fixed_closest.bed'])
-#     path_to_check = os.path.join(wd, filename_fixed_bed)
-#
-#     # Construct command
-#     cmd_count_closest_bed = ['wc', '-l', path_to_check]
-#     process = subprocess.Popen(
-#         cmd_count_closest_bed, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-#     )
-#     stdout, stderr = process.communicate()
-#     num_line_closest_bed = stdout.decode().split()[0]
-#
-#     if num_line_closest_bed == num_lines_table.at[prefix, 'num_line_stranded_nonoverlap']:
-#         print(prefix + ': OK')
-#     else:
-#         print(prefix + ': Something is wrong')
+# Check line numbers are okay: THIS DOESN'T WORK
+for l in libs:
+    # Setting up input/output directory
+    wd = os.path.join(mapping_dir, l)
+
+    # Grab folder name prefix
+    match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', l)
+    prefix = match.group(1)
+
+    # File to check
+    filename_fixed_bed = '_'.join([prefix, 'fixed_closest.bed'])
+    path_to_check = os.path.join(wd, filename_fixed_bed)
+
+    # Construct command
+    cmd_count_closest_bed = "wc -l " + path_to_check
+    process = subprocess.Popen(
+        shlex.split(cmd_count_closest_bed), stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    while True:
+        stdout, stderr = process.communicate()
+        if process.poll() is not None:
+            break
+    num_line_closest_bed = stdout.decode().split()[0]
+
+    if num_line_closest_bed == num_lines_table.at[prefix, 'num_line_stranded_nonoverlap']:
+        print(prefix + '_fixed_closest.bed: ' + stdout + ' lines: OK')
+    else:
+        print(prefix + '_fixed_closest.bed: ' + stdout + ' lines: Something is wrong')
 
 # parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
 # gtf = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr.annotation.gtf'
