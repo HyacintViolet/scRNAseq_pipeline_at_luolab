@@ -50,7 +50,7 @@ if len(cmd_all_head) is not 0:
     pool.map(work, cmd_all_head)
 print('Correct YT..._closest.bed tail lines: finished.')
 
-# Check line numbers are okay: THIS DOESN'T WORK
+# Check line numbers are okay
 for l in libs:
     # Setting up input/output directory
     wd = os.path.join(mapping_dir, l)

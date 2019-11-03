@@ -1,5 +1,7 @@
 import os
 import re
+import pandas as pd
+import shlex
 # import logging
 import multiprocessing as mp
 import subprocess
@@ -12,7 +14,7 @@ def work(cmd):
     return subprocess.call(cmd, shell=True)
 
 
-def awk_extract(libs, parent_dir):
+def awk_extract(libs, parent_dir, num_lines_table):
     cmd_awk_all = []
     for l in libs:
 
@@ -80,11 +82,45 @@ def awk_extract(libs, parent_dir):
         pool.map(work, cmd_awk_extract_paste_all)
     print('awk extract gene_name: finished.')
 
+    # Check line numbers are okay
+    for l in libs:
+        # Setting up working directory
+        wd = os.path.join(parent_dir, l)
+
+        # Grab folder name prefix
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', l)
+        prefix = match.group(1)
+
+        # File to check
+        filename_extracted_bed = '_'.join([prefix, 'extracted.bed'])
+        path_to_check = os.path.join(wd, filename_extracted_bed)
+
+        # Construct command
+        cmd_count_closest_bed = "wc -l " + path_to_check
+        process = subprocess.Popen(
+            shlex.split(cmd_count_closest_bed), stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+        while True:
+            stdout, stderr = process.communicate()
+            if process.poll() is not None:
+                break
+        num_line_extracted_bed = int(stdout.decode().split()[0])
+        num_line_stranded_nonoverlap = int(num_lines_table.at[prefix, 'num_line_stranded_nonoverlap'])
+
+        if num_line_extracted_bed == num_line_stranded_nonoverlap:
+            print(prefix + '_extracted.bed: ' + str(num_line_extracted_bed) + ' lines, _stranded_nonoverlap.bam ' +
+                  str(num_line_stranded_nonoverlap) + ' lines: OK')
+        else:
+            print(prefix + '_extracted.bed: ' + str(num_line_extracted_bed) + ' lines, _stranded_nonoverlap.bam ' +
+                  str(num_line_stranded_nonoverlap) + ' lines: Something is wrong')
+    print('Check .._extracted.bed line number: finished.')
+
 
 def main():
     parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
     libs = sorted(os.listdir(parent_dir))
-    awk_extract(libs, parent_dir)
+    num_lines_table = pd.read_csv('/media/luolab/ZA1BT1ER/yanting/vM23/num_lines.csv', index_col='library')
+    awk_extract(libs, parent_dir, num_lines_table)
 
 
 if __name__ == '__main__':
