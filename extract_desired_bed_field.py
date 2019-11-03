@@ -12,7 +12,7 @@ def work(cmd):
     return subprocess.call(cmd, shell=True)
 
 
-def awk_extract(libs):
+def awk_extract(libs, parent_dir):
     cmd_awk_all = []
     for l in libs:
 
@@ -47,7 +47,7 @@ def awk_extract(libs):
 def main():
     parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
     libs = sorted(os.listdir(parent_dir))
-    awk_extract(libs)
+    awk_extract(libs, parent_dir)
 
 
 if __name__ == '__main__':
