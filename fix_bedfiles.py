@@ -75,9 +75,9 @@ for l in libs:
     num_line_closest_bed = stdout.decode().split()[0]
 
     if num_line_closest_bed == num_lines_table.at[prefix, 'num_line_stranded_nonoverlap']:
-        print(prefix + '_fixed_closest.bed: ' + stdout + ' lines: OK')
+        print(prefix + '_fixed_closest.bed: ' + str(num_line_closest_bed) + ' lines: OK')
     else:
-        print(prefix + '_fixed_closest.bed: ' + stdout + ' lines: Something is wrong')
+        print(prefix + '_fixed_closest.bed: ' + str(num_line_closest_bed) + ' lines: Something is wrong')
 
 # parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
 # gtf = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr.annotation.gtf'
