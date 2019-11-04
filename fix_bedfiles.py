@@ -178,10 +178,13 @@ def main():
     # Count YT..._closest.bed line numbers
     num_lines_new = count_file_type(ftype="closest.bed", parent_dir=parent_dir, num_lines_table=num_lines_table)
     num_lines_table.update(num_lines_new)
+    num_lines_table.to_csv('/media/luolab/ZA1BT1ER/yanting/vM23/num_lines_table.csv', index_label='library')
+
     # Count YT..._stranded_nonoverlap.bam line numbers
     num_lines_new = count_file_type(ftype="stranded_nonoverlap.bam",
                                     parent_dir=parent_dir, num_lines_table=num_lines_table)
     num_lines_table.update(num_lines_new)
+    num_lines_table.to_csv('/media/luolab/ZA1BT1ER/yanting/vM23/num_lines_table.csv', index_label='library')
 
     # Trim tail lines: YT..._closest.bed
     num_lines_table['tail_to_trim'] = num_lines_table['closest.bed'] - num_lines_table['stranded_nonoverlap.bam'] + 1
