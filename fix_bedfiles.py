@@ -10,7 +10,10 @@ import subprocess
 def work(cmd):
     lib_name = re.search('(YT[0-9]*)', cmd).group(1)
     # Display progress
-    print('Fixing: head -n -... library:' + lib_name)
+    if 'Fixing' in cmd:
+        print('Trimming gibberish tails. head -n -... library:' + lib_name)
+    elif 'awk' in cmd:
+        print('Removing useless rows. awk ... library:' + lib_name)
     return subprocess.call(cmd, shell=True)
 
 
@@ -68,9 +71,10 @@ def count_files(file_to_count, parent_dir):
             output = p2.communicate()[0]
             if p2.poll() is not None:
                 break
-        counts.at[prefix, file_to_count] = int(output.decode())
+        num_lines = int(output.decode())
+        counts.at[prefix, file_to_count] = num_lines
         # Display progress
-        print(str(output.decode()) + 'lines.')
+        print(str(num_lines) + ' lines.')
     return counts
 
 
@@ -148,7 +152,7 @@ def remove_useless_entries(parent_dir):
         if not os.path.exists(path_to_output):
             # Construct command
             cmd_this_awk = 'awk \'BEGIN{FS=\"\\t\"} $14!=-1 {print $0}\' ' + path_to_input + ' > ' + path_to_output + \
-                ' && rm ' + filename_input
+                ' && rm ' + path_to_input
             cmd_all_awk.append(cmd_this_awk)
 
     # Parallel run by Pool
