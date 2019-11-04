@@ -77,19 +77,19 @@ def count_files(file_to_count, parent_dir):
 def count_file_type(ftype="", parent_dir='/media/luolab/ZA1BT1ER/yanting/vM23/mapping/',
                     num_lines_table=pd.DataFrame(data=None)):
     # ftype: 0 = all; 1 = _closest.bed; 2 = _stranded_nonoverlap; 3 = fixed_closest.bed
-    valid_types = {1, "closest.bed", 2, "stranded_nonoverlap.bam", 3, "fixed_closest.bed"}
+    valid_types = {"closest.bed", "stranded_nonoverlap.bam", "fixed_closest.bed"}
     if ftype not in valid_types:
         raise ValueError("results: ftype must be one of %r." % valid_types)
 
-    if ftype == 1 or ftype == "closest.bed":
+    if ftype == "closest.bed":
         file_to_count = "closest.bed"
         counts = count_files(file_to_count, parent_dir)
         num_lines_table.update(counts)
-    elif ftype == 2 or ftype == "stranded_nonoverlap.bam":
+    elif ftype == "stranded_nonoverlap.bam":
         file_to_count = "stranded_nonoverlap.bam"
         counts = count_files(file_to_count, parent_dir)
         num_lines_table.update(counts)
-    elif ftype == 3 or ftype == "fixed_closest.bed":
+    elif ftype == "fixed_closest.bed":
         file_to_count = "fixed_closest.bed"
         counts = count_files(file_to_count, parent_dir)
         num_lines_table.update(counts)
@@ -97,37 +97,65 @@ def count_file_type(ftype="", parent_dir='/media/luolab/ZA1BT1ER/yanting/vM23/ma
     return num_lines_table
 
 
-def fix_bed_tails(parent_dir, num_lines_table):
+def trim_bed_tails(parent_dir, num_lines_table):
     libs = get_libs(parent_dir)
     cmd_all_head = []
     for l in libs:
         # Setting up working directory
         wd = os.path.join(parent_dir, l)
-
         # Grab folder name prefix
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', l)
-        prefix = match.group(1)
+        prefix = get_prefix(l)
 
-        # File to fix TODO: continue from here
-        filename_closest_bed = '_'.join([prefix, 'closest.bed'])
-        path_to_input = os.path.join(wd, filename_closest_bed)
+        # File to fix
+        filename_input = '_'.join([prefix, 'closest.bed'])
+        path_to_input = os.path.join(wd, filename_input)
         # Number of lines to correct
-        sub = num_lines_table.at[prefix, 'sub']
+        tail_to_trim = num_lines_table.at[prefix, 'tail_to_trim']
 
         # Output file
-        filename_output = '_'.join([prefix, 'fixed_closest.bed'])
+        filename_output = '_'.join([prefix, 'temp', 'closest.bed'])
         path_to_output = os.path.join(wd, filename_output)
 
-        if not os.path.exists(path_to_output) and sub != 0:
+        if not os.path.exists(path_to_output) and tail_to_trim != 0:
             # Construct command
-            cmd_this_head = 'head -n -' + str(sub) + ' ' + path_to_input + ' > ' + path_to_output
+            cmd_this_head = 'head -n -' + str(tail_to_trim) + ' ' + path_to_input + ' > ' + path_to_output
             cmd_all_head.append(cmd_this_head)
 
     # Parallel run by Pool
     pool = mp.Pool(1)
     if len(cmd_all_head) is not 0:
         pool.map(work, cmd_all_head)
-    print('Correct YT..._closest.bed tail lines: finished.')
+    print('Trim YT..._closest.bed tail lines: finished.')
+
+
+def remove_useless_entries(parent_dir):
+    libs = get_libs(parent_dir)
+    cmd_all_awk = []
+    for l in libs:
+        # Setting up working directory
+        wd = os.path.join(parent_dir, l)
+        # Grab folder name prefix
+        prefix = get_prefix(l)
+
+        # File to fix
+        filename_input = '_'.join([prefix, 'temp', 'closest.bed'])
+        path_to_input = os.path.join(wd, filename_input)
+
+        # Output file
+        filename_output = '_'.join([prefix, 'fixed', 'closest.bed'])
+        path_to_output = os.path.join(wd, filename_output)
+
+        if not os.path.exists(path_to_output):
+            # Construct command
+            cmd_this_awk = 'awk \'BEGIN{FS=\"\\t\"} $14!=-1 {print $0}\' ' + path_to_input + ' > ' + path_to_output + \
+                ' && rm ' + filename_input
+            cmd_all_awk.append(cmd_this_awk)
+
+    # Parallel run by Pool
+    pool = mp.Pool(1)
+    if len(cmd_all_awk) is not 0:
+        pool.map(work, cmd_all_awk)
+    print('Remove YT..._closest.bed useless entries: finished.')
 
 
 def main():
@@ -135,7 +163,7 @@ def main():
     parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
 
     libs = get_libs(parent_dir)
-    path_to_num_lines_table = os.path.join(analysis_dir, "num_lines.csv")
+    path_to_num_lines_table = os.path.join(analysis_dir, "num_lines_table.csv")
 
     if os.path.exists(path_to_num_lines_table):
         # Read table if it already exists
@@ -144,75 +172,65 @@ def main():
         # Get index
         idx = get_idx(libs)
         # Initialize empty DataFrame
-        num_lines_table = pd.DataFrame(data=None, index=idx, columns=["closest.bed",
-                                                                      "stranded_nonoverlap.bam",
-                                                                      "sub", "fixed_closest.bed"])
-    num_lines_new = count_file_type(ftype="", parent_dir=parent_dir, num_lines_table=num_lines_table)
+        num_lines_table = pd.DataFrame(data=None, index=idx, columns=["closest.bed", "stranded_nonoverlap.bam",
+                                                                      "tail_to_trim", "fixed_closest.bed"])
+
+    # Count YT..._closest.bed line numbers
+    num_lines_new = count_file_type(ftype="closest.bed", parent_dir=parent_dir, num_lines_table=num_lines_table)
+    num_lines_table.update(num_lines_new)
+    # Count YT..._stranded_nonoverlap.bam line numbers
+    num_lines_new = count_file_type(ftype="stranded_nonoverlap.bam",
+                                    parent_dir=parent_dir, num_lines_table=num_lines_table)
     num_lines_table.update(num_lines_new)
 
-    num_lines_table.to_csv('/media/luolab/ZA1BT1ER/yanting/vM23/file.csv', index_label='library')
+    # Trim tail lines: YT..._closest.bed
+    num_lines_table['tail_to_trim'] = num_lines_table['closest.bed'] - num_lines_table['stranded_nonoverlap.bam'] + 1
+    trim_bed_tails(parent_dir, num_lines_table)
 
-    cmd_all_head = []
-    for l in libs:
-        # Setting up working directory
-        wd = os.path.join(parent_dir, l)
+    # Remove some useless reads mapped to the tails of chromosomes
+    remove_useless_entries(parent_dir)
 
-        # Grab folder name prefix
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', l)
-        prefix = match.group(1)
+    # Count YT..._fixed_closest.bed line numbers
+    num_lines_new = count_file_type(ftype="fixed_closest.bed", parent_dir=parent_dir, num_lines_table=num_lines_table)
+    num_lines_table.update(num_lines_new)
+    # Save to num_lines_table.csv
+    num_lines_table.to_csv('/media/luolab/ZA1BT1ER/yanting/vM23/num_lines_table.csv', index_label='library')
 
-        # File to correct
-        filename_closest_bed = '_'.join([prefix, 'closest.bed'])
-        path_to_input = os.path.join(wd, filename_closest_bed)
-        # Number of lines to correct
-        sub = num_lines_table.at[prefix, 'sub']
 
-        # Output file
-        filename_output = '_'.join([prefix, 'fixed_closest.bed'])
-        path_to_output = os.path.join(wd, filename_output)
+if __name__ == '__main__':
+    main()
 
-        if not os.path.exists(path_to_output) and sub != 0:
-            # Construct command
-            cmd_this_head = 'head -n -' + str(sub) + ' ' + path_to_input + ' > ' + path_to_output
-            cmd_all_head.append(cmd_this_head)
-
-    # Parallel run by Pool
-    pool = mp.Pool(1)
-    if len(cmd_all_head) is not 0:
-        pool.map(work, cmd_all_head)
-    print('Correct YT..._closest.bed tail lines: finished.')
-
-    # Check line numbers are okay
-    for l in libs:
-        # Setting up input/output directory
-        wd = os.path.join(parent_dir, l)
-
-        # Grab folder name prefix
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', l)
-        prefix = match.group(1)
-
-        # File to check
-        filename_fixed_bed = '_'.join([prefix, 'fixed_closest.bed'])
-        path_to_check = os.path.join(wd, filename_fixed_bed)
-
-        # Construct command
-        cmd_count_closest_bed = "wc -l " + path_to_check
-        process = subprocess.Popen(
-            shlex.split(cmd_count_closest_bed), stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
-        while True:
-            stdout, stderr = process.communicate()
-            if process.poll() is not None:
-                break
-        num_line_closest_bed = int(stdout.decode().split()[0])
-        num_line_stranded_nonoverlap = int(num_lines_table.at[prefix, 'num_line_stranded_nonoverlap'])
-
-        if num_line_closest_bed == num_line_stranded_nonoverlap:
-            print(prefix + '_fixed_closest.bed: ' + str(num_line_closest_bed) + ' lines, _stranded_nonoverlap.bam ' +
-                  str(num_line_stranded_nonoverlap) + ' lines: OK')
-        else:
-            print(prefix + '_fixed_closest.bed: ' + str(num_line_closest_bed) + ' lines, _stranded_nonoverlap.bam ' +
-                  str(num_line_stranded_nonoverlap) + ' lines: Something is wrong')
+    # # Check line numbers are okay
+    # for l in libs:
+    #     # Setting up input/output directory
+    #     wd = os.path.join(parent_dir, l)
+    #
+    #     # Grab folder name prefix
+    #     match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', l)
+    #     prefix = match.group(1)
+    #
+    #     # File to check
+    #     filename_fixed_bed = '_'.join([prefix, 'fixed_closest.bed'])
+    #     path_to_check = os.path.join(wd, filename_fixed_bed)
+    #
+    #     # Construct command
+    #     cmd_count_closest_bed = "wc -l " + path_to_check
+    #     process = subprocess.Popen(
+    #         shlex.split(cmd_count_closest_bed), stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    #     )
+    #     while True:
+    #         stdout, stderr = process.communicate()
+    #         if process.poll() is not None:
+    #             break
+    #     num_line_closest_bed = int(stdout.decode().split()[0])
+    #     num_line_stranded_nonoverlap = int(num_lines_table.at[prefix, 'num_line_stranded_nonoverlap'])
+    #
+    #     if num_line_closest_bed == num_line_stranded_nonoverlap:
+    #         print(prefix + '_fixed_closest.bed: ' + str(num_line_closest_bed) + ' lines, _stranded_nonoverlap.bam ' +
+    #               str(num_line_stranded_nonoverlap) + ' lines: OK')
+    #     else:
+    #         print(prefix + '_fixed_closest.bed: ' + str(num_line_closest_bed) + ' lines, _stranded_nonoverlap.bam ' +
+    #               str(num_line_stranded_nonoverlap) + ' lines: Something is wrong')
 
 # parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
 # gtf = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr.annotation.gtf'
