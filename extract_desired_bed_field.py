@@ -71,7 +71,7 @@ def awk_extract(libs, parent_dir, num_lines_table):
         if not os.path.exists(path_to_output):
             # Construct command
             cmd_this_extract_paste = 'awk \'BEGIN{FS="gene_name";OFS=\"\\t\"}{print $2}\' ' + path_to_input + \
-                            ' | awk \'BEGIN{FS=";";OFS="\\t"}{print $1,"' + prefix + '"}\' | tr -d \'"\' | paste ' + \
+                            ' | awk \'BEGIN{FS=";";OFS="\\t"}{print $1,"' + prefix + '"}\' | tr -d \'" \' | paste ' + \
                             path_to_pasted_file + ' - > ' + path_to_temp + ' && mv ' + path_to_temp + ' ' + \
                             path_to_output
             cmd_awk_extract_paste_all.append(cmd_this_extract_paste)
