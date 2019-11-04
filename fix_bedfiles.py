@@ -108,7 +108,7 @@ def fix_bed_tails(parent_dir, num_lines_table):
         match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', l)
         prefix = match.group(1)
 
-        # File to fix
+        # File to fix TODO: continue from here
         filename_closest_bed = '_'.join([prefix, 'closest.bed'])
         path_to_input = os.path.join(wd, filename_closest_bed)
         # Number of lines to correct
