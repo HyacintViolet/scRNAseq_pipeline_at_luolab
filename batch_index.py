@@ -1,3 +1,8 @@
+import os
+import re
+import multiprocessing as mp
+
+
 cmd_index = []
     for out in os.listdir(dst):
 
@@ -8,7 +13,7 @@ cmd_index = []
         os.chdir(out_dir)
 
         # Grab folder name
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)out_name_samtools
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
         prefix = match.group(1)
 
         # Input file name for samtools index
