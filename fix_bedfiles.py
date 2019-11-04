@@ -4,7 +4,7 @@ import shlex
 # import numpy as np
 import pandas as pd
 import multiprocessing as mp
-from subprocess import Popen, PIPE
+import subprocess
 
 
 def work(cmd):
@@ -59,8 +59,8 @@ def count_files(file_to_count, parent_dir):
         cmd_count = "wc -l"
 
         # Open process
-        p1 = Popen(shlex.split(cmd_expand_file), stdout=PIPE, stderr=PIPE)
-        p2 = Popen(shlex.split(cmd_count), stdin=p1.stdout, stdout=PIPE)
+        p1 = subprocess.Popen(shlex.split(cmd_expand_file), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p2 = subprocess.Popen(shlex.split(cmd_count), stdin=p1.stdout, stdout=subprocess.PIPE)
         p1.stdout.close()
 
         # Wait for process to finish and then read stdout
