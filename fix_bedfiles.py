@@ -87,53 +87,47 @@ def count_file_type(ftype="", parent_dir='/media/luolab/ZA1BT1ER/yanting/vM23/ma
         num_lines_table.update(counts)
     elif ftype == 2 or ftype == "stranded_nonoverlap.bam":
         file_to_count = "stranded_nonoverlap.bam"
-        counts = count_files(file_to_count)
+        counts = count_files(file_to_count, parent_dir)
         num_lines_table.update(counts)
     elif ftype == 3 or ftype == "fixed_closest.bed":
         file_to_count = "fixed_closest.bed"
-        counts = count_files(file_to_count)
+        counts = count_files(file_to_count, parent_dir)
         num_lines_table.update(counts)
 
     return num_lines_table
 
 
-def fix_bed_tails():
+def fix_bed_tails(parent_dir, num_lines_table):
     libs = get_libs(parent_dir)
-    idx = get_idx(libs)
-    counts = pd.DataFrame(data=None, index=idx, columns=[file_to_count], dtype=int)
+    cmd_all_head = []
     for l in libs:
         # Setting up working directory
         wd = os.path.join(parent_dir, l)
+
         # Grab folder name prefix
-        prefix = get_prefix(l)
+        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', l)
+        prefix = match.group(1)
 
-        # File to count
-        filename_count = '_'.join([prefix, file_to_count])
-        path_to_file_count = os.path.join(wd, filename_count)
-        # Display progress
-        print('Counting ' + filename_count + ':')
+        # File to fix
+        filename_closest_bed = '_'.join([prefix, 'closest.bed'])
+        path_to_input = os.path.join(wd, filename_closest_bed)
+        # Number of lines to correct
+        sub = num_lines_table.at[prefix, 'sub']
 
-        # Construct command
-        if filename_count.endswith('.bam'):
-            cmd_expand_file = 'samtools view ' + path_to_file_count
-        else:
-            cmd_expand_file = "cat " + path_to_file_count
-        cmd_count = "wc -l"
+        # Output file
+        filename_output = '_'.join([prefix, 'fixed_closest.bed'])
+        path_to_output = os.path.join(wd, filename_output)
 
-        # Open process
-        p1 = Popen(shlex.split(cmd_expand_file), stdout=PIPE, stderr=PIPE)
-        p2 = Popen(shlex.split(cmd_count), stdin=p1.stdout, stdout=PIPE)
-        p1.stdout.close()
+        if not os.path.exists(path_to_output) and sub != 0:
+            # Construct command
+            cmd_this_head = 'head -n -' + str(sub) + ' ' + path_to_input + ' > ' + path_to_output
+            cmd_all_head.append(cmd_this_head)
 
-        # Wait for process to finish and then read stdout
-        while True:
-            output = p2.communicate()[0]
-            if p2.poll() is not None:
-                break
-        counts.at[prefix, file_to_count] = int(output.decode())
-        # Display progress
-        print(str(output.decode()) + 'lines.')
-    return counts
+    # Parallel run by Pool
+    pool = mp.Pool(1)
+    if len(cmd_all_head) is not 0:
+        pool.map(work, cmd_all_head)
+    print('Correct YT..._closest.bed tail lines: finished.')
 
 
 def main():
