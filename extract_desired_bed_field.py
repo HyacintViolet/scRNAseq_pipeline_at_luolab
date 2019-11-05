@@ -105,21 +105,21 @@ def awk_extract(libs, parent_dir, num_lines_table):
             if process.poll() is not None:
                 break
         num_line_extracted_bed = int(stdout.decode().split()[0])
-        num_line_stranded_nonoverlap = int(num_lines_table.at[prefix, 'num_line_stranded_nonoverlap'])
+        num_line_fixed = int(num_lines_table.at[prefix, 'fixed_closest.bed'])
 
-        if num_line_extracted_bed == num_line_stranded_nonoverlap:
-            print(prefix + '_extracted.bed: ' + str(num_line_extracted_bed) + ' lines, _stranded_nonoverlap.bam ' +
-                  str(num_line_stranded_nonoverlap) + ' lines: OK')
+        if num_line_extracted_bed == num_line_fixed:
+            print(prefix + '_extracted.bed: ' + str(num_line_extracted_bed) + ' lines, fixed_closest.bed ' +
+                  str(num_line_fixed) + ' lines: OK')
         else:
-            print(prefix + '_extracted.bed: ' + str(num_line_extracted_bed) + ' lines, _stranded_nonoverlap.bam ' +
-                  str(num_line_stranded_nonoverlap) + ' lines: Something is wrong')
+            print(prefix + '_extracted.bed: ' + str(num_line_extracted_bed) + ' lines, fixed_closest.bed ' +
+                  str(num_line_fixed) + ' lines: Something is wrong')
     print('Check .._extracted.bed line number: finished.')
 
 
 def main():
     parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
     libs = sorted(os.listdir(parent_dir))
-    num_lines_table = pd.read_csv('/media/luolab/ZA1BT1ER/yanting/vM23/num_lines.csv', index_col='library')
+    num_lines_table = pd.read_csv('/media/luolab/ZA1BT1ER/yanting/vM23/num_lines_table.csv', index_col='library')
     awk_extract(libs, parent_dir, num_lines_table)
 
 
