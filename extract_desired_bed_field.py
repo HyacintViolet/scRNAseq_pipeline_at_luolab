@@ -14,16 +14,27 @@ def work(cmd):
     return subprocess.call(cmd, shell=True)
 
 
+def get_libs(parent_dir):
+    # Input path to mapping dir. Output a list of library names.
+    libs = sorted(os.listdir(parent_dir))
+    return libs
+
+
+def get_prefix(lib):
+    # Input library folder name. Output library prefix.
+    match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', lib)
+    prefix = match.group(1)
+    return prefix
+
+
 def awk_extract(libs, parent_dir, num_lines_table):
     cmd_awk_all = []
     for l in libs:
 
-        # Setting up input/output directory
+        # Setting up working directory
         wd = os.path.join(parent_dir, l)
-
         # Grab folder name prefix
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', l)
-        prefix = match.group(1)
+        prefix = get_prefix(l)
 
         # Input file name
         filename_fixed_bed = '_'.join([prefix, 'fixed', 'closest.bed'])
@@ -49,12 +60,10 @@ def awk_extract(libs, parent_dir, num_lines_table):
     cmd_awk_extract_paste_all = []
     for l in libs:
 
-        # Setting up input/output directory
+        # Setting up working directory
         wd = os.path.join(parent_dir, l)
-
         # Grab folder name prefix
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', l)
-        prefix = match.group(1)
+        prefix = get_prefix(l)
 
         # Input file name
         filename_fixed_bed = '_'.join([prefix, 'fixed', 'closest.bed'])
@@ -73,7 +82,7 @@ def awk_extract(libs, parent_dir, num_lines_table):
             cmd_this_extract_paste = 'awk \'BEGIN{FS="gene_name";OFS=\"\\t\"}{print $2}\' ' + path_to_input + \
                             ' | awk \'BEGIN{FS=";";OFS="\\t"}{print $1,"' + prefix + '"}\' | tr -d \'" \' | paste ' + \
                             path_to_pasted_file + ' - > ' + path_to_temp + ' && mv ' + path_to_temp + ' ' + \
-                            path_to_output
+                            path_to_output + ' && rm ' + filename_extracted_part
             cmd_awk_extract_paste_all.append(cmd_this_extract_paste)
 
     # Parallel run by Pool
@@ -86,10 +95,8 @@ def awk_extract(libs, parent_dir, num_lines_table):
     for l in libs:
         # Setting up working directory
         wd = os.path.join(parent_dir, l)
-
         # Grab folder name prefix
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', l)
-        prefix = match.group(1)
+        prefix = get_prefix(l)
 
         # File to check
         filename_extracted_bed = '_'.join([prefix, 'extracted.bed'])
@@ -118,7 +125,7 @@ def awk_extract(libs, parent_dir, num_lines_table):
 
 def main():
     parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
-    libs = sorted(os.listdir(parent_dir))
+    libs = get_libs(parent_dir)
     num_lines_table = pd.read_csv('/media/luolab/ZA1BT1ER/yanting/vM23/num_lines_table.csv', index_col='library')
     awk_extract(libs, parent_dir, num_lines_table)
 
