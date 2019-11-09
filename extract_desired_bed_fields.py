@@ -9,13 +9,13 @@ import subprocess
 
 def work(cmd):
     # Display progress
-    lib = re.search('(YT[0-9]*)', cmd)
-    if lib is not None:
-        lib = lib.group(1)
+    lib_name = re.search('(YT[0-9]*)', cmd)
+    if lib_name is not None:
+        lib_name = lib_name.group(1)
         if '$1,$2,$3,$4' in cmd:
-            print('Extracting part from fixed_closest.bed. Library: ' + lib)
+            print('Extracting part from fixed_closest.bed. Library: ' + lib_name)
         elif 'gene_type' in cmd:
-            print('Extracting & pasting to part. Library: ' + lib)
+            print('Extracting & pasting to part. Library: ' + lib_name)
     return subprocess.call(cmd, shell=True)
 
 

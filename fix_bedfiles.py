@@ -11,12 +11,13 @@ import subprocess
 def work(cmd):
     lib_name = re.search('(YT[0-9]*)', cmd).group(1)
     # Display progress
-    if 'head -n' in cmd:
-        print('Trimming gibberish tails. head -n -... Library:' + lib_name)
-    elif '$14!=-1' in cmd:
-        print('Removing telomeric reads. Library:' + lib_name)
-    elif '$18=="+" && $23>0' in cmd:
-        print('Removing reads upstram to 5\'UTRs. Library:' + lib_name)
+    if lib_name is not None:
+        if 'head -n' in cmd:
+            print('Trimming gibberish tails. head -n ... Library:' + lib_name)
+        elif '$14!=-1' in cmd:
+            print('Removing telomeric reads. awk ... $14!=-1 ... Library:' + lib_name)
+        elif '$18=="+" && $23>0' in cmd:
+            print('Removing reads upstream to 5\'UTRs. Library:' + lib_name)
     return subprocess.call(cmd, shell=True)
 
 
@@ -256,7 +257,7 @@ def main():
     trim_bed_tails(parent_dir, num_lines_table)
 
     # Remove some useless reads mapped to the telomeric region of chromosomes
-    remove_telomeric_reads(libs, parent_dir, suffix_input='temp_closest.bed', suffix_output='temp2_closest.bed')
+    # remove_telomeric_reads(libs, parent_dir, suffix_input='temp_closest.bed', suffix_output='temp2_closest.bed')  # Don't execute, ad interim.
     # Remove intermediate files ending with _temp_closest.bed
     remove_intermediate(libs, parent_dir, suffix_file_to_remove='temp_closest.bed')
 
