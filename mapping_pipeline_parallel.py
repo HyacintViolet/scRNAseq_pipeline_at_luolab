@@ -106,7 +106,8 @@ def main():
             cmd_whitelist.append(cmd_this_whitelist)
 
     pool = mp.Pool(16)
-    pool.map(work, cmd_whitelist)
+    if len(cmd_whitelist) is not 0:
+        pool.map(work, cmd_whitelist)
     print('umi_tools whitelist: finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -180,7 +181,8 @@ def main():
 
     # Parallel run by Pool
     pool = mp.Pool(16)
-    pool.map(work, cmd_extract)
+    if len(cmd_extract) is not 0:
+        pool.map(work, cmd_extract)
     print('umi_tools extract: finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -223,7 +225,8 @@ def main():
 
     # Parallel run by Pool
     pool = mp.Pool(1)  # DO NOT CHANGE THIS
-    pool.map(work, cmd_star_mapping)
+    if len(cmd_star_mapping) is not 0:
+        pool.map(work, cmd_star_mapping)
     print('STAR maping: finished.')
 
     # STEP 4: Assign reads to genes
@@ -254,7 +257,8 @@ def main():
 
     # Parallel run by Pool
     pool = mp.Pool(1)  # DO NOT CHANGE THIS
-    pool.map(work, cmd_featurecounts)
+    if len(cmd_featurecounts) is not 0:
+        pool.map(work, cmd_featurecounts)
     print('featureCounts: finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -291,7 +295,8 @@ def main():
 
     # Parallel run by Pool
     pool = mp.Pool(16)
-    pool.map(work, cmd_sort)
+    if len(cmd_sort) is not 0:
+        pool.map(work, cmd_sort)
     print('samtools sort: finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -326,7 +331,8 @@ def main():
 
     # Parallel run by Pool
     pool = mp.Pool(16)
-    pool.map(work, cmd_index)
+    if len(cmd_index) is not 0:
+        pool.map(work, cmd_index)
     print('samtools index: finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -363,7 +369,8 @@ def main():
 
     # Parallel run by Pool
     pool = mp.Pool(16)
-    pool.map(work, cmd_count)
+    if len(cmd_count) is not 0:
+        pool.map(work, cmd_count)
     print('umi_tools count: finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -396,7 +403,8 @@ def main():
 
     # Parallel run by Pool
     pool = mp.Pool(16)
-    pool.map(work, cmd_nuniquemap)
+    if len(cmd_nuniquemap) is not 0:
+        pool.map(work, cmd_nuniquemap)
     print('samtools view extract Nuniqmapped: finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
