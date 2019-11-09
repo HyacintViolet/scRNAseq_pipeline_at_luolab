@@ -55,3 +55,6 @@ Fix annotation pipeline:
    - Run command:
      zcat YT_extracted_less_than_20k.txt.gz | awk 'BEGIN{FS="\t";OFS="\t"}{print $7, $10, $11, $9}' | gzip -9c > \
      distance_to_gene.txt.gz
+
+TODO: distance to gene is extracted directly from the output of 'bedtools closest ...' command, which does not take strand into account.
+TODO: MAJOR todo, squeeze functions. 3 categories: do_parallel(), do_serial(), do_receive_output(). Args: parent_wd, libs, input, output. See check_line() in extract_desired_bed_fields.py as an example.
