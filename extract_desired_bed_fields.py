@@ -60,7 +60,7 @@ def awk_extract_part(libs, parent_dir, suffix_input, suffix_output):
     pool = mp.Pool(1)
     if len(cmd_awk_extract_part_all) is not 0:
         pool.map(work, cmd_awk_extract_part_all)
-    print('awk extract desired fields: finished.')
+    print('awk extract desired fields: finished.\n')
 
 
 def awk_extract_paste(libs, parent_dir):
@@ -98,7 +98,7 @@ def awk_extract_paste(libs, parent_dir):
     pool = mp.Pool(1)
     if len(cmd_awk_extract_paste_all) is not 0:
         pool.map(work, cmd_awk_extract_paste_all)
-    print('awk extract gene_name: finished.')
+    print('awk extract gene_name: finished.\n')
 
 
 def remove_intermediate(libs, parent_dir, suffix_file_to_remove):
@@ -122,9 +122,10 @@ def remove_intermediate(libs, parent_dir, suffix_file_to_remove):
     pool = mp.Pool(1)
     if num_count == num_libs and len(cmd_rm_intermediate) is not 0:
         pool.map(work, cmd_rm_intermediate)
+        print('Files ending with ' + suffix_file_to_remove + 'successfully removed.\n')
     else:
         warnings.warn('Trying to remove ..' + suffix_file_to_remove + ', but file number does not match with library '
-                      'number. Abort.')
+                      'number. Abort.\n')
 
 
 def check_line(libs, parent_dir, suffix_file_to_check, suffix_file_ground_truth, num_lines_table):
@@ -157,7 +158,7 @@ def check_line(libs, parent_dir, suffix_file_to_check, suffix_file_ground_truth,
         else:
             print(prefix + '_extracted.bed: ' + str(num_line_extracted_bed) + ' lines, fixed_closest.bed ' +
                   str(num_line_fixed) + ' lines: Something is wrong')
-    print('Check .._extracted.bed line number: finished.')
+    print('Check .._extracted.bed line number: finished.\n')
 
 
 def main():

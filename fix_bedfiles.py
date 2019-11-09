@@ -14,11 +14,11 @@ def work(cmd):
     if lib_name is not None:
         lib_name = lib_name.group(1)
         if 'head -n' in cmd:
-            print('Trimming gibberish tails. head -n ... Library:' + lib_name)
+            print('Trimming gibberish tails. head -n ... Library: ' + lib_name)
         elif '$14!=-1' in cmd:
-            print('Removing telomeric reads. awk ... $14!=-1 ... Library:' + lib_name)
+            print('Removing telomeric reads. awk ... $14!=-1 ... Library: ' + lib_name)
         elif '$18=="+" && $23>0' in cmd:
-            print('Removing reads upstream to 5\'UTRs. Library:' + lib_name)
+            print('Removing reads upstream to 5\'UTRs. Library: ' + lib_name)
     return subprocess.call(cmd, shell=True)
 
 
@@ -136,7 +136,7 @@ def trim_bed_tails(parent_dir, num_lines_table):
     pool = mp.Pool(1)
     if len(cmd_all_head) is not 0:
         pool.map(work, cmd_all_head)
-    print('Trim YT..._closest.bed tail lines: finished.')
+    print('Trim YT..._closest.bed tail lines: finished.\n')
 
 
 def remove_telomeric_reads(libs, parent_dir, suffix_input, suffix_output):
@@ -164,7 +164,7 @@ def remove_telomeric_reads(libs, parent_dir, suffix_input, suffix_output):
     pool = mp.Pool(1)
     if len(cmd_all_awk) is not 0:
         pool.map(work, cmd_all_awk)
-    print('Remove YT..._closest.bed telomeric reads: finished.')
+    print('Remove YT..._closest.bed telomeric reads: finished.\n')
 
 
 def remove_5_prime_upstream(libs, parent_dir, suffix_input, suffix_output):
@@ -195,7 +195,7 @@ def remove_5_prime_upstream(libs, parent_dir, suffix_input, suffix_output):
     pool = mp.Pool(1)
     if len(cmd_all_awk) is not 0:
         pool.map(work, cmd_all_awk)
-    print('Remove YT..._closest.bed telomeric entries: finished.')
+    print('Remove YT..._closest.bed telomeric entries: finished.\n')
 
 
 def remove_intermediate(libs, parent_dir, suffix_file_to_remove):
@@ -219,9 +219,10 @@ def remove_intermediate(libs, parent_dir, suffix_file_to_remove):
     pool = mp.Pool(1)
     if num_count == num_libs and len(cmd_rm_intermediate) is not 0:
         pool.map(work, cmd_rm_intermediate)
+        print('Files ending with ' + suffix_file_to_remove + 'successfully removed.\n')
     else:
         warnings.warn('Trying to remove ..' + suffix_file_to_remove + ', but file number does not match with library '
-                      'number. Abort.')
+                      'number. Abort.\n')
 
 
 def main():
@@ -258,12 +259,12 @@ def main():
     trim_bed_tails(parent_dir, num_lines_table)
 
     # Remove some useless reads mapped to the telomeric region of chromosomes
-    # remove_telomeric_reads(libs, parent_dir, suffix_input='temp_closest.bed', suffix_output='temp2_closest.bed')  # Don't execute, ad interim.
+    remove_telomeric_reads(libs, parent_dir, suffix_input='temp_closest.bed', suffix_output='temp2_closest.bed')
     # Remove intermediate files ending with _temp_closest.bed
     remove_intermediate(libs, parent_dir, suffix_file_to_remove='temp_closest.bed')
 
     # Remove reads mapped to upstream regions of 5'UTRs.
-    remove_5_prime_upstream(libs, parent_dir, suffix_input='temp2_closest.bed', suffix_output='fixed.closest.bed')
+    remove_5_prime_upstream(libs, parent_dir, suffix_input='temp2_closest.bed', suffix_output='fixed_closest.bed')
     # Remove intermediate files: .._temp2_closest.bed
     remove_intermediate(libs, parent_dir, suffix_file_to_remove='temp2_closest.bed')
 
