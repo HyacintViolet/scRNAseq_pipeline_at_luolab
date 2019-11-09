@@ -120,7 +120,7 @@ def remove_intermediate(libs, parent_dir, suffix_file_to_remove):
     # Command to remove files
     cmd_rm_intermediate = ['find ' + parent_dir + ' -name "*' + suffix_file_to_remove + '" -type f -delete']
     pool = mp.Pool(1)
-    if num_count == num_libs & len(cmd_rm_intermediate) is not 0:
+    if num_count == num_libs and len(cmd_rm_intermediate) is not 0:
         pool.map(work, cmd_rm_intermediate)
     else:
         warnings.warn('Trying to remove ..extracted_part.bed, but file number does not match with library number.'
