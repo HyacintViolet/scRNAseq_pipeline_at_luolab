@@ -13,9 +13,9 @@ bed = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr.ann
 def work(cmd):
     lib = re.search('(YT[0-9]*)', cmd).group(1)
     if 'intersect' in cmd:
-        print('Processing: bedtools intersect... library=' + lib)
+        print('Processing: bedtools intersect... library:' + lib)
     elif 'closest' in cmd:
-        print('Processing: bedtools closest... library=' + lib)
+        print('Processing: bedtools closest... library:' + lib)
     return subprocess.call(cmd, shell=True)
 
 
