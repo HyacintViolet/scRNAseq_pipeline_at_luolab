@@ -9,9 +9,10 @@ import subprocess
 
 
 def work(cmd):
-    lib_name = re.search('(YT[0-9]*)', cmd).group(1)
+    lib_name = re.search('(YT[0-9]*)', cmd)
     # Display progress
     if lib_name is not None:
+        lib_name = lib_name.group(1)
         if 'head -n' in cmd:
             print('Trimming gibberish tails. head -n ... Library:' + lib_name)
         elif '$14!=-1' in cmd:
