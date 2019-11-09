@@ -32,7 +32,7 @@ def get_prefix(lib):
     return prefix
 
 
-def awk_extract_part(libs, parent_dir):
+def awk_extract_part(libs, parent_dir, suffix_input, suffix_output):
     cmd_awk_extract_part_all = []
     for l in libs:
 
@@ -42,11 +42,11 @@ def awk_extract_part(libs, parent_dir):
         prefix = get_prefix(l)
 
         # Input file name
-        filename_fixed_bed = '_'.join([prefix, 'fixed', 'closest.bed'])
+        filename_fixed_bed = '_'.join([prefix, suffix_input])  # 'fixed_closest.bed'
         path_to_input = os.path.join(wd, filename_fixed_bed)
 
         # Output file name
-        filename_output = '_'.join([prefix, 'extracted', 'part.bed'])
+        filename_output = '_'.join([prefix, suffix_output])  # 'extracted_part.bed'
         path_to_output = os.path.join(wd, filename_output)
 
         # Check if output already exists. If not, construct command.
@@ -165,12 +165,13 @@ def main():
     libs = get_libs(parent_dir)
     num_lines_table = pd.read_csv('/media/luolab/ZA1BT1ER/yanting/vM23/num_lines_table.csv', index_col='library')
 
-    awk_extract_part(libs, parent_dir)
+    awk_extract_part(libs, parent_dir, suffix_input='fixed_closest.bed', suffix_output='extracted_part.bed')
     awk_extract_paste(libs, parent_dir)
 
-    remove_intermediate(libs, parent_dir, 'extracted_part.bed')
+    remove_intermediate(libs, parent_dir, suffix_file_to_remove='extracted_part.bed')
     # Check that line number of final output matches input
-    check_line(libs, parent_dir, 'extracted.bed', 'fixed_closest.bed', num_lines_table)
+    check_line(libs, parent_dir, suffix_file_to_check='extracted.bed', suffix_file_ground_truth='fixed_closest.bed',
+               num_lines_table=num_lines_table)
 
 
 if __name__ == '__main__':

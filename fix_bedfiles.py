@@ -11,10 +11,12 @@ import subprocess
 def work(cmd):
     lib_name = re.search('(YT[0-9]*)', cmd).group(1)
     # Display progress
-    if 'Fixing' in cmd:
-        print('Trimming gibberish tails. head -n -... library:' + lib_name)
-    elif 'awk' in cmd:
-        print('Removing useless rows. awk ... library:' + lib_name)
+    if 'head -n' in cmd:
+        print('Trimming gibberish tails. head -n -... Library:' + lib_name)
+    elif '$14!=-1' in cmd:
+        print('Removing telomeric reads. Library:' + lib_name)
+    elif '$18=="+" && $23>0' in cmd:
+        print('Removing reads upstram to 5\'UTRs. Library:' + lib_name)
     return subprocess.call(cmd, shell=True)
 
 
@@ -114,13 +116,13 @@ def trim_bed_tails(parent_dir, num_lines_table):
         prefix = get_prefix(l)
 
         # File to fix
-        filename_input = '_'.join([prefix, 'closest.bed'])
+        filename_input = '_'.join([prefix, 'closest.bed'])   # 'closest.bed'
         path_to_input = os.path.join(wd, filename_input)
         # Number of lines to correct
         tail_to_trim = num_lines_table.at[prefix, 'tail_to_trim']
 
         # Output file
-        filename_output = '_'.join([prefix, 'temp', 'closest.bed'])
+        filename_output = '_'.join([prefix, 'temp', 'closest.bed'])   # 'temp_closest.bed'
         path_to_output = os.path.join(wd, filename_output)
 
         if not os.path.exists(path_to_output) and tail_to_trim != 0:
@@ -144,11 +146,11 @@ def remove_telomeric_reads(libs, parent_dir, suffix_input, suffix_output):
         prefix = get_prefix(l)
 
         # File to fix
-        filename_input = '_'.join([prefix, suffix_input])
+        filename_input = '_'.join([prefix, suffix_input])  # 'temp_closest.bed'
         path_to_input = os.path.join(wd, filename_input)
 
         # Output file
-        filename_output = '_'.join([prefix, suffix_output])
+        filename_output = '_'.join([prefix, suffix_output])  # 'temp2_closest.bed'
         path_to_output = os.path.join(wd, filename_output)
 
         if not os.path.exists(path_to_output):
@@ -160,7 +162,7 @@ def remove_telomeric_reads(libs, parent_dir, suffix_input, suffix_output):
     pool = mp.Pool(1)
     if len(cmd_all_awk) is not 0:
         pool.map(work, cmd_all_awk)
-    print('Remove YT..._closest.bed telomeric entries: finished.')
+    print('Remove YT..._closest.bed telomeric reads: finished.')
 
 
 def remove_5_prime_upstream(libs, parent_dir, suffix_input, suffix_output):
@@ -174,11 +176,11 @@ def remove_5_prime_upstream(libs, parent_dir, suffix_input, suffix_output):
         prefix = get_prefix(l)
 
         # File to fix
-        filename_input = '_'.join([prefix, suffix_input])
+        filename_input = '_'.join([prefix, suffix_input])   # 'temp2_closest.bed'
         path_to_input = os.path.join(wd, filename_input)
 
         # Output file
-        filename_output = '_'.join([prefix, suffix_output])
+        filename_output = '_'.join([prefix, suffix_output])   # 'fixed_closest.bed'
         path_to_output = os.path.join(wd, filename_output)
 
         if not os.path.exists(path_to_output):
