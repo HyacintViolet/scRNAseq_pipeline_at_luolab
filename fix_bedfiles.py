@@ -1,6 +1,7 @@
 import os
 import re
 import shlex
+import warnings
 # import numpy as np
 import pandas as pd
 import multiprocessing as mp
@@ -79,24 +80,26 @@ def count_files(file_to_count, parent_dir):
 
 
 def count_file_type(ftype="", parent_dir='/media/luolab/ZA1BT1ER/yanting/vM23/mapping/',
-                    num_lines_table=pd.DataFrame(data=None)):
+                    num_lines_table=pd.DataFrame(data=None), do_count=True):
     # ftype: 0 = all; 1 = _closest.bed; 2 = _stranded_nonoverlap; 3 = fixed_closest.bed
     valid_types = {"closest.bed", "stranded_nonoverlap.bam", "fixed_closest.bed"}
     if ftype not in valid_types:
         raise ValueError("results: ftype must be one of %r." % valid_types)
 
-    if ftype == "closest.bed":
-        file_to_count = "closest.bed"
-        counts = count_files(file_to_count, parent_dir)
-        num_lines_table.update(counts)
-    elif ftype == "stranded_nonoverlap.bam":
-        file_to_count = "stranded_nonoverlap.bam"
-        counts = count_files(file_to_count, parent_dir)
-        num_lines_table.update(counts)
-    elif ftype == "fixed_closest.bed":
-        file_to_count = "fixed_closest.bed"
-        counts = count_files(file_to_count, parent_dir)
-        num_lines_table.update(counts)
+    # Top level control of whether to count or not
+    if do_count:
+        if ftype == "closest.bed":
+            file_to_count = "closest.bed"
+            counts = count_files(file_to_count, parent_dir)
+            num_lines_table.update(counts)
+        elif ftype == "stranded_nonoverlap.bam":
+            file_to_count = "stranded_nonoverlap.bam"
+            counts = count_files(file_to_count, parent_dir)
+            num_lines_table.update(counts)
+        elif ftype == "fixed_closest.bed":
+            file_to_count = "fixed_closest.bed"
+            counts = count_files(file_to_count, parent_dir)
+            num_lines_table.update(counts)
 
     return num_lines_table
 
@@ -132,8 +135,7 @@ def trim_bed_tails(parent_dir, num_lines_table):
     print('Trim YT..._closest.bed tail lines: finished.')
 
 
-def remove_useless_entries(parent_dir):
-    libs = get_libs(parent_dir)
+def remove_telomeric_reads(libs, parent_dir, suffix_input, suffix_output):
     cmd_all_awk = []
     for l in libs:
         # Setting up working directory
@@ -142,24 +144,80 @@ def remove_useless_entries(parent_dir):
         prefix = get_prefix(l)
 
         # File to fix
-        filename_input = '_'.join([prefix, 'temp', 'closest.bed'])
+        filename_input = '_'.join([prefix, suffix_input])
         path_to_input = os.path.join(wd, filename_input)
 
         # Output file
-        filename_output = '_'.join([prefix, 'fixed', 'closest.bed'])
+        filename_output = '_'.join([prefix, suffix_output])
         path_to_output = os.path.join(wd, filename_output)
 
         if not os.path.exists(path_to_output):
             # Construct command
-            cmd_this_awk = 'awk \'BEGIN{FS=\"\\t\"} $14!=-1 {print $0}\' ' + path_to_input + ' > ' + path_to_output + \
-                ' && rm ' + path_to_input
+            cmd_this_awk = 'awk \'BEGIN{FS=\"\\t\"} $14!=-1 {print $0}\' ' + path_to_input + ' > ' + path_to_output
             cmd_all_awk.append(cmd_this_awk)
 
     # Parallel run by Pool
     pool = mp.Pool(1)
     if len(cmd_all_awk) is not 0:
         pool.map(work, cmd_all_awk)
-    print('Remove YT..._closest.bed useless entries: finished.')
+    print('Remove YT..._closest.bed telomeric entries: finished.')
+
+
+def remove_5_prime_upstream(libs, parent_dir, suffix_input, suffix_output):
+    # We're only interested in reads mapped to downstream regions of 3'UTRs. Remove reads mapped to upstream regions
+    # of 5'UTRs.
+    cmd_all_awk = []
+    for l in libs:
+        # Setting up working directory
+        wd = os.path.join(parent_dir, l)
+        # Grab folder name prefix
+        prefix = get_prefix(l)
+
+        # File to fix
+        filename_input = '_'.join([prefix, suffix_input])
+        path_to_input = os.path.join(wd, filename_input)
+
+        # Output file
+        filename_output = '_'.join([prefix, suffix_output])
+        path_to_output = os.path.join(wd, filename_output)
+
+        if not os.path.exists(path_to_output):
+            # Construct command
+            cmd_this_awk = 'awk \'BEGIN{FS="\\t";OFS="\\t"}{if($18=="+" && $23>0){print $0}else if($18=="-" && $23<0)' \
+                           '{print $0}}\' ' + path_to_input + ' > ' + path_to_output
+            cmd_all_awk.append(cmd_this_awk)
+
+    # Parallel run by Pool
+    pool = mp.Pool(1)
+    if len(cmd_all_awk) is not 0:
+        pool.map(work, cmd_all_awk)
+    print('Remove YT..._closest.bed telomeric entries: finished.')
+
+
+def remove_intermediate(libs, parent_dir, suffix_file_to_remove):
+    # Remove intermediate files with 'find ... -delete'
+    # Check that file numbers match
+    num_libs = len(libs)
+    # Count file number with pipe
+    cmd_count_extracted_part_1 = 'find ' + parent_dir + ' -name "*' + suffix_file_to_remove + '" -type f'
+    cmd_count_extracted_part_2 = 'wc -l'
+    # Open process
+    p1 = subprocess.Popen(shlex.split(cmd_count_extracted_part_1), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p2 = subprocess.Popen(shlex.split(cmd_count_extracted_part_2), stdin=p1.stdout, stdout=subprocess.PIPE)
+    p1.stdout.close()
+    while True:
+        output = p2.communicate()[0]
+        if p2.poll() is not None:
+            break
+    num_count = int(output.decode())
+    # Command to remove files
+    cmd_rm_intermediate = ['find ' + parent_dir + ' -name "*' + suffix_file_to_remove + '" -type f -delete']
+    pool = mp.Pool(1)
+    if num_count == num_libs and len(cmd_rm_intermediate) is not 0:
+        pool.map(work, cmd_rm_intermediate)
+    else:
+        warnings.warn('Trying to remove ..' + suffix_file_to_remove + ', but file number does not match with library '
+                      'number. Abort.')
 
 
 def main():
@@ -180,13 +238,14 @@ def main():
                                                                       "tail_to_trim", "fixed_closest.bed"])
 
     # Count YT..._closest.bed line numbers
-    num_lines_new = count_file_type(ftype="closest.bed", parent_dir=parent_dir, num_lines_table=num_lines_table)
+    num_lines_new = count_file_type(ftype="closest.bed", parent_dir=parent_dir, num_lines_table=num_lines_table,
+                                    do_count=False)  # Don't count, ad interim.
     num_lines_table.update(num_lines_new)
     num_lines_table.to_csv('/media/luolab/ZA1BT1ER/yanting/vM23/num_lines_table.csv', index_label='library')
 
     # Count YT..._stranded_nonoverlap.bam line numbers
-    num_lines_new = count_file_type(ftype="stranded_nonoverlap.bam",
-                                    parent_dir=parent_dir, num_lines_table=num_lines_table)
+    num_lines_new = count_file_type(ftype="stranded_nonoverlap.bam", parent_dir=parent_dir,
+                                    num_lines_table=num_lines_table, do_count=False)  # Don't count, ad interim.
     num_lines_table.update(num_lines_new)
     num_lines_table.to_csv('/media/luolab/ZA1BT1ER/yanting/vM23/num_lines_table.csv', index_label='library')
 
@@ -194,8 +253,15 @@ def main():
     num_lines_table['tail_to_trim'] = num_lines_table['closest.bed'] - num_lines_table['stranded_nonoverlap.bam'] + 1
     trim_bed_tails(parent_dir, num_lines_table)
 
-    # Remove some useless reads mapped to the tails of chromosomes
-    remove_useless_entries(parent_dir)
+    # Remove some useless reads mapped to the telomeric region of chromosomes
+    remove_telomeric_reads(libs, parent_dir, suffix_input='temp_closest.bed', suffix_output='temp2_closest.bed')
+    # Remove intermediate files ending with _temp_closest.bed
+    remove_intermediate(libs, parent_dir, suffix_file_to_remove='temp_closest.bed')
+
+    # Remove reads mapped to upstream regions of 5'UTRs.
+    remove_5_prime_upstream(libs, parent_dir, suffix_input='temp2_closest.bed', suffix_output='fixed.closest.bed')
+    # Remove intermediate files: .._temp2_closest.bed
+    remove_intermediate(libs, parent_dir, suffix_file_to_remove='temp2_closest.bed')
 
     # Count YT..._fixed_closest.bed line numbers
     num_lines_new = count_file_type(ftype="fixed_closest.bed", parent_dir=parent_dir, num_lines_table=num_lines_table)

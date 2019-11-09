@@ -1,8 +1,8 @@
 import os
 import re
+import shlex
 import warnings
 import pandas as pd
-import shlex
 import multiprocessing as mp
 import subprocess
 
@@ -123,8 +123,8 @@ def remove_intermediate(libs, parent_dir, suffix_file_to_remove):
     if num_count == num_libs and len(cmd_rm_intermediate) is not 0:
         pool.map(work, cmd_rm_intermediate)
     else:
-        warnings.warn('Trying to remove ..extracted_part.bed, but file number does not match with library number.'
-                      ' Abort.')
+        warnings.warn('Trying to remove ..' + suffix_file_to_remove + ', but file number does not match with library '
+                      'number. Abort.')
 
 
 def check_line(libs, parent_dir, suffix_file_to_check, suffix_file_ground_truth, num_lines_table):
