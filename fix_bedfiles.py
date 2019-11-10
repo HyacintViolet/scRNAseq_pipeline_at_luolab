@@ -17,7 +17,7 @@ def work(cmd):
             print('Trimming gibberish tails. head -n ... Library: ' + lib_name)
         elif '$14!=-1' in cmd:
             print('Removing telomeric reads. awk ... $14!=-1 ... Library: ' + lib_name)
-        elif '$18=="+" && $23>0' in cmd:
+        elif 'if($23<0){print $0}' in cmd:
             print('Removing reads upstream to 5\'UTRs. Library: ' + lib_name)
     return subprocess.call(cmd, shell=True)
 
