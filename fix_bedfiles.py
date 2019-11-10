@@ -187,8 +187,8 @@ def remove_5_prime_upstream(libs, parent_dir, suffix_input, suffix_output):
 
         if not os.path.exists(path_to_output):
             # Construct command
-            cmd_this_awk = 'awk \'BEGIN{FS="\\t";OFS="\\t"}{if($18=="+" && $23>0){print $0}else if($18=="-" && $23<0)' \
-                           '{print $0}}\' ' + path_to_input + ' > ' + path_to_output
+            cmd_this_awk = 'awk \'BEGIN{FS="\\t";OFS="\\t"}{if($23<0){print $0}}\' ' + path_to_input + ' > ' \
+                           + path_to_output
             cmd_all_awk.append(cmd_this_awk)
 
     # Parallel run by Pool

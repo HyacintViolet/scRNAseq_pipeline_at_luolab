@@ -53,7 +53,7 @@ def awk_extract_part(libs, parent_dir, suffix_input, suffix_output):
         if not os.path.exists(path_to_output):
             # Construct command
             cmd_awk_extract_part_this = 'awk \'BEGIN{FS=\"\\t\"; OFS=\"\\t\"}{print $1,$2,$3,$4,$14,$15,$16,$18,' \
-                                        '$23}\' ' + path_to_input + ' > ' + path_to_output
+                                        '-$23}\' ' + path_to_input + ' > ' + path_to_output
             cmd_awk_extract_part_all.append(cmd_awk_extract_part_this)
 
     # Parallel run by Pool
