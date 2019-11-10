@@ -53,7 +53,7 @@ Fix annotation pipeline:
      zcat YT_extracted_all.txt.gz | awk 'BEGIN{FS="\t";OFS="\t"} $9>0 && $9 < 20000 {print $0}' | gzip -9c > \
      YT_extracted_less_than_20k.txt.gz
    - Run command:
-     zcat YT_extracted_less_than.txt.gz | awk 'BEGIN{FS="\t";OFS="\t"}{print $7, $10, $11, $9}' | gzip -9c > \
+     zcat YT_extracted_all.txt.gz | awk 'BEGIN{FS="\t";OFS="\t"}{print $7, $10, $11, $9}' | gzip -9c > \
      distance_to_gene.txt.gz
      zcat YT_extracted_less_than_20k.txt.gz | awk 'BEGIN{FS="\t";OFS="\t"}{print $7, $10, $11, $9}' | gzip -9c > \
      distance_to_gene_20k.txt.gz
