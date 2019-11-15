@@ -16,11 +16,24 @@ import subprocess
 import pandas as pd
 
 
+def get_libs(parent_dir):
+    # Input path to mapping dir. Output a list of library names.
+    libs = sorted(os.listdir(parent_dir))
+    return libs
+
+
+def get_prefix(lib):
+    # Input library folder name. Output library prefix.
+    match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', lib)
+    prefix = match.group(1)
+    return prefix
+
+
 def wash_whitelist(out_dir, bc_ground_truth, match):
-    print('Washing ' + out_dir)
+    print('Washing barcode whitelist. Library: ' + out_dir)
     os.chdir(out_dir)
 
-    # Read whitelist8
+    # Read whitelist80
     whitelist80 = pd.read_csv('whitelist80.txt', sep="\t", names=['cell', 'candidate', 'Nreads', 'Ncandidate'])
 
     # Remove rows whose 'cell' value is not found in barcode_ground_truth
@@ -50,7 +63,7 @@ def main():
     dst = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
 
     # Path to genome annotation and index
-    genome_anno = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_scaff.annotation.gtf'
+    genome_gtf = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_scaff.annotation.gtf'
     genome_index = '/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM23/'
 
     # Parent working dir: to write aggregate results
@@ -121,7 +134,7 @@ def main():
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
         match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
-        prefix = match.group(1)
+        prefix = get_prefix(l)
 
         # Wash whitelist, output whitelist_washed.txt
         out_dir = os.path.join(dst, out)
@@ -251,7 +264,7 @@ def main():
         featurecounts_out = os.path.join(out_dir, out_name_featurecounts)
 
         if not os.path.exists(featurecounts_out):
-            cmd_this_featurecounts = 'featureCounts -s 1 -a ' + genome_anno + ' -o ' + featurecounts_out + \
+            cmd_this_featurecounts = 'featureCounts -s 1 -a ' + genome_gtf + ' -o ' + featurecounts_out + \
                                 ' -R BAM ' + map_out + ' -T 32'
             cmd_featurecounts.append(cmd_this_featurecounts)
 
