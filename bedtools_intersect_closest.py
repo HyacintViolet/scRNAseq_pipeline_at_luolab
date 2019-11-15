@@ -6,8 +6,8 @@ import subprocess
 
 
 parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
-gtf = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr.annotation.gtf'
-bed = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr.annotation.fixed.bed'
+gtf = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_primary.annotation.gtf'
+bed = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_primary.annotation.fixed.bed'
 
 
 def work(cmd):

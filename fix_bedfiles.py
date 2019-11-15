@@ -311,8 +311,8 @@ if __name__ == '__main__':
     #               str(num_line_stranded_nonoverlap) + ' lines: Something is wrong')
 
 # parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
-# gtf = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr.annotation.gtf'
-# bed = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr.annotation.fixed.bed'
+# gtf = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_primary.annotation.gtf'
+# bed = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_primary.annotation.fixed.bed'
 #
 #
 # def work(cmd):

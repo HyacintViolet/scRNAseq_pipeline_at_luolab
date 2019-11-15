@@ -25,17 +25,17 @@ Fix annotation pipeline:
    a. for gtf, remove non-primary assembly entries with the following bash line (first column not chrX, i.e. KZ28...):
       - Run command:
       awk -F "\t" 'BEGIN{OFS="\t"} $1~"chr"{print $0}' gencode.vM23.chr_hapl_scaffold.annotation.gtf \
-      > gencode.vM23.chr.annotation.gtf
+      > gencode.vM23.chr_primary.annotation.gtf
    b. for bed, convert gencode_vM23.chr.annotation.gtf with BEDOPS gtf2bed (this also performs sorting, which is
       required by 'bedtools closest' command)
       - BEDOPS gtf2bed checks GTF column 9 and requires BOTH gene_id and transcript_id entries, which is not satisfied
       by original gencode gtf files. Generate a fixed file by adding placeholders: transcript_id "";
       See this thread: www.biostars.org/p/206342
       - Run command:
-      awk '{ if ($0 ~ "transcript_id") print $0; else print $0" transcript_id \"\";"; }' gencode.vM23.chr.annotation.gtf
-      > gencode.vM23.chr.annotation.fixed.gtf
+      awk '{ if ($0 ~ "transcript_id") print $0; else print $0" transcript_id \"\";"; }' gencode.vM23.chr_primary.annotation.gtf
+      > gencode.vM23.chr_primary.annotation.fixed.gtf
    c. Now convert with gtf2bed:
-      gtf2bed < gencode.vM23.chr.annotation.fixed.gtf > gencode.vM23.chr.annotation.fixed.bed
+      gtf2bed < gencode.vM23.chr_primary.annotation.fixed.gtf > gencode.vM23.chr_primary.annotation.fixed.bed
 
 2. bedtools_intersect_closest.py # run pipe
 
