@@ -16,6 +16,33 @@ import subprocess
 import pandas as pd
 
 
+def parse_input(src_dir, l, task=None, option=None, set_cell_number=80, input_file=None):
+    if task is "umi_whitelist":
+        wd = os.path.join(src_dir, l)
+        for file in os.listdir(wd):
+            if file.endswith('2.fq.gz') or file.endswith('2.clean.fq.gz'):
+                read1_filename = file
+            elif file.endswith('1.fq.gz') or file.endswith('1.clean.fq.gz'):
+                read2_filename = file
+        input_args = dict()
+        input_args['path_to_read1'] = os.path.join(wd, read1_filename)
+        input_args['path_to_read2'] = os.path.join(wd, read2_filename)
+        input_args['set_cell_number'] = set_cell_number
+        return input_args
+    elif
+
+
+
+def parse_output(dst_dir, l, task=None, option=None, set_cell_number=80, output_file=None):
+    if task is "umi_whitelist":
+        wd = os.path.join(dst_dir, l)
+        output_args = dict()
+        output_args['path_to_whitelist'] = os.path.join(wd, 'whitelist' + str(set_cell_number) + '.txt')
+        output_args['plot_prefix'] = os.path.join(wd, '_'.join(['cell_num',set_cell_number]))
+        output_args['log2stderr'] = os.path.join(wd, 'whitelist80.txt')
+    return output_args
+
+
 def get_libs(parent_dir):
     # Input path to mapping dir. Output a list of library names.
     libs = sorted(os.listdir(parent_dir))
@@ -29,29 +56,54 @@ def get_prefix(lib):
     return prefix
 
 
-def wash_whitelist(out_dir, bc_ground_truth, match):
-    print('Washing barcode whitelist. Library: ' + out_dir)
-    os.chdir(out_dir)
-
-    # Read whitelist80
-    whitelist80 = pd.read_csv('whitelist80.txt', sep="\t", names=['cell', 'candidate', 'Nreads', 'Ncandidate'])
-
-    # Remove rows whose 'cell' value is not found in barcode_ground_truth
-    whitelist_washed = whitelist80[whitelist80['cell'].isin(bc_ground_truth)]
-
-    # Reset index
-    whitelist_washed = whitelist_washed.reset_index(drop=True)
-
-    # Output
-    filename = '_'.join([match.group(1), 'whitelist_washed.txt'])
-    whitelist_washed.to_csv(filename, sep="\t", index=False, header=False)
-
-
 def work(cmd):
     return subprocess.call(cmd, shell=True)
 
-# ----------------------------------------------------------------------------------------------------------------------
 
+def do_parallel(src_dir=None, dst_dir=None, task=None, option=None, input_file=None, output_file=None,
+                thread=1, genome_index='/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM23/', genome_gtf=None):
+    libs = get_libs(src_dir)
+
+    class CmdAll:
+        cmd_all = []
+        task = str()
+        lib = str()
+    CmdAll.task = task
+    CmdAll.lib = lib
+
+    for l in libs:
+        # Setup input/output directory
+        input_args = parse_input(src_dir, l, task=task, option=option, input_file=input_file)
+        output_args = parse_output(dst_dir, l, task=task, option=option, output_file=output_file)
+
+def wash_whitelist(parent_dir, libs, bc_ground_truth):
+    for lib in libs:
+        # Display progress
+        print('Washing barcode whitelist. Library: ' + lib)
+
+        # Grab folder name prefix
+        prefix = get_prefix(lib)
+
+        # Setup input/output paths
+        wd = os.path.join(parent_dir, lib)
+        filename_input = 'whitelist80.txt'
+        path_to_input_file = os.path.join(wd, filename_input)
+        filename_output = '_'.join([prefix, 'whitelist_washed.txt'])
+        path_to_output_file = os.path.join(wd, filename_output)
+
+        # Read whitelist80
+        whitelist80 = pd.read_csv(path_to_input_file, sep="\t", names=['cell', 'candidate', 'Nreads', 'Ncandidate'])
+
+        # Remove rows whose 'cell' value is not found in barcode_ground_truth
+        whitelist_washed = whitelist80[whitelist80['cell'].isin(bc_ground_truth)]
+        # Reset index
+        whitelist_washed = whitelist_washed.reset_index(drop=True)
+
+        # Write to output
+        if not os.path.exists(path_to_output_file):
+            whitelist_washed.to_csv(path_to_output_file, sep="\t", index=False, header=False)
+        else:
+            print()
 
 def main():
 

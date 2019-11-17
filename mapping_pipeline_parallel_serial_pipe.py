@@ -16,6 +16,19 @@ import subprocess
 import pandas as pd
 
 
+def get_libs(parent_dir):
+    # Input path to mapping dir. Output a list of library names.
+    libs = sorted(os.listdir(parent_dir))
+    return libs
+
+
+def get_prefix(lib):
+    # Input library folder name. Output library prefix.
+    match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', lib)
+    prefix = match.group(1)
+    return prefix
+
+
 def wash_whitelist(out_dir, bc_ground_truth, match):
     print('Washing barcode whitelist. Library: ' + out_dir)
     os.chdir(out_dir)
@@ -120,8 +133,7 @@ def main():
 
         # Grab folder name and construct input file names. For the data in this example, the read1, read2 naming
         # convention is reversed.
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
-        prefix = match.group(1)
+        prefix = get_prefix(out)
 
         # Wash whitelist, output whitelist_washed.txt
         out_dir = os.path.join(dst, out)
@@ -153,8 +165,7 @@ def main():
         out_dir = os.path.join(dst, s)
 
         # Grab folder name prefix
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', s)
-        prefix = match.group(1)
+        prefix = get_prefix(s)
 
         # Fetch input file name. Read 1 suffix: _2.fq.gz, read 2 suffix: _1.fq.gz.
         for item in os.listdir(input_dir):
@@ -202,8 +213,7 @@ def main():
         out_dir = os.path.join(dst, out)
 
         # Grab folder name
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
-        prefix = match.group(1)
+        prefix = get_prefix(out)
 
         # Input dir
         out_name_extract = '_'.join([prefix, 'extracted.fq.gz'])
@@ -239,8 +249,7 @@ def main():
         out_dir = os.path.join(dst, out)
 
         # Grab folder name
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
-        prefix = match.group(1)
+        prefix = get_prefix(out)
 
         # Input dir
         out_name_map = '_'.join([prefix, 'Aligned.sortedByCoord.out.bam'])
@@ -277,8 +286,7 @@ def main():
         out_dir = os.path.join(dst, out)
 
         # Grab folder name
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
-        prefix = match.group(1)
+        prefix = get_prefix(out)
 
         # Input file name for samtools sort
         featurecounts_bam_out = '_'.join([prefix, 'Aligned.sortedByCoord.out.bam.featureCounts.bam'])
@@ -318,8 +326,7 @@ def main():
         os.chdir(out_dir)
 
         # Grab folder name
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
-        prefix = match.group(1)
+        prefix = get_prefix(out)
 
         # Input file name for samtools index
         out_name_samtools = '_'.join([prefix, 'assigned_sorted.bam'])
@@ -350,8 +357,7 @@ def main():
         out_dir = os.path.join(dst, out)
 
         # Grab folder name
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
-        prefix = match.group(1)
+        prefix = get_prefix(out)
 
         # Input file name for umi_tools count
         out_name_samtools = '_'.join([prefix, 'assigned_sorted.bam'])
@@ -388,8 +394,7 @@ def main():
         out_dir = os.path.join(dst, out)
 
         # Grab folder name
-        match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', out)
-        prefix = match.group(1)
+        prefix = get_prefix(out)
 
         aligned_out = '_'.join([prefix, 'Aligned.sortedByCoord.out.bam'])
         nuniquemap_in = os.path.join(out_dir, aligned_out)
