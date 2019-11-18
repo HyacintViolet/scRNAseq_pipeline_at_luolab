@@ -29,7 +29,7 @@ def get_prefix(lib):
     return prefix
 
 
-def wash_whitelist(out_dir, bc_ground_truth, match):
+def wash_whitelist(out_dir, bc_ground_truth, prefix):
     print('Washing barcode whitelist. Library: ' + out_dir)
     os.chdir(out_dir)
 
@@ -43,7 +43,7 @@ def wash_whitelist(out_dir, bc_ground_truth, match):
     whitelist_washed = whitelist_washed.reset_index(drop=True)
 
     # Output
-    filename = '_'.join([match.group(1), 'whitelist_washed.txt'])
+    filename = '_'.join([prefix, 'whitelist_washed.txt'])
     whitelist_washed.to_csv(filename, sep="\t", index=False, header=False)
 
 
@@ -143,7 +143,7 @@ def main():
         wash_out = os.path.join(out_dir, out_name_wash)
 
         if not os.path.exists(wash_out):
-            wash_whitelist(out_dir, barcode_ground_truth, match)
+            wash_whitelist(out_dir, barcode_ground_truth, prefix)
 
     print('Wash whitelist: finished.')
 
