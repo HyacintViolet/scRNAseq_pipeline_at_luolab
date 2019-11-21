@@ -63,7 +63,8 @@ def main():
     dst = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
 
     # Path to genome annotation and index
-    genome_gtf = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_scaff.annotation.gtf'
+    genome_gtf = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_scaff.annotation.' \
+                 'extended.gtf'
     genome_index = '/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM23/'
 
     # Parent working dir: to write aggregate results
@@ -118,7 +119,7 @@ def main():
                                  os.path.join(out_dir, 'whitelist80.txt')
             cmd_whitelist.append(cmd_this_whitelist)
 
-    pool = mp.Pool(16)
+    pool = mp.Pool(32)
     if len(cmd_whitelist) is not 0:
         pool.map(work, cmd_whitelist)
     print('umi_tools whitelist: finished.')
@@ -191,7 +192,7 @@ def main():
             cmd_extract.append(cmd_this_extract)
 
     # Parallel run by Pool
-    pool = mp.Pool(16)
+    pool = mp.Pool(32)
     if len(cmd_extract) is not 0:
         pool.map(work, cmd_extract)
     print('umi_tools extract: finished.')
@@ -201,217 +202,217 @@ def main():
 # ----------------------------------------------------------------------------------------------------------------------
 # CHUNK 4 STARTS HERE
 # ----------------------------------------------------------------------------------------------------------------------
-
-    # STEP 3: Map reads
-    # Command to use: STAR
-    # Construct command and execute. DON'T PARALLELIZE.
-    # The iterative subprocess.Popen strategy will cause some runs to fail. Abandoned. Shifting everything to mp.Pool.
-    cmd_star_mapping = []
-    for out in os.listdir(dst):
-
-        # Setup output directory
-        out_dir = os.path.join(dst, out)
-
-        # Grab folder name
-        prefix = get_prefix(out)
-
-        # Input dir
-        out_name_extract = '_'.join([prefix, 'extracted.fq.gz'])
-        extract_out = os.path.join(out_dir, out_name_extract)
-
-        # STAR map output file dir
-        out_name_map = '_'.join([prefix, 'Aligned.sortedByCoord.out.bam'])
-        map_out = os.path.join(out_dir, out_name_map)
-
-        # Construct commands
-        if not os.path.exists(map_out):
-            cmd_this_mapping = 'STAR --runThreadN 32 --genomeDir ' + genome_index + \
-                               ' --readFilesIn ' + extract_out + \
-                               ' --readFilesCommand zcat --outFilterMultimapNmax 1 --outFilterType BySJout' + \
-                               ' --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonical' + \
-                               ' --outFilterMismatchNmax 6 --outSAMtype BAM SortedByCoordinate --outFileNamePrefix ' + \
-                               os.path.join(out_dir, prefix) + '_ --outReadsUnmapped Fastx'
-            cmd_star_mapping.append(cmd_this_mapping)
-
-    # Parallel run by Pool
-    pool = mp.Pool(1)  # DO NOT CHANGE THIS
-    if len(cmd_star_mapping) is not 0:
-        pool.map(work, cmd_star_mapping)
-    print('STAR maping: finished.')
-
-    # STEP 4: Assign reads to genes
-    # Command to use: featureCounts, samtools sort, samtools index
-    # Construct commands for featureCounts. DON'T PARALLELIZE.
-    cmd_featurecounts = []
-    for out in os.listdir(dst):
-
-        # Setup output directory
-        out_dir = os.path.join(dst, out)
-
-        # Grab folder name
-        prefix = get_prefix(out)
-
-        # Input dir
-        out_name_map = '_'.join([prefix, 'Aligned.sortedByCoord.out.bam'])
-        map_out = os.path.join(out_dir, out_name_map)
-
-        # featureCounts output file name
-        out_name_featurecounts = '_'.join([prefix, 'gene_assigned'])
-        featurecounts_out = os.path.join(out_dir, out_name_featurecounts)
-
-        if not os.path.exists(featurecounts_out):
-            cmd_this_featurecounts = 'featureCounts -s 1 -a ' + genome_gtf + ' -o ' + featurecounts_out + \
-                                ' -R BAM ' + map_out + ' -T 32'
-            cmd_featurecounts.append(cmd_this_featurecounts)
-
-    # Parallel run by Pool
-    pool = mp.Pool(1)  # DO NOT CHANGE THIS
-    if len(cmd_featurecounts) is not 0:
-        pool.map(work, cmd_featurecounts)
-    print('featureCounts: finished.')
-
-# ----------------------------------------------------------------------------------------------------------------------
-# CHUNK 4 ENDS
-# ----------------------------------------------------------------------------------------------------------------------
-# CHUNK 5 STARTS HERE
-# ----------------------------------------------------------------------------------------------------------------------
-
-    # STEP 5: Sort featureCounts assigned BAM files (Aligned.sortedByCoord.out.bam.featureCounts.bam)
-    # samtools sort parallelized
-    # Generate list of strings as commands.
-    cmd_sort = []
-    for out in os.listdir(dst):
-
-        # Setup output directory
-        out_dir = os.path.join(dst, out)
-
-        # Grab folder name
-        prefix = get_prefix(out)
-
-        # Input file name for samtools sort
-        featurecounts_bam_out = '_'.join([prefix, 'Aligned.sortedByCoord.out.bam.featureCounts.bam'])
-        sort_in = os.path.join(out_dir, featurecounts_bam_out)
-
-        # Output file name
-        out_name_samtools = '_'.join([prefix, 'assigned_sorted.bam'])
-        sort_out = os.path.join(out_dir, out_name_samtools)
-
-        if not os.path.exists(sort_out):
-            # Construct commands
-            cmd_this_sort = 'samtools sort ' + sort_in + ' -o ' + sort_out
-            cmd_sort.append(cmd_this_sort)
-
-    # Parallel run by Pool
-    pool = mp.Pool(16)
-    if len(cmd_sort) is not 0:
-        pool.map(work, cmd_sort)
-    print('samtools sort: finished.')
-
-# ----------------------------------------------------------------------------------------------------------------------
-# CHUNK 5 ENDS
-# ----------------------------------------------------------------------------------------------------------------------
-# CHUNK 6 STARTS HERE
-# ----------------------------------------------------------------------------------------------------------------------
-
-    # STEP 6: Generate index
-    # samtools index parallelized
-    # Generate list of strings as commands.
-    cmd_index = []
-    for out in os.listdir(dst):
-
-        # Setup output directory
-        out_dir = os.path.join(dst, out)
-
-        # Change directory to output folder
-        os.chdir(out_dir)
-
-        # Grab folder name
-        prefix = get_prefix(out)
-
-        # Input file name for samtools index
-        out_name_samtools = '_'.join([prefix, 'assigned_sorted.bam'])
-        index_in = os.path.join(out_dir, out_name_samtools)
-
-        # Construct command
-        cmd_this_index = 'samtools index ' + index_in
-        cmd_index.append(cmd_this_index)
-
-    # Parallel run by Pool
-    pool = mp.Pool(16)
-    if len(cmd_index) is not 0:
-        pool.map(work, cmd_index)
-    print('samtools index: finished.')
-
-# ----------------------------------------------------------------------------------------------------------------------
-# CHUNK 6 ENDS
-# ----------------------------------------------------------------------------------------------------------------------
-# CHUNK 7 STARTS HERE
-# ----------------------------------------------------------------------------------------------------------------------
-
-    # STEP 7: Count UMIs per gene per cell. Command to use: umi_tools count.
-    # Generate list of strings as commands.
-    cmd_count = []
-    for out in os.listdir(dst):
-
-        # Setup output directory
-        out_dir = os.path.join(dst, out)
-
-        # Grab folder name
-        prefix = get_prefix(out)
-
-        # Input file name for umi_tools count
-        out_name_samtools = '_'.join([prefix, 'assigned_sorted.bam'])
-        samtools_in = os.path.join(out_dir, out_name_samtools)
-
-        # Output file name
-        out_name_count = '_'.join([prefix, 'counts.tsv.gz'])
-        count_out = os.path.join(out_dir, out_name_count)
-
-        if not os.path.exists(count_out):
-            # Construct commands
-            cmd_this_count = 'umi_tools count --per-gene --gene-tag=XT --per-cell -I ' + samtools_in + ' -S ' \
-                             + count_out
-            cmd_count.append(cmd_this_count)
-
-    # Parallel run by Pool
-    pool = mp.Pool(16)
-    if len(cmd_count) is not 0:
-        pool.map(work, cmd_count)
-    print('umi_tools count: finished.')
-
-# ----------------------------------------------------------------------------------------------------------------------
-# CHUNK 7 ENDS
-# ----------------------------------------------------------------------------------------------------------------------
-# CHUNK 8 STARTS HERE
-# ----------------------------------------------------------------------------------------------------------------------
-
-    # STEP 8: Geneate mapping stats (Nuniqmapped)
-    # Construct commands
-    cmd_nuniquemap = []
-    for out in os.listdir(dst):
-
-        # Setup output directory
-        out_dir = os.path.join(dst, out)
-
-        # Grab folder name
-        prefix = get_prefix(out)
-
-        aligned_out = '_'.join([prefix, 'Aligned.sortedByCoord.out.bam'])
-        nuniquemap_in = os.path.join(out_dir, aligned_out)
-        out_name_nuniquemap = '_'.join([prefix, 'Nuniqmapped.txt'])
-        nuniquemap_out = os.path.join(out_dir, out_name_nuniquemap)
-
-        if not os.path.exists(nuniquemap_out):
-            cmd_this_nuniquemap = 'samtools view -F4 ' + nuniquemap_in + ' | cut -f 2 -d \'_\' |sort|uniq -c > ' + \
-                                  nuniquemap_out
-            cmd_nuniquemap.append(cmd_this_nuniquemap)
-
-    # Parallel run by Pool
-    pool = mp.Pool(16)
-    if len(cmd_nuniquemap) is not 0:
-        pool.map(work, cmd_nuniquemap)
-    print('samtools view extract Nuniqmapped: finished.')
-
+#
+#     # STEP 3: Map reads
+#     # Command to use: STAR
+#     # Construct command and execute. DON'T PARALLELIZE.
+#     # The iterative subprocess.Popen strategy will cause some runs to fail. Abandoned. Shifting everything to mp.Pool.
+#     cmd_star_mapping = []
+#     for out in os.listdir(dst):
+#
+#         # Setup output directory
+#         out_dir = os.path.join(dst, out)
+#
+#         # Grab folder name
+#         prefix = get_prefix(out)
+#
+#         # Input dir
+#         out_name_extract = '_'.join([prefix, 'extracted.fq.gz'])
+#         extract_out = os.path.join(out_dir, out_name_extract)
+#
+#         # STAR map output file dir
+#         out_name_map = '_'.join([prefix, 'Aligned.sortedByCoord.out.bam'])
+#         map_out = os.path.join(out_dir, out_name_map)
+#
+#         # Construct commands
+#         if not os.path.exists(map_out):
+#             cmd_this_mapping = 'STAR --runThreadN 32 --genomeDir ' + genome_index + \
+#                                ' --readFilesIn ' + extract_out + \
+#                                ' --readFilesCommand zcat --outFilterMultimapNmax 1 --outFilterType BySJout' + \
+#                                ' --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonical' + \
+#                                ' --outFilterMismatchNmax 6 --outSAMtype BAM SortedByCoordinate --outFileNamePrefix ' + \
+#                                os.path.join(out_dir, prefix) + '_ --outReadsUnmapped Fastx'
+#             cmd_star_mapping.append(cmd_this_mapping)
+#
+#     # Parallel run by Pool
+#     pool = mp.Pool(1)  # DO NOT CHANGE THIS
+#     if len(cmd_star_mapping) is not 0:
+#         pool.map(work, cmd_star_mapping)
+#     print('STAR maping: finished.')
+#
+#     # STEP 4: Assign reads to genes
+#     # Command to use: featureCounts, samtools sort, samtools index
+#     # Construct commands for featureCounts. DON'T PARALLELIZE.
+#     cmd_featurecounts = []
+#     for out in os.listdir(dst):
+#
+#         # Setup output directory
+#         out_dir = os.path.join(dst, out)
+#
+#         # Grab folder name
+#         prefix = get_prefix(out)
+#
+#         # Input dir
+#         out_name_map = '_'.join([prefix, 'Aligned.sortedByCoord.out.bam'])
+#         map_out = os.path.join(out_dir, out_name_map)
+#
+#         # featureCounts output file name
+#         out_name_featurecounts = '_'.join([prefix, 'gene_assigned'])
+#         featurecounts_out = os.path.join(out_dir, out_name_featurecounts)
+#
+#         if not os.path.exists(featurecounts_out):
+#             cmd_this_featurecounts = 'featureCounts -s 1 -a ' + genome_gtf + ' -o ' + featurecounts_out + \
+#                                 ' -R BAM ' + map_out + ' -T 32'
+#             cmd_featurecounts.append(cmd_this_featurecounts)
+#
+#     # Parallel run by Pool
+#     pool = mp.Pool(1)  # DO NOT CHANGE THIS
+#     if len(cmd_featurecounts) is not 0:
+#         pool.map(work, cmd_featurecounts)
+#     print('featureCounts: finished.')
+#
+# # ----------------------------------------------------------------------------------------------------------------------
+# # CHUNK 4 ENDS
+# # ----------------------------------------------------------------------------------------------------------------------
+# # CHUNK 5 STARTS HERE
+# # ----------------------------------------------------------------------------------------------------------------------
+#
+#     # STEP 5: Sort featureCounts assigned BAM files (Aligned.sortedByCoord.out.bam.featureCounts.bam)
+#     # samtools sort parallelized
+#     # Generate list of strings as commands.
+#     cmd_sort = []
+#     for out in os.listdir(dst):
+#
+#         # Setup output directory
+#         out_dir = os.path.join(dst, out)
+#
+#         # Grab folder name
+#         prefix = get_prefix(out)
+#
+#         # Input file name for samtools sort
+#         featurecounts_bam_out = '_'.join([prefix, 'Aligned.sortedByCoord.out.bam.featureCounts.bam'])
+#         sort_in = os.path.join(out_dir, featurecounts_bam_out)
+#
+#         # Output file name
+#         out_name_samtools = '_'.join([prefix, 'assigned_sorted.bam'])
+#         sort_out = os.path.join(out_dir, out_name_samtools)
+#
+#         if not os.path.exists(sort_out):
+#             # Construct commands
+#             cmd_this_sort = 'samtools sort ' + sort_in + ' -o ' + sort_out
+#             cmd_sort.append(cmd_this_sort)
+#
+#     # Parallel run by Pool
+#     pool = mp.Pool(16)
+#     if len(cmd_sort) is not 0:
+#         pool.map(work, cmd_sort)
+#     print('samtools sort: finished.')
+#
+# # ----------------------------------------------------------------------------------------------------------------------
+# # CHUNK 5 ENDS
+# # ----------------------------------------------------------------------------------------------------------------------
+# # CHUNK 6 STARTS HERE
+# # ----------------------------------------------------------------------------------------------------------------------
+#
+#     # STEP 6: Generate index
+#     # samtools index parallelized
+#     # Generate list of strings as commands.
+#     cmd_index = []
+#     for out in os.listdir(dst):
+#
+#         # Setup output directory
+#         out_dir = os.path.join(dst, out)
+#
+#         # Change directory to output folder
+#         os.chdir(out_dir)
+#
+#         # Grab folder name
+#         prefix = get_prefix(out)
+#
+#         # Input file name for samtools index
+#         out_name_samtools = '_'.join([prefix, 'assigned_sorted.bam'])
+#         index_in = os.path.join(out_dir, out_name_samtools)
+#
+#         # Construct command
+#         cmd_this_index = 'samtools index ' + index_in
+#         cmd_index.append(cmd_this_index)
+#
+#     # Parallel run by Pool
+#     pool = mp.Pool(16)
+#     if len(cmd_index) is not 0:
+#         pool.map(work, cmd_index)
+#     print('samtools index: finished.')
+#
+# # ----------------------------------------------------------------------------------------------------------------------
+# # CHUNK 6 ENDS
+# # ----------------------------------------------------------------------------------------------------------------------
+# # CHUNK 7 STARTS HERE
+# # ----------------------------------------------------------------------------------------------------------------------
+#
+#     # STEP 7: Count UMIs per gene per cell. Command to use: umi_tools count.
+#     # Generate list of strings as commands.
+#     cmd_count = []
+#     for out in os.listdir(dst):
+#
+#         # Setup output directory
+#         out_dir = os.path.join(dst, out)
+#
+#         # Grab folder name
+#         prefix = get_prefix(out)
+#
+#         # Input file name for umi_tools count
+#         out_name_samtools = '_'.join([prefix, 'assigned_sorted.bam'])
+#         samtools_in = os.path.join(out_dir, out_name_samtools)
+#
+#         # Output file name
+#         out_name_count = '_'.join([prefix, 'counts.tsv.gz'])
+#         count_out = os.path.join(out_dir, out_name_count)
+#
+#         if not os.path.exists(count_out):
+#             # Construct commands
+#             cmd_this_count = 'umi_tools count --per-gene --gene-tag=XT --per-cell -I ' + samtools_in + ' -S ' \
+#                              + count_out
+#             cmd_count.append(cmd_this_count)
+#
+#     # Parallel run by Pool
+#     pool = mp.Pool(16)
+#     if len(cmd_count) is not 0:
+#         pool.map(work, cmd_count)
+#     print('umi_tools count: finished.')
+#
+# # ----------------------------------------------------------------------------------------------------------------------
+# # CHUNK 7 ENDS
+# # ----------------------------------------------------------------------------------------------------------------------
+# # CHUNK 8 STARTS HERE
+# # ----------------------------------------------------------------------------------------------------------------------
+#
+#     # STEP 8: Geneate mapping stats (Nuniqmapped)
+#     # Construct commands
+#     cmd_nuniquemap = []
+#     for out in os.listdir(dst):
+#
+#         # Setup output directory
+#         out_dir = os.path.join(dst, out)
+#
+#         # Grab folder name
+#         prefix = get_prefix(out)
+#
+#         aligned_out = '_'.join([prefix, 'Aligned.sortedByCoord.out.bam'])
+#         nuniquemap_in = os.path.join(out_dir, aligned_out)
+#         out_name_nuniquemap = '_'.join([prefix, 'Nuniqmapped.txt'])
+#         nuniquemap_out = os.path.join(out_dir, out_name_nuniquemap)
+#
+#         if not os.path.exists(nuniquemap_out):
+#             cmd_this_nuniquemap = 'samtools view -F4 ' + nuniquemap_in + ' | cut -f 2 -d \'_\' |sort|uniq -c > ' + \
+#                                   nuniquemap_out
+#             cmd_nuniquemap.append(cmd_this_nuniquemap)
+#
+#     # Parallel run by Pool
+#     pool = mp.Pool(16)
+#     if len(cmd_nuniquemap) is not 0:
+#         pool.map(work, cmd_nuniquemap)
+#     print('samtools view extract Nuniqmapped: finished.')
+#
 # ----------------------------------------------------------------------------------------------------------------------
 # CHUNK 8 ENDS
 # ----------------------------------------------------------------------------------------------------------------------
