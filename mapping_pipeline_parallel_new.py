@@ -216,31 +216,31 @@ def main():
             os.makedirs(os.path.join(dst_dir, out))
 
     # STEP 1: umi_tools whitelist
-    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_whitelist", thread=16)
+    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_whitelist", thread=32)
 
     # STEP 2: wash whitelist
     wash_whitelist(src_dir=src_dir, dst_dir=dst_dir, parent_dir=parent_dir, task="wash_whitelist", overwrite=True)
 
     # STEP 3: umi_tools extract
-    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_extract", thread=16)
+    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_extract", thread=32)
 
     # STEP 4: STAR mapping
-    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index)  # Default thread = 1
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index)  # Default thread = 1
 
     # STEP 5: featureCounts
-    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf)  # Default thread = 1
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf)  # Default thread = 1
 
     # STEP 6: samtools sort
-    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="samtools_sort", thread=16)
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="samtools_sort", thread=16)
 
     # STEP 7: samtools index
-    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="samtools_index", thread=16)
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="samtools_index", thread=16)
 
     # STEP 8: umitools count
-    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_count", thread=16)
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_count", thread=16)
 
     # STEP 9: umitools count
-    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="nuniquemapped", thread=16)
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="nuniquemapped", thread=16)
 
 
 if __name__ == '__main__':
