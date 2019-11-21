@@ -17,14 +17,16 @@ import pandas as pd
 
 
 def parse_input(src_dir, l, task=None, option=None, set_cell_number=80, input_file=None):
-    if task is "umi_whitelist":
-        wd = os.path.join(src_dir, l)
+    wd = os.path.join(src_dir, l)
+    input_args = dict()
+    if task is "umitools_whitelist":
         for file in os.listdir(wd):
             if file.endswith('2.fq.gz') or file.endswith('2.clean.fq.gz'):
                 read1_filename = file
             elif file.endswith('1.fq.gz') or file.endswith('1.clean.fq.gz'):
                 read2_filename = file
-        input_args = dict()
+        input_args['task'] = task
+        input_args['out_dir'] = wd
         input_args['path_to_read1'] = os.path.join(wd, read1_filename)
         input_args['path_to_read2'] = os.path.join(wd, read2_filename)
         input_args['set_cell_number'] = set_cell_number
@@ -34,13 +36,24 @@ def parse_input(src_dir, l, task=None, option=None, set_cell_number=80, input_fi
 
 
 def parse_output(dst_dir, l, task=None, option=None, set_cell_number=80, output_file=None):
-    if task is "umi_whitelist":
-        wd = os.path.join(dst_dir, l)
-        output_args = dict()
-        output_args['path_to_whitelist'] = os.path.join(wd, 'whitelist' + str(set_cell_number) + '.txt')
+    wd = os.path.join(dst_dir, l)
+    output_args = dict()
+    if task is "umitools_whitelist":
+        output_args['task'] = task
+        output_args['output_main'] = os.path.join(wd, 'whitelist' + str(set_cell_number) + '.txt')
         output_args['plot_prefix'] = os.path.join(wd, '_'.join(['cell_num',set_cell_number]))
-        output_args['log2stderr'] = os.path.join(wd, 'whitelist80.txt')
+    elif
+
     return output_args
+
+
+def parse_command(input_args, output_args, task=task, option=option):
+    if task is "umitools_whitelist":
+        cmd = 'umi_tools whitelist --stdin ' + input_args['path_to_read1'] + ' --bc-pattern=CCCCCCCCNNNNNNNN ' \
+              '--set-cell-number=' + input_args['set_cell_number'] + ' --plot-prefix=' + output_args['plot_prefix']\
+              + ' -v 1 --log2stderr > ' + output_args['output_main']
+
+    return cmd
 
 
 def get_libs(parent_dir):
@@ -62,19 +75,16 @@ def work(cmd):
 
 def do_parallel(src_dir=None, dst_dir=None, task=None, option=None, input_file=None, output_file=None,
                 thread=1, genome_index='/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM23/', genome_gtf=None):
+
     libs = get_libs(src_dir)
 
-    class CmdAll:
-        cmd_all = []
-        task = str()
-        lib = str()
-    CmdAll.task = task
-    CmdAll.lib = lib
-
     for l in libs:
-        # Setup input/output directory
+        # Parse input/output args
         input_args = parse_input(src_dir, l, task=task, option=option, input_file=input_file)
         output_args = parse_output(dst_dir, l, task=task, option=option, output_file=output_file)
+        if not os.path.exists(output_args['output_main']):
+            cmd = parse_command(input_args, output_args, task=task, option=option)
+
 
 def wash_whitelist(parent_dir, libs, bc_ground_truth):
     for lib in libs:
