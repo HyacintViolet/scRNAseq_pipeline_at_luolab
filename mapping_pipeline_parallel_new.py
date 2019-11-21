@@ -25,7 +25,7 @@ def parse_input_output(src_dir, dst_dir, l, task=None, set_cell_number=80):
             if file.endswith('2.fq.gz') or file.endswith('2.clean.fq.gz'):
                 read1_filename = file
         input_args['path_to_read1'] = os.path.join(in_dir, read1_filename)
-        input_args['set_cell_number'] = set_cell_number
+        input_args['set_cell_number'] = str(set_cell_number)
         output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'whitelist'+str(set_cell_number)+'.txt']))
         output_args['plot_prefix'] = os.path.join(out_dir, '_'.join(['cell_num', str(set_cell_number)]))
 
