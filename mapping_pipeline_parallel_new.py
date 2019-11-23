@@ -128,22 +128,30 @@ def parse_command(input_args, output_args, task=None, num_thread=None, genome_in
         #       '--outFileNamePrefix ' + output_args['out_prefix'] + ' --outReadsUnmapped Fastx'
 
     elif task is "featurecounts":
-        cmd = 'featureCounts -s 1 -a ' + genome_gtf + ' -o ' + output_args['output'] + \
-              ' -R BAM ' + input_args['mapped'] + ' -T ' + num_thread
+        cmd = ' '.join(['featureCounts', '-s', '1', '-a', genome_gtf, '-o', output_args['output'], '-R', '-BAM',
+                        input_args['mapped'], '-T', num_thread])
+        # cmd = 'featureCounts -s 1 -a ' + genome_gtf + ' -o ' + output_args['output'] + \
+        #       ' -R BAM ' + input_args['mapped'] + ' -T ' + num_thread
 
     elif task is "samtools_sort":
-        cmd = 'samtools sort ' + input_args['input'] + ' -o ' + output_args['output']
+        cmd = ' '.join(['samtools', 'sort', input_args['input'], '-o', output_args['output']])
+        # cmd = 'samtools sort ' + input_args['input'] + ' -o ' + output_args['output']
 
     elif task is "samtools_index":
-        cmd = 'samtools index ' + input_args['input']
+        cmd = ' '.join(['samtools', 'index', input_args['input']])
+        # cmd = 'samtools index ' + input_args['input']
 
     elif task is "umitools_count":
-        cmd = 'umi_tools count --per-gene --gene-tag=XT --per-cell -I ' + input_args['input'] + \
-              ' -S ' + output_args['output']
+        cmd = ' '.join(['umi_tools', 'count', '--per-gene', '--gene-tag=XT', '--per-cell', '-I', input_args['input'],
+                        '-S', output_args['output']])
+        # cmd = 'umi_tools count --per-gene --gene-tag=XT --per-cell -I ' + input_args['input'] + \
+        #       ' -S ' + output_args['output']
 
     elif task is "nuniquemapped":
-        cmd = 'samtools view -F4 ' + input_args['input'] + ' | cut -f 2 -d \'_\' |sort|uniq -c > ' + \
-              output_args['output']
+        cmd = ' '.join(['samtools', 'view', '-F4', input_args['input'], '|', 'cut', '-f', '2', '-d', '\'_\'', 'sort',
+                        '|', 'uniq', '-c', '>', output_args['output']])
+        # cmd = 'samtools view -F4 ' + input_args['input'] + ' | cut -f 2 -d \'_\' |sort|uniq -c > ' + \
+        #       output_args['output']
 
     return cmd
 
@@ -175,7 +183,7 @@ def work(cmd_this):
     return subprocess.call(cmd, shell=True)
 
 
-def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=True, num_process=1, num_thread=32, genome_index=None,
+def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=True, num_process=1, num_thread=1, genome_index=None,
                 genome_gtf=None):
 
     libs = get_libs(src_dir)
@@ -198,6 +206,10 @@ def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=True, num_proce
                 cmd_all.append([(prefix, task), cmd])
             else:
                 continue
+
+    # Check process & thread number
+    if num_process*num_thread > 47:
+        raise SystemExit(' '.join(['Process & thread number exploded.', 'Task:', task]))
 
     # Parallel run by pool
     pool = mp.Pool(processes=num_process)
@@ -272,24 +284,22 @@ def main():
     # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_extract", num_process=32)
 
     # STEP 4: STAR mapping
-    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index)
-    # Default num_process = 1
+    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
 
     # STEP 5: featureCounts
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf)
-    # Default num_process = 1
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf, num_thread=32)
 
     # STEP 6: samtools sort
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="samtools_sort", num_process=16)
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="samtools_sort", num_process=32)
 
     # STEP 7: samtools index
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="samtools_index", num_process=16)
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="samtools_index", num_process=32)
 
     # STEP 8: umitools count
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_count", num_process=16)
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_count", num_process=32)
 
     # STEP 9: umitools count
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="nuniquemapped", num_process=16)
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="nuniquemapped", num_process=32)
 
 
 if __name__ == '__main__':
