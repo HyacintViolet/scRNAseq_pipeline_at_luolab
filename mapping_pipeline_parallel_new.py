@@ -15,6 +15,11 @@ def parse_input_output(src_dir, dst_dir, l, task=None, set_cell_number=80):
     in_dir = os.path.join(src_dir, l)
     out_dir = os.path.join(dst_dir, l)
     prefix = get_prefix(l)
+
+    # Coerce args to str
+    set_cell_number = str(set_cell_number)
+
+    # Initialize empty dictionary
     input_args = dict()
     output_args = dict()
 
@@ -26,13 +31,13 @@ def parse_input_output(src_dir, dst_dir, l, task=None, set_cell_number=80):
             if file.endswith('2.fq.gz') or file.endswith('2.clean.fq.gz'):
                 read1_filename = file
         input_args['path_to_read1'] = os.path.join(in_dir, read1_filename)
-        input_args['set_cell_number'] = str(set_cell_number)
-        output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'whitelist'+str(set_cell_number)+'.txt']))
-        output_args['plot_prefix'] = os.path.join(out_dir, '_'.join(['cell_num', str(set_cell_number)]))
+        input_args['set_cell_number'] = set_cell_number
+        output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'whitelist'+set_cell_number+'.txt']))
+        output_args['plot_prefix'] = os.path.join(out_dir, '_'.join(['cell_num', set_cell_number]))
 
     elif task is "wash_whitelist":
         input_args['path_to_whitelist'] = os.path.join(out_dir,
-                                                       '_'.join([prefix, 'whitelist'+str(set_cell_number)+'.txt']))
+                                                       '_'.join([prefix, 'whitelist'+set_cell_number+'.txt']))
         output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'whitelist_washed.txt']))
 
     elif task is "umitools_extract":
@@ -45,7 +50,7 @@ def parse_input_output(src_dir, dst_dir, l, task=None, set_cell_number=80):
                 read2_filename = file
         input_args['path_to_read1'] = os.path.join(in_dir, read1_filename)
         input_args['path_to_read2'] = os.path.join(in_dir, read2_filename)
-        input_args['whitelist'] = os.path.join(out_dir, '_'.join([prefix, 'whitelist'+str(set_cell_number)+'.txt']))
+        input_args['whitelist'] = os.path.join(out_dir, '_'.join([prefix, 'whitelist'+set_cell_number+'.txt']))
         output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'extracted.fq.gz']))
 
     elif task is "STAR_mapping":
@@ -77,41 +82,69 @@ def parse_input_output(src_dir, dst_dir, l, task=None, set_cell_number=80):
     return input_args, output_args
 
 
-def parse_command(input_args, output_args, task=None, genome_index=None, genome_gtf=None):
+def parse_command(input_args, output_args, task=None, num_thread=None, genome_index=None, genome_gtf=None):
+
+    # Coerce args to string
+    num_thread = str(num_thread)
+
+    # Initialize empty var.
     cmd = ''
+
     if task is None:
         print("Error in parse_command: task not specified.")
+
     elif task is "umitools_whitelist":
-        cmd = 'umi_tools whitelist --stdin ' + input_args['path_to_read1'] + \
-              ' --bc-pattern=CCCCCCCCNNNNNNNN ' + '--set-cell-number=' + input_args['set_cell_number'] +\
-              ' --plot-prefix=' + output_args['plot_prefix'] + ' -v 1 --log2stderr > ' + output_args['output']
+        cmd = ' '.join(['umi_tools', 'whitelist', '--stdin', input_args['path_to_read1'],
+                        '--bc-pattern=CCCCCCCCNNNNNNNN', '--set-cell-number=' + input_args['set_cell_number'],
+                        '--plot-prefix=' + output_args['plot_prefix'], '-v', '1', '--log2stderr', '>',
+                        output_args['output']])
+        # cmd = 'umi_tools whitelist --stdin ' + input_args['path_to_read1'] + \
+        #       ' --bc-pattern=CCCCCCCCNNNNNNNN ' + '--set-cell-number=' + input_args['set_cell_number'] +\
+        #       ' --plot-prefix=' + output_args['plot_prefix'] + ' -v 1 --log2stderr > ' + output_args['output']
+
     elif task is "umitools_extract":
-        cmd = 'umi_tools extract --bc-pattern=CCCCCCCCNNNNNNNN' \
-              ' --stdin ' + input_args['path_to_read1'] + \
-              ' --read2-in ' + input_args['path_to_read2'] + \
-              ' --stdout ' + output_args['output'] + \
-              ' --read2-stdout --filter-cell-barcode --error-correct-cell' \
-              ' --whitelist=' + input_args['whitelist']
+        cmd = ' '.join(['umi_tools', 'extract', '--bc-pattern=CCCCCCCCNNNNNNNN', '--stdin', input_args['path_to_read1'],
+                       '--read2-in', input_args['path_to_read2'], '--stdout', output_args['output'], '--read2-stdout',
+                        '--filter-cell-barcode', '--error-correct-cell', '--whitelist=' + input_args['whitelist']])
+        # cmd = 'umi_tools extract --bc-pattern=CCCCCCCCNNNNNNNN' \
+        #       ' --stdin ' + input_args['path_to_read1'] + \
+        #       ' --read2-in ' + input_args['path_to_read2'] + \
+        #       ' --stdout ' + output_args['output'] + \
+        #       ' --read2-stdout --filter-cell-barcode --error-correct-cell' \
+        #       ' --whitelist=' + input_args['whitelist']
+
     elif task is "STAR_mapping":
-        cmd = 'STAR --runThreadN 32 --genomeDir ' + genome_index + \
-              ' --readFilesIn ' + input_args['extracted'] + \
-              ' --readFilesCommand zcat --outFilterMultimapNmax 1 --outFilterType BySJout' \
-              ' --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonical' \
-              ' --outFilterMismatchNmax 6 --outSAMtype BAM SortedByCoordinate ' \
-              '--outFileNamePrefix ' + output_args['out_prefix'] + ' --outReadsUnmapped Fastx'
+        cmd = ' '.join(['STAR', '--runThreadN', num_thread, '--genomeDir', genome_index,
+                        '--readFilesIn', input_args['extracted'], '--readFilesCommand', 'zcat',
+                        '--outFilterMultimapNmax', '1', '--outFilterType', 'BySJout',
+                        '--outSAMstrandField', 'intronMotif', '--outFilterIntronMotifs', 'RemoveNoncanonical',
+                        '--outFilterMismatchNmax', '6', '--outSAMtype', 'BAM', 'SortedByCoordinate',
+                        '--outFileNamePrefix', output_args['out_prefix'], '--outReadsUnmapped', 'Fastx'])
+        # cmd = 'STAR --runThreadN ' + num_thread + ' --genomeDir ' + genome_index + \
+        #       ' --readFilesIn ' + input_args['extracted'] + \
+        #       ' --readFilesCommand zcat --outFilterMultimapNmax 1 --outFilterType BySJout' \
+        #       ' --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonical' \
+        #       ' --outFilterMismatchNmax 6 --outSAMtype BAM SortedByCoordinate ' \
+        #       '--outFileNamePrefix ' + output_args['out_prefix'] + ' --outReadsUnmapped Fastx'
+
     elif task is "featurecounts":
         cmd = 'featureCounts -s 1 -a ' + genome_gtf + ' -o ' + output_args['output'] + \
-              ' -R BAM ' + input_args['mapped'] + ' -T 32'
+              ' -R BAM ' + input_args['mapped'] + ' -T ' + num_thread
+
     elif task is "samtools_sort":
         cmd = 'samtools sort ' + input_args['input'] + ' -o ' + output_args['output']
+
     elif task is "samtools_index":
         cmd = 'samtools index ' + input_args['input']
+
     elif task is "umitools_count":
         cmd = 'umi_tools count --per-gene --gene-tag=XT --per-cell -I ' + input_args['input'] + \
               ' -S ' + output_args['output']
+
     elif task is "nuniquemapped":
         cmd = 'samtools view -F4 ' + input_args['input'] + ' | cut -f 2 -d \'_\' |sort|uniq -c > ' + \
               output_args['output']
+
     return cmd
 
 
@@ -128,6 +161,12 @@ def get_prefix(lib):
     return prefix
 
 
+# def args_int2str(arg): TODO: check args in function calls, convert int to string
+#     if type(arg) is int:
+#         arg = str(arg)
+#     return arg
+
+
 def work(cmd_this):
     lib = cmd_this[0][0]
     task = cmd_this[0][1]
@@ -136,7 +175,8 @@ def work(cmd_this):
     return subprocess.call(cmd, shell=True)
 
 
-def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=True, thread=1, genome_index=None, genome_gtf=None):
+def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=True, num_process=1, num_thread=32, genome_index=None,
+                genome_gtf=None):
 
     libs = get_libs(src_dir)
     cmd_all = dict()
@@ -146,18 +186,19 @@ def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=True, thread=1,
 
         # Construct commands. Store to cmd_all for (parallel) iter run by mp.Pool.
         if overwrite:
-            cmd = parse_command(input_args, output_args, task=task, genome_index=genome_index, genome_gtf=genome_gtf)
+            cmd = parse_command(input_args, output_args, task=task, num_thread=num_thread,
+                                genome_index=genome_index, genome_gtf=genome_gtf)
             cmd_all[(l, task)] = cmd
         else:
             if not os.path.exists(output_args['output']):
-                cmd = parse_command(input_args, output_args, task=task, genome_index=genome_index,
-                                    genome_gtf=genome_gtf)
+                cmd = parse_command(input_args, output_args, task=task, num_thread=num_thread,
+                                    genome_index=genome_index, genome_gtf=genome_gtf)
                 cmd_all[(l, task)] = cmd
             else:
                 continue
 
     # Parallel run by pool
-    pool = mp.Pool(processes=thread)
+    pool = mp.Pool(processes=num_process)
     if len(cmd_all) is not 0:
         pool.map(work, cmd_all)
     print(task + ': finished.')
@@ -220,31 +261,33 @@ def main():
             os.makedirs(os.path.join(dst_dir, out))
 
     # STEP 1: umi_tools whitelist
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_whitelist", thread=32)
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_whitelist", num_process=32)
 
     # STEP 2: wash whitelist
     # wash_whitelist(src_dir=src_dir, dst_dir=dst_dir, parent_dir=parent_dir, task="wash_whitelist", overwrite=True)
 
     # STEP 3: umi_tools extract
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_extract", thread=32)
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_extract", num_process=32)
 
     # STEP 4: STAR mapping
-    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index)  # Default thread = 1
+    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index)
+    # Default num_process = 1
 
     # STEP 5: featureCounts
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf)  # Default thread = 1
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf)
+    # Default num_process = 1
 
     # STEP 6: samtools sort
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="samtools_sort", thread=16)
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="samtools_sort", num_process=16)
 
     # STEP 7: samtools index
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="samtools_index", thread=16)
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="samtools_index", num_process=16)
 
     # STEP 8: umitools count
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_count", thread=16)
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_count", num_process=16)
 
     # STEP 9: umitools count
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="nuniquemapped", thread=16)
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="nuniquemapped", num_process=16)
 
 
 if __name__ == '__main__':
