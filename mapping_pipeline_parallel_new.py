@@ -171,7 +171,7 @@ def work(cmd_this):
     lib = cmd_this[0][0]
     task = cmd_this[0][1]
     cmd = cmd_this[1]
-    print(' '.join([task, lib, '...', cmd]))
+    print(' '.join([task, lib, '...\ncommand:', cmd]))
     return subprocess.call(cmd, shell=True)
 
 
