@@ -21,6 +21,7 @@ def parse_input_output(src_dir, dst_dir, l, task=None, set_cell_number=80):
     if task is None:
         print("Error in parse_input_output: task not specified.")
     elif task is "umitools_whitelist":
+        read1_filename = ''
         for file in os.listdir(in_dir):
             if file.endswith('2.fq.gz') or file.endswith('2.clean.fq.gz'):
                 read1_filename = file
@@ -35,6 +36,8 @@ def parse_input_output(src_dir, dst_dir, l, task=None, set_cell_number=80):
         output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'whitelist_washed.txt']))
 
     elif task is "umitools_extract":
+        read1_filename = ''
+        read2_filename = ''
         for file in os.listdir(in_dir):
             if file.endswith('2.fq.gz') or file.endswith('2.clean.fq.gz'):
                 read1_filename = file
@@ -75,6 +78,7 @@ def parse_input_output(src_dir, dst_dir, l, task=None, set_cell_number=80):
 
 
 def parse_command(input_args, output_args, task=None, genome_index=None, genome_gtf=None):
+    cmd = ''
     if task is None:
         print("Error in parse_command: task not specified.")
     elif task is "umitools_whitelist":
@@ -190,7 +194,7 @@ def wash_whitelist(src_dir, dst_dir, parent_dir, task="wash_whitelist", overwrit
             if not os.path.exists(output_args['output']):
                 whitelist_washed.to_csv(output_args['output'], sep="\t", index=False, header=False)
             else:
-                print(l + "whitelist_washed.txt exists. Skip.")
+                print(l + "whitelist_washed.txt already exists. Skipping.")
 
 
 def main():
@@ -216,16 +220,16 @@ def main():
             os.makedirs(os.path.join(dst_dir, out))
 
     # STEP 1: umi_tools whitelist
-    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_whitelist", thread=32)
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_whitelist", thread=32)
 
     # STEP 2: wash whitelist
-    wash_whitelist(src_dir=src_dir, dst_dir=dst_dir, parent_dir=parent_dir, task="wash_whitelist", overwrite=True)
+    # wash_whitelist(src_dir=src_dir, dst_dir=dst_dir, parent_dir=parent_dir, task="wash_whitelist", overwrite=True)
 
     # STEP 3: umi_tools extract
-    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_extract", thread=32)
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_extract", thread=32)
 
     # STEP 4: STAR mapping
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index)  # Default thread = 1
+    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index)  # Default thread = 1
 
     # STEP 5: featureCounts
     # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf)  # Default thread = 1
