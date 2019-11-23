@@ -179,8 +179,10 @@ def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=True, num_proce
                 genome_gtf=None):
 
     libs = get_libs(src_dir)
-    cmd_all = dict()
+    cmd_all = []
     for l in libs:
+        prefix = get_prefix(l)
+
         # Parse input/output args
         input_args, output_args = parse_input_output(src_dir, dst_dir, l, task=task)
 
@@ -188,12 +190,12 @@ def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=True, num_proce
         if overwrite:
             cmd = parse_command(input_args, output_args, task=task, num_thread=num_thread,
                                 genome_index=genome_index, genome_gtf=genome_gtf)
-            cmd_all[(l, task)] = cmd
+            cmd_all.append([(prefix, task), cmd])
         else:
             if not os.path.exists(output_args['output']):
                 cmd = parse_command(input_args, output_args, task=task, num_thread=num_thread,
                                     genome_index=genome_index, genome_gtf=genome_gtf)
-                cmd_all[(l, task)] = cmd
+                cmd_all.append([(prefix, task), cmd])
             else:
                 continue
 
