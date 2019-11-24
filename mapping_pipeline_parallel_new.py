@@ -287,10 +287,10 @@ def main():
     # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
 
     # STEP 5: featureCounts
-    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf, num_thread=32)
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf, num_thread=32)
 
     # STEP 6: samtools sort
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="samtools_sort", num_process=32)
+    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="samtools_sort", num_process=32)
 
     # STEP 7: samtools index
     # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="samtools_index", num_process=32)
