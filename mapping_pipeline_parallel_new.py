@@ -150,7 +150,7 @@ def parse_command(input_args, output_args, task=None, num_thread=None, genome_in
     elif task is "nuniquemapped":
         cmd = ' '.join(['samtools', 'view', '-F4', input_args['input'], '|', 'cut', '-f', '2', '-d', '\'_\'', 'sort',
                         '|', 'uniq', '-c', '>', output_args['output']])
-        # cmd = 'samtools view -F4 ' + input_args['input'] + ' | cut -f 2 -d \'_\' |sort|uniq -c > ' + \
+        # cmd = 'samtools view -F4 ' + input_args['input'] + ' | cut -f 2 -d \'_\' | sort | uniq -c > ' + \
         #       output_args['output']
 
     return cmd
@@ -205,7 +205,7 @@ def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=True, num_proce
                                     genome_index=genome_index, genome_gtf=genome_gtf)
                 cmd_all.append([(prefix, task), cmd])
             else:
-                continue
+                print(' '.join([output_args['output'], 'already exists, skipping.']))
 
     # Check process & thread number
     if num_process*num_thread > 47:
@@ -298,7 +298,7 @@ def main():
     # STEP 8: umitools count
     # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_count", num_process=32)
 
-    # STEP 9: umitools count
+    # STEP 9: N unique mapped
     # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="nuniquemapped", num_process=32)
 
 
