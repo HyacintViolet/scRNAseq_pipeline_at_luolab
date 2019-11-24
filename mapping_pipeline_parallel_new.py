@@ -128,7 +128,7 @@ def parse_command(input_args, output_args, task=None, num_thread=None, genome_in
         #       '--outFileNamePrefix ' + output_args['out_prefix'] + ' --outReadsUnmapped Fastx'
 
     elif task is "featurecounts":
-        cmd = ' '.join(['featureCounts', '-s', '1', '-a', genome_gtf, '-o', output_args['output'], '-R', '-BAM',
+        cmd = ' '.join(['featureCounts', '-s', '1', '-a', genome_gtf, '-o', output_args['output'], '-R', 'BAM',
                         input_args['mapped'], '-T', num_thread])
         # cmd = 'featureCounts -s 1 -a ' + genome_gtf + ' -o ' + output_args['output'] + \
         #       ' -R BAM ' + input_args['mapped'] + ' -T ' + num_thread
@@ -284,10 +284,10 @@ def main():
     # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_extract", num_process=32)
 
     # STEP 4: STAR mapping
-    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
 
     # STEP 5: featureCounts
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf, num_thread=32)
+    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf, num_thread=32)
 
     # STEP 6: samtools sort
     # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="samtools_sort", num_process=32)
