@@ -299,7 +299,7 @@ def main():
     do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_count", num_process=16)
 
     # STEP 9: N unique mapped
-    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="nuniquemapped", num_process=16)
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="nuniquemapped", num_process=16)
 
 
 if __name__ == '__main__':
