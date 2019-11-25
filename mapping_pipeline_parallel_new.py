@@ -148,8 +148,8 @@ def parse_command(input_args, output_args, task=None, num_thread=None, genome_in
         #       ' -S ' + output_args['output']
 
     elif task is "nuniquemapped":
-        cmd = ' '.join(['samtools', 'view', '-F4', input_args['input'], '|', 'cut', '-f', '2', '-d', '\'_\'', 'sort',
-                        '|', 'uniq', '-c', '>', output_args['output']])
+        cmd = ' '.join(['samtools', 'view', '-F4', input_args['input'], '|', 'cut', '-f', '2', '-d', '\'_\'', '|',
+                        'sort', '|', 'uniq', '-c', '>', output_args['output']])
         # cmd = 'samtools view -F4 ' + input_args['input'] + ' | cut -f 2 -d \'_\' | sort | uniq -c > ' + \
         #       output_args['output']
 
