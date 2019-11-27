@@ -50,9 +50,14 @@ Fix annotation pipeline:
 
 6. Further filtering on final output
    - Run command:
-     zcat YT_extracted_all.txt.gz | awk 'BEGIN{FS="\t";OFS="\t"} $9>0 && $9 < 20000 {print $0}' | gzip -9c > \
-     YT_extracted_less_than_20k.txt.gz
+     zcat YT_extracted_all.txt.gz | awk 'BEGIN{FS="\t";OFS="\t"} $9>0 && $9 < 10000 {print $0}' | gzip -9c > \
+     YT_extracted_less_than_10k.txt.gz
    - Run command:
+     zcat YT_extracted_less_than_10k.txt.gz | awk 'BEGIN{FS="\t";OFS="\t"}{if($8=="+"){print $6, $7, $8, $10, $11, $9} \
+     else {print $5, $7, $8, $10, $11, $9}}' | awk 'BEGIN{FS="\t";OFS="\t"}$5~"protein_coding"{print $0}' | gzip -9c > \
+     distance_to_gene_10k_protein_coding.txt.gz
+
+
      zcat YT_extracted_all.txt.gz | awk 'BEGIN{FS="\t";OFS="\t"}{print $7, $10, $11, $9}' | gzip -9c > \
      distance_to_gene.txt.gz
      zcat YT_extracted_less_than_20k.txt.gz | awk 'BEGIN{FS="\t";OFS="\t"}{print $7, $10, $11, $9}' | gzip -9c > \
@@ -61,4 +66,3 @@ Fix annotation pipeline:
      distance_to_gene_20k_protein_coding.txt.gz
 
 TODO: distance to gene is extracted directly from the output of 'bedtools closest ...' command, which does not take strand into account.
-TODO: MAJOR todo, squeeze functions. 3 categories: do_parallel(), do_serial(), do_receive_output(). Args: parent_wd, libs, input, output. See check_line() in extract_desired_bed_fields.py as an example.

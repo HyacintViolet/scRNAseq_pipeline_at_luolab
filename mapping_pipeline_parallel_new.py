@@ -36,7 +36,7 @@ def parse_input_output(src_dir, dst_dir, l, task=None, set_cell_number=80):
         output_args['plot_prefix'] = os.path.join(out_dir, '_'.join(['cell_num', set_cell_number]))
 
     elif task is "wash_whitelist":
-        input_args['path_to_whitelist'] = os.path.join(out_dir,
+        input_args['path_to_whitelist'] = os.path.join(in_dir,
                                                        '_'.join([prefix, 'whitelist'+set_cell_number+'.txt']))
         output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'whitelist_washed.txt']))
 
@@ -54,29 +54,29 @@ def parse_input_output(src_dir, dst_dir, l, task=None, set_cell_number=80):
         output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'extracted.fq.gz']))
 
     elif task is "STAR_mapping":
-        input_args['extracted'] = os.path.join(out_dir, '_'.join([prefix, 'extracted.fq.gz']))
+        input_args['extracted'] = os.path.join(in_dir, '_'.join([prefix, 'extracted.fq.gz']))
         output_args['out_prefix'] = os.path.join(out_dir, prefix+'_')
         output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'Aligned.sortedByCoord.out.bam']))
 
     elif task is "featurecounts":
-        input_args['mapped'] = os.path.join(out_dir, '_'.join([prefix, 'Aligned.sortedByCoord.out.bam']))
+        input_args['mapped'] = os.path.join(in_dir, '_'.join([prefix, 'Aligned.sortedByCoord.out.bam']))
         output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'gene_assigned']))
 
     elif task is "samtools_sort":
-        input_args['input'] = os.path.join(out_dir,
+        input_args['input'] = os.path.join(in_dir,
                                            '_'.join([prefix, 'Aligned.sortedByCoord.out.bam.featureCounts.bam']))
         output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'assigned_sorted.bam']))
 
     elif task is "samtools_index":
-        input_args['input'] = os.path.join(out_dir, '_'.join([prefix, 'assigned_sorted.bam']))
+        input_args['input'] = os.path.join(in_dir, '_'.join([prefix, 'assigned_sorted.bam']))
         output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'assigned_sorted.bam.bai']))
 
     elif task is "umitools_count":
-        input_args['input'] = os.path.join(out_dir, '_'.join([prefix, 'assigned_sorted.bam']))
+        input_args['input'] = os.path.join(in_dir, '_'.join([prefix, 'assigned_sorted.bam']))
         output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'counts.tsv.gz']))
 
     elif task is "nuniquemapped":
-        input_args['input'] = os.path.join(out_dir, '_'.join([prefix, 'Aligned.sortedByCoord.out.bam']))
+        input_args['input'] = os.path.join(in_dir, '_'.join([prefix, 'Aligned.sortedByCoord.out.bam']))
         output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'Nuniqmapped.txt']))
 
     return input_args, output_args
@@ -254,22 +254,26 @@ def wash_whitelist(src_dir, dst_dir, parent_dir, task="wash_whitelist", overwrit
 
 def main():
 
-    # Source dir: sequencing reads data
+    # Source dir
     src_dir = '/media/luolab/ZA1BT1ER/scRNAseq/yanting_all/data/yanting/'
+    src_dir2 = '/media/luolab/ZA1BT1ER/yanting/vM23_extended/mapping/'
+    src_dir3 = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
 
-    # Destination dir: mapping results
-    dst_dir = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
+    # Destination dir
+    dst_dir = '/media/luolab/ZA1BT1ER/yanting/vM23_extended/mapping/'
+    dst_dir2 = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
 
     # Parent working dir
     parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM23/'
 
     # Path to genome annotation and index
+    genome_gtf_unextended = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_scaff.' \
+                            'annotation.gtf'
     genome_gtf = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_scaff.annotation.' \
                  'extended.gtf'
-    genome_index = '/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM23/'
+    genome_index = '/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM23_extended/'
 
     # Create output directory if not exist.barcode_ground_truth
-    os.chdir(dst_dir)
     for out in get_libs(src_dir):
         if not os.path.exists(os.path.join(dst_dir, out)):
             os.makedirs(os.path.join(dst_dir, out))
@@ -278,28 +282,28 @@ def main():
     # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_whitelist", num_process=32)
 
     # STEP 2: wash whitelist
-    # wash_whitelist(src_dir=src_dir, dst_dir=dst_dir, parent_dir=parent_dir, task="wash_whitelist", overwrite=True)
+    # wash_whitelist(src_dir=src_dir2, dst_dir=dst_dir, parent_dir=parent_dir, task="wash_whitelist", overwrite=True)
 
     # STEP 3: umi_tools extract
     # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_extract", num_process=32)
 
     # STEP 4: STAR mapping
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
 
     # STEP 5: featureCounts
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf, num_thread=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir2, task="featurecounts", genome_gtf=genome_gtf_unextended, num_thread=32)
 
     # STEP 6: samtools sort
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="samtools_sort", num_process=24)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_sort", num_process=24)
 
     # STEP 7: samtools index
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="samtools_index", num_process=16)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_index", num_process=16)
 
     # STEP 8: umitools count
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_count", num_process=16)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="umitools_count", num_process=16)
 
     # STEP 9: N unique mapped
-    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="nuniquemapped", num_process=32)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="nuniquemapped", num_process=32)
 
 
 if __name__ == '__main__':
