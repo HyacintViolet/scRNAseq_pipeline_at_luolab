@@ -13,6 +13,13 @@ import pandas as pd
 idle = True
 
 
+def proceed_when_idle():
+    global idle
+    while True:
+        if idle is True:
+            break
+
+
 def parse_input_output(src_dir, dst_dir, l, task=None, set_cell_number=80):
     in_dir = os.path.join(src_dir, l)
     out_dir = os.path.join(dst_dir, l)
@@ -292,54 +299,39 @@ def main():
             os.makedirs(os.path.join(dst_dir, out))
 
     # STEP 1: umi_tools whitelist
+    proceed_when_idle()
     # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_whitelist", num_process=32)
 
     # STEP 2: wash whitelist
-    while True:
-        if idle is True:
-            break
+    proceed_when_idle()
     # wash_whitelist(src_dir=src_dir2, dst_dir=dst_dir, parent_dir=parent_dir, task="wash_whitelist", overwrite=True)
 
     # STEP 3: umi_tools extract
-    while True:
-        if idle is True:
-            break
+    proceed_when_idle()
     # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_extract", num_process=32)
 
     # STEP 4: STAR mapping
-    while True:
-        if idle is True:
-            break
+    proceed_when_idle()
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
 
     # STEP 5: featureCounts
-    while True:
-        if idle is True:
-            break
+    proceed_when_idle()
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf_extended, num_thread=32)
 
     # STEP 6: samtools sort
-    while True:
-        if idle is True:
-            break
+    proceed_when_idle()
     do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_sort", num_process=24)
 
     # STEP 7: samtools index
-    while True:
-        if idle is True:
-            break
+    proceed_when_idle()
     do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_index", num_process=16)
 
     # STEP 8: umitools count
-    while True:
-        if idle is True:
-            break
+    proceed_when_idle()
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="umitools_count", num_process=16)
 
     # STEP 9: N unique mapped
-    while True:
-        if idle is True:
-            break
+    proceed_when_idle()
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="nuniquemapped", num_process=32)
 
 
