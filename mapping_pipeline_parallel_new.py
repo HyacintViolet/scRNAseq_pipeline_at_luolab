@@ -10,7 +10,6 @@ import multiprocessing as mp
 import subprocess
 import pandas as pd
 
-
 idle = True
 
 
@@ -188,6 +187,7 @@ def work(cmd_this):
 
 def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=True, num_process=1, num_thread=1, genome_index=None,
                 genome_gtf=None):
+
     # Change running status
     global idle
     idle = False
@@ -227,6 +227,10 @@ def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=True, num_proce
 
 def wash_whitelist(src_dir, dst_dir, parent_dir, task="wash_whitelist", overwrite=True):
 
+    # Change running status
+    global idle
+    idle = False
+
     # Read barcode ground truth list
     barcode_ground_truth_raw = pd.read_excel(os.path.join(parent_dir, 'barcode_ground_truth_checklist.xlsx'))
     barcode_ground_truth = barcode_ground_truth_raw['Primer_sequence'].str.extract(
@@ -257,6 +261,8 @@ def wash_whitelist(src_dir, dst_dir, parent_dir, task="wash_whitelist", overwrit
                 whitelist_washed.to_csv(output_args['output'], sep="\t", index=False, header=False)
             else:
                 print(l + "whitelist_washed.txt already exists. Skipping.")
+
+    idle = True
 
 
 def main():
