@@ -11,6 +11,9 @@ import subprocess
 import pandas as pd
 
 
+idle = True
+
+
 def parse_input_output(src_dir, dst_dir, l, task=None, set_cell_number=80):
     in_dir = os.path.join(src_dir, l)
     out_dir = os.path.join(dst_dir, l)
@@ -185,6 +188,9 @@ def work(cmd_this):
 
 def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=True, num_process=1, num_thread=1, genome_index=None,
                 genome_gtf=None):
+    # Change running status
+    global idle
+    idle = False
 
     libs = get_libs(src_dir)
     cmd_all = []
@@ -216,6 +222,7 @@ def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=True, num_proce
     if len(cmd_all) is not 0:
         pool.map(work, cmd_all)
     print(task + ': finished.')
+    idle = True
 
 
 def wash_whitelist(src_dir, dst_dir, parent_dir, task="wash_whitelist", overwrite=True):
@@ -269,8 +276,8 @@ def main():
     # Path to genome annotation and index
     genome_gtf_unextended = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_scaff.' \
                             'annotation.gtf'
-    genome_gtf_extended = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_scaff.annotation.' \
-                 'extended.gtf'
+    genome_gtf_extended = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_scaff.' \
+                          'annotation.extended.gtf'
     genome_index = '/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM23_extended/'
 
     # Create output directory if not exist.barcode_ground_truth
@@ -282,28 +289,51 @@ def main():
     # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_whitelist", num_process=32)
 
     # STEP 2: wash whitelist
+    while True:
+        if idle is True:
+            break
     # wash_whitelist(src_dir=src_dir2, dst_dir=dst_dir, parent_dir=parent_dir, task="wash_whitelist", overwrite=True)
 
     # STEP 3: umi_tools extract
+    while True:
+        if idle is True:
+            break
     # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_extract", num_process=32)
 
     # STEP 4: STAR mapping
+    while True:
+        if idle is True:
+            break
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
 
     # STEP 5: featureCounts
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf_extended,
-                num_thread=32, overwrite=False)
+    while True:
+        if idle is True:
+            break
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf_extended, num_thread=32)
 
     # STEP 6: samtools sort
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_sort", num_process=24)
+    while True:
+        if idle is True:
+            break
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_sort", num_process=24)
 
     # STEP 7: samtools index
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_index", num_process=16)
+    while True:
+        if idle is True:
+            break
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_index", num_process=16)
 
     # STEP 8: umitools count
+    while True:
+        if idle is True:
+            break
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="umitools_count", num_process=16)
 
     # STEP 9: N unique mapped
+    while True:
+        if idle is True:
+            break
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="nuniquemapped", num_process=32)
 
 
