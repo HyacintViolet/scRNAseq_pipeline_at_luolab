@@ -320,19 +320,19 @@ def main():
 
     # STEP 6: samtools sort
     proceed_when_idle()
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_sort", num_process=24)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_sort", num_process=24)
 
     # STEP 7: samtools index
     proceed_when_idle()
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_index", num_process=16)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_index", num_process=16)
 
     # STEP 8: umitools count
     proceed_when_idle()
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="umitools_count", num_process=16)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="umitools_count", num_process=16)
 
     # STEP 9: N unique mapped
     proceed_when_idle()
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="nuniquemapped", num_process=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="nuniquemapped", num_process=32)
 
 
 if __name__ == '__main__':
