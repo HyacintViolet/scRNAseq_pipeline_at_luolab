@@ -22,16 +22,24 @@ def extend_gtf_coordinates(parent_dir, filename_extension_profile, filename_gtf)
     cmd_all = []
     for index, row in extension_profile.iterrows():
         gene_id = row['gene_id']
+        strand_this_gene = row['strand_this_gene']
+        coord_to_extend = int(row['coord_to_extend'])
+        coord_after_extend = int(row['coord_after_extend'])
         length_of_extension = int(row['length_of_extension'])
 
         if length_of_extension is 0:
             continue
         else:
-            cmd_this = 'awk \'BEGIN{FS="\\t";OFS="\\t"}{if($3=="gene" && $9~"protein_coding" && $9~"' + gene_id + \
-                       '"){if($7=="+"){print $1,$2,$3,$4,$5+' + str(length_of_extension) + ',$6,$7,$8,$9} ' \
-                       'else if($7=="-"){print $1,$2,$3,$4-' + str(length_of_extension) + ',$5,$6,$7,$8,$9}}' \
-                       'else{print $0}}\' ' + path_to_gtf + ' > tmp && mv tmp ' + path_to_gtf
-            cmd_all.append(cmd_this)
+            if strand_this_gene == "+":
+                cmd = 'awk \'BEGIN{FS="\\t";OFS="\\t"}{if($9~"' + gene_id + '" && ($3=="gene" || $3=="exon") &&' \
+                           ' $5==' + str(coord_to_extend) + '){print $1,$2,$3,$4,' + str(coord_after_extend) + \
+                           ',$6,$7,$8,$9}else{print $0}}\' ' + path_to_gtf + ' > tmp && mv tmp ' + path_to_gtf
+                cmd_all.append(cmd)
+            elif strand_this_gene == "-":
+                cmd = 'awk \'BEGIN{FS="\\t";OFS="\\t"}{if($9~"' + gene_id + '" && ($3=="gene" || $3=="exon") &&' \
+                           ' $4==' + str(coord_to_extend) + '){print $1,$2,$3,' + str(coord_after_extend) + \
+                           ',$5,$6,$7,$8,$9}else{print $0}}\' ' + path_to_gtf + ' > tmp && mv tmp ' + path_to_gtf
+                cmd_all.append(cmd)
 
     # Parallel run by Pool
     pool = mp.Pool(1)
@@ -41,7 +49,7 @@ def extend_gtf_coordinates(parent_dir, filename_extension_profile, filename_gtf)
 
 
 def main():
-    parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM23/'
+    parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM23_extended/'
 
     filename_extension_profile = 'extension_profiles.txt'
 

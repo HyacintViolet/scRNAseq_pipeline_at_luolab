@@ -54,7 +54,7 @@ Fix annotation pipeline:
      YT_extracted_less_than_10k.txt.gz
    - Run command:
      zcat YT_extracted_less_than_10k.txt.gz | awk 'BEGIN{FS="\t";OFS="\t"}{if($8=="+"){print $6, $7, $8, $10, $11, $9} \
-     else {print $5, $7, $8, $10, $11, $9}}' | awk 'BEGIN{FS="\t";OFS="\t"}$5~"protein_coding"{print $0}' | gzip -9c > \
+     else {print $5+1, $7, $8, $10, $11, $9}}' | awk 'BEGIN{FS="\t";OFS="\t"}$5~"protein_coding"{print $0}' | gzip -9c > \
      distance_to_gene_10k_protein_coding.txt.gz
 
 

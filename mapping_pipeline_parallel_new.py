@@ -269,7 +269,7 @@ def main():
     # Path to genome annotation and index
     genome_gtf_unextended = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_scaff.' \
                             'annotation.gtf'
-    genome_gtf = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_scaff.annotation.' \
+    genome_gtf_extended = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_scaff.annotation.' \
                  'extended.gtf'
     genome_index = '/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM23_extended/'
 
@@ -291,7 +291,8 @@ def main():
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
 
     # STEP 5: featureCounts
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir2, task="featurecounts", genome_gtf=genome_gtf_unextended, num_thread=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf_extended,
+                num_thread=32, overwrite=False)
 
     # STEP 6: samtools sort
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_sort", num_process=24)
