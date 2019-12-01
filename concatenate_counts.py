@@ -9,8 +9,8 @@ import os
 import pandas as pd
 
 # Set up working directories
-parent_wd = '/media/luolab/ZA1BT1ER/yanting/vM23/'
-data_wd = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
+parent_wd = '/media/luolab/ZA1BT1ER/yanting/vM23_extended/'
+data_wd = '/media/luolab/ZA1BT1ER/yanting/vM23_extended/mapping/'
 os.chdir(parent_wd)
 counts_new = pd.DataFrame(columns=['gene', 'cell', 'count'])
 

@@ -6,7 +6,7 @@ import os
 import re
 
 # Set working directory
-data_wd = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
+data_wd = '/media/luolab/ZA1BT1ER/yanting/vM23_extended/mapping/'
 
 # Change working directory
 os.chdir(data_wd)
@@ -23,7 +23,7 @@ for folder in folders:  # Iterate over wd, go into one folder each time
     prefix = match.group(1)
 
     if not os.path.exists(os.path.join(data_wd, folder, '_'.join([prefix, 'counts.tsv']))):
-        print('Extracting ' + prefix + 'counts.tsv.gz')
+        print('Extracting ' + '_'.join([prefix, 'counts.tsv.gz']))
         for filename in os.listdir():  # Iterate over all files in each folder
             if filename.endswith(".tsv.gz"):  # Find counts.tsv.gz
                 cmd = 'gunzip -k '+filename  # Construct command line
