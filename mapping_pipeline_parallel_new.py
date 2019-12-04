@@ -13,17 +13,23 @@ import pandas as pd
 idle = True
 
 
-def proceed_when_idle():
+def set_idle_status(status):
+    global idle
+    idle = status
+
+
+def proceed_if_idle():
     global idle
     while True:
         if idle is True:
+            set_idle_status(False)
             break
 
 
-def parse_input_output(src_dir, dst_dir, l, task=None, set_cell_number=80):
-    in_dir = os.path.join(src_dir, l)
-    out_dir = os.path.join(dst_dir, l)
-    prefix = get_prefix(l)
+def parse_input_output(src_dir, dst_dir, lib, task=None, set_cell_number=80):
+    in_dir = os.path.join(src_dir, lib)
+    out_dir = os.path.join(dst_dir, lib)
+    prefix = get_prefix(lib)
 
     # Coerce args to str
     set_cell_number = str(set_cell_number)
@@ -195,17 +201,16 @@ def work(cmd_this):
 def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=True, num_process=1, num_thread=1, genome_index=None,
                 genome_gtf=None):
 
-    # Change running status
-    global idle
-    idle = False
+    # Check idle status. If idle is True, proceed and set idle to False.
+    proceed_if_idle()
 
     libs = get_libs(src_dir)
     cmd_all = []
-    for l in libs:
-        prefix = get_prefix(l)
+    for lib in libs:
+        prefix = get_prefix(lib)
 
         # Parse input/output args
-        input_args, output_args = parse_input_output(src_dir, dst_dir, l, task=task)
+        input_args, output_args = parse_input_output(src_dir, dst_dir, lib, task=task)
 
         # Construct commands. Store to cmd_all for (parallel) iter run by mp.Pool.
         if overwrite:
@@ -229,14 +234,14 @@ def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=True, num_proce
     if len(cmd_all) is not 0:
         pool.map(work, cmd_all)
     print(task + ': finished.')
-    idle = True
+    # Change idle status
+    set_idle_status(True)
 
 
 def wash_whitelist(src_dir, dst_dir, parent_dir, task="wash_whitelist", overwrite=True):
 
-    # Change running status
-    global idle
-    idle = False
+    # Check idle status. If idle is True, proceed and set idle to False.
+    proceed_if_idle()
 
     # Read barcode ground truth list
     barcode_ground_truth_raw = pd.read_excel(os.path.join(parent_dir, 'barcode_ground_truth_checklist.xlsx'))
@@ -244,12 +249,12 @@ def wash_whitelist(src_dir, dst_dir, parent_dir, task="wash_whitelist", overwrit
         r'TCAGACGTGTGCTCTTCCGATCT([ATCG]{8})', expand=False)
 
     libs = get_libs(src_dir)
-    for l in libs:
+    for lib in libs:
         # Display progress
-        print('Washing barcode whitelist. Library: ' + l)
+        print('Washing barcode whitelist. Library: ' + lib)
 
         # Parse input/output args
-        input_args, output_args = parse_input_output(src_dir, dst_dir, l, task=task)
+        input_args, output_args = parse_input_output(src_dir, dst_dir, lib, task=task)
 
         # Read whitelist80
         whitelist = pd.read_csv(input_args["path_to_whitelist"], sep="\t",
@@ -267,21 +272,21 @@ def wash_whitelist(src_dir, dst_dir, parent_dir, task="wash_whitelist", overwrit
             if not os.path.exists(output_args['output']):
                 whitelist_washed.to_csv(output_args['output'], sep="\t", index=False, header=False)
             else:
-                print(l + "whitelist_washed.txt already exists. Skipping.")
-
-    idle = True
+                print(lib + "whitelist_washed.txt already exists. Skipping.")
+    # Change idle status
+    set_idle_status(True)
 
 
 def main():
 
-    # Source dir
+    # Source dirs
     src_dir = '/media/luolab/ZA1BT1ER/scRNAseq/yanting_all/data/yanting/'
     src_dir2 = '/media/luolab/ZA1BT1ER/yanting/vM23_extended/mapping/'
-    src_dir3 = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
+    src_dir3 = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'  # For unextended mapping
 
-    # Destination dir
-    dst_dir = '/media/luolab/ZA1BT1ER/yanting/vM23_extended/mapping/'
-    dst_dir2 = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
+    # Destination dirs
+    dst_dir = '/media/luolab/ZA1BT1ER/yanting/vM23_extended/mapping/'  # Same as src_dir2
+    dst_dir2 = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'  # For unextended mapping
 
     # Parent working dir
     parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM23/'
@@ -299,40 +304,32 @@ def main():
             os.makedirs(os.path.join(dst_dir, out))
 
     # STEP 1: umi_tools whitelist
-    proceed_when_idle()
+
     # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_whitelist", num_process=32)
 
     # STEP 2: wash whitelist
-    proceed_when_idle()
     # wash_whitelist(src_dir=src_dir2, dst_dir=dst_dir, parent_dir=parent_dir, task="wash_whitelist", overwrite=True)
 
     # STEP 3: umi_tools extract
-    proceed_when_idle()
     # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_extract", num_process=32)
 
     # STEP 4: STAR mapping
-    proceed_when_idle()
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
 
     # STEP 5: featureCounts
-    proceed_when_idle()
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf_extended, num_thread=32)
 
     # STEP 6: samtools sort
-    proceed_when_idle()
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_sort", num_process=24)
 
     # STEP 7: samtools index
-    proceed_when_idle()
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_index", num_process=16)
 
     # STEP 8: umitools count
-    proceed_when_idle()
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="umitools_count", num_process=16)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="umitools_count", num_process=16, overwrite=False)
 
     # STEP 9: N unique mapped
-    proceed_when_idle()
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="nuniquemapped", num_process=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="nuniquemapped", num_process=32, overwrite=False)
 
 
 if __name__ == '__main__':
