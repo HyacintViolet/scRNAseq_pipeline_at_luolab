@@ -214,10 +214,10 @@ def parse_command(input_args, output_args, task=None, num_thread=None, genome_in
         #               -T 32
 
     elif task is "samtools_sort":
-        cmd = ' '.join(['samtools', 'sort', input_args['input'], '-o', output_args['output']])
+        cmd = ' '.join(['samtools', 'sort', input_args['input'], '-o', output_args['output'], '-@', num_thread])
         # Example command:
         # samtools sort /path/to/map_result/YT013101_Aligned.sortedByCoord.out.bam.featureCounts.bam
-        #               -o /path/to/map_result/YT013101_assigned_sorted.bam
+        #               -o /path/to/map_result/YT013101_assigned_sorted.bam -@ 32
 
     elif task is "samtools_index":
         cmd = ' '.join(['samtools', 'index', input_args['input']])
@@ -393,13 +393,13 @@ def main():
     do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf_extended, num_thread=32)
 
     # STEP 9: samtools sort
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_sort", num_process=24)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_sort", num_thread=32)
 
     # STEP 10: samtools index
     do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_index", num_process=16)
 
     # STEP 11: umitools count
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="umitools_count", num_process=16, overwrite=False)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="umitools_count", num_process=24, overwrite=False)
 
 
 if __name__ == '__main__':
