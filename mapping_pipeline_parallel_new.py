@@ -73,6 +73,26 @@ def parse_input_output(src_dir, dst_dir, lib, task=None, set_cell_number=80):
         output_args['out_prefix'] = os.path.join(out_dir, prefix+'_')
         output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'Aligned.sortedByCoord.out.bam']))
 
+    elif task is "split_bam":
+        input_args['input'] = os.path.join(in_dir, '_'.join([prefix, 'Aligned.sortedByCoord.out.bam']))
+        output_args['unmapped_output'] = os.path.join(in_dir, '_'.join([prefix, 'unmapped_sorted.bam']))
+        output_args['tmp'] = os.path.join(in_dir, 'tmp')
+        output_args['mapped_output'] = input_args['input']
+
+    elif task is "alignment_stats":
+        input_args['mapped_input'] = os.path.join(in_dir, '_'.join([prefix, 'Aligned.sortedByCoord.out.bam']))
+        input_args['unmapped_input'] = os.path.join(in_dir, '_'.join([prefix, 'unmapped_sorted.bam']))
+        output_args['uniquemapped'] = os.path.join(in_dir, '_'.join([prefix, 'uniquemapped_by_cell.txt']))
+        output_args['multimapped'] = os.path.join(in_dir, '_'.join([prefix, 'multimapped_by_cell.txt']))
+        output_args['unmapped'] = os.path.join(in_dir, '_'.join([prefix, 'unmapped_by_cell.txt']))
+
+    elif task is "merge_aln_stats":
+        input_args['uniquemapped'] = os.path.join(in_dir, '_'.join([prefix, 'uniquemapped_by_cell.txt']))
+        input_args['multimapped'] = os.path.join(in_dir, '_'.join([prefix, 'multimapped_by_cell.txt']))
+        input_args['unmapped'] = os.path.join(in_dir, '_'.join([prefix, 'unmapped_by_cell.txt']))
+        output_args['tmp'] = os.path.join(in_dir, 'tmp')
+        output_args['aln_stats'] = os.path.join(in_dir, '_'.join([prefix, 'aln_stats_by_cell.txt']))
+
     elif task is "featurecounts":
         input_args['mapped'] = os.path.join(in_dir, '_'.join([prefix, 'Aligned.sortedByCoord.out.bam']))
         output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'gene_assigned']))
@@ -89,10 +109,6 @@ def parse_input_output(src_dir, dst_dir, lib, task=None, set_cell_number=80):
     elif task is "umitools_count":
         input_args['input'] = os.path.join(in_dir, '_'.join([prefix, 'assigned_sorted.bam']))
         output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'counts.tsv.gz']))
-
-    elif task is "nuniquemapped":
-        input_args['input'] = os.path.join(in_dir, '_'.join([prefix, 'Aligned.sortedByCoord.out.bam']))
-        output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'Nuniqmapped.txt']))
 
     return input_args, output_args
 
@@ -113,20 +129,24 @@ def parse_command(input_args, output_args, task=None, num_thread=None, genome_in
                         '--bc-pattern=CCCCCCCCNNNNNNNN', '--set-cell-number=' + input_args['set_cell_number'],
                         '--plot-prefix=' + output_args['plot_prefix'], '-v', '1', '--log2stderr', '>',
                         output_args['output']])
-        # cmd = 'umi_tools whitelist --stdin ' + input_args['path_to_read1'] + \
-        #       ' --bc-pattern=CCCCCCCCNNNNNNNN ' + '--set-cell-number=' + input_args['set_cell_number'] +\
-        #       ' --plot-prefix=' + output_args['plot_prefix'] + ' -v 1 --log2stderr > ' + output_args['output']
+        # Example command:
+        # umi_tools whitelist --stdin /path/to/seq_data/YT013101_......_2.fq.gz
+        #                     --bc-pattern=CCCCCCCCNNNNNNNN
+        #                     --set-cell-number=80 --plot-prefix=/path/to/map_result/cell_num_80
+        #                     -v 1
+        #                     --log2stderr > /path/to/map_result/YT013101_whitelist80.txt
 
     elif task is "umitools_extract":
         cmd = ' '.join(['umi_tools', 'extract', '--bc-pattern=CCCCCCCCNNNNNNNN', '--stdin', input_args['path_to_read1'],
                        '--read2-in', input_args['path_to_read2'], '--stdout', output_args['output'], '--read2-stdout',
                         '--filter-cell-barcode', '--error-correct-cell', '--whitelist=' + input_args['whitelist']])
-        # cmd = 'umi_tools extract --bc-pattern=CCCCCCCCNNNNNNNN' \
-        #       ' --stdin ' + input_args['path_to_read1'] + \
-        #       ' --read2-in ' + input_args['path_to_read2'] + \
-        #       ' --stdout ' + output_args['output'] + \
-        #       ' --read2-stdout --filter-cell-barcode --error-correct-cell' \
-        #       ' --whitelist=' + input_args['whitelist']
+        # Example command:
+        # umi_tools extract --bc-pattern=CCCCCCCCNNNNNNNN
+        #                   --stdin /path/to/seq_data/YT013101_..._2.fq.gz
+        #                   --read2-in /path/to/seq_data/YT013101_..._1.fq.gz
+        #                   --stdout /path/to/map_result/YT013101_extracted.fq.gz
+        #                   --read2-stdout --filter-cell-barcode --error-correct-cell
+        #                   --whitelist=/path/to/map_result/YT013101_whitelist_washed.txt
 
     elif task is "STAR_mapping":
         cmd = ' '.join(['STAR', '--runThreadN', num_thread, '--genomeDir', genome_index,
@@ -134,39 +154,77 @@ def parse_command(input_args, output_args, task=None, num_thread=None, genome_in
                         '--outFilterMultimapNmax', '1', '--outFilterType', 'BySJout',
                         '--outSAMstrandField', 'intronMotif', '--outFilterIntronMotifs', 'RemoveNoncanonical',
                         '--outFilterMismatchNmax', '6', '--outSAMtype', 'BAM', 'SortedByCoordinate',
-                        '--outFileNamePrefix', output_args['out_prefix'], '--outReadsUnmapped', 'Fastx'])
-        # cmd = 'STAR --runThreadN ' + num_thread + ' --genomeDir ' + genome_index + \
-        #       ' --readFilesIn ' + input_args['extracted'] + \
-        #       ' --readFilesCommand zcat --outFilterMultimapNmax 1 --outFilterType BySJout' \
-        #       ' --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonical' \
-        #       ' --outFilterMismatchNmax 6 --outSAMtype BAM SortedByCoordinate ' \
-        #       '--outFileNamePrefix ' + output_args['out_prefix'] + ' --outReadsUnmapped Fastx'
+                        '--outFileNamePrefix', output_args['out_prefix'], '--outSAMunmapped', 'Within'])
+        # Example command:
+        # STAR --runThreadN 32 --genomeDir /media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM23_extended/
+        #      --readFilesIn /path/to/map_result/YT013101_extracted.fq.gz
+        #      --readFilesCommand zcat --outFilterMultimapNmax 1 --outFilterType BySJout
+        #      --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonical
+        #      --outFilterMismatchNmax 6 --outSAMtype BAM SortedByCoordinate
+        #      --outFileNamePrefix /path/to/map_result/YT013101_
+        #      --outSAMunmapped Within
+
+    elif task is "split_bam":
+        cmd = ' '.join(['samtools', 'view', '-f4', '-bS', input_args['input'], '-@', num_thread, '|',
+                        'samtools', 'sort', '-', '-o', output_args['unmapped_output'], '-@', num_thread, '&&',
+                        'samtools', 'view', '-F4', '-bS', input_args['input'], '-@', num_thread, '|',
+                        'samtools', 'sort', '-', '-o', output_args['tmp'], '-@', num_thread, '&&',
+                        'mv', output_args['tmp'], output_args['mapped_output']])
+        # Example command:
+        # samtools view -f4 -bS YT013101_Aligned.sortedByCoord.out.bam -@ 32 | samtools sort - -o
+        # YT013101_unmapped_sorted.bam -@ 32 && samtools view -F4 -bS YT013101_Aligned.sortedByCoord.out.bam -@ 32 |
+        # samtools sort - -o tmp -@ 32 && mv tmp YT013101_Aligned.sortedByCoord.out.bam
+
+    elif task is "alignment_stats":
+        cmd = ' '.join(['samtools', 'view', input_args['mapped_input'], '-@', num_thread, '|', 'cut', '-f2', '-d',
+                        '\'_\'', '|', 'sort', '|', 'uniq', '-c', '>', output_args['uniquemapped'], '&&',
+                        'samtools', 'view', input_args['unmapped_input'], '-@', num_thread, '|', 'grep', '-w',
+                        '"uT:A:3"', '|', 'cut', '-f2', '-d', '\'_\'', '|', 'sort', '|', 'uniq', '-c', '>',
+                        output_args['multimapped'], '&&',
+                        'samtools', 'view', input_args['unmapped_input'], '-@', num_thread, '|', 'grep', '-w',
+                        '"uT:A:[^3]"', '|', 'cut', '-f2', '-d', '\'_\'', '|', 'sort', '|', 'uniq', '-c', '>',
+                        output_args['unmapped']])
+        # Example command:
+        # samtools view YT013101_Aligned.sortedByCoord -@ 32 | cut -f2 -d '_' | sort | uniq -c >
+        # YT013101_uniquemapped_by_cell.txt &&
+        # samtools view YT013101_unmapped_sorted.bam -@ 32 | grep -w "uT:A:3" | cut -f2 -d '_' | sort | uniq -c >
+        # YT013101_multimapped_by_cell.txt &&
+        # samtools view YT013101_unmapped_sorted.bam -@ 32 | grep -w "uT:A:[^3]" | cut -f2 -d '_' | sort | uniq -c >
+        # YT013101_unmapped_by_cell.txt
+
+    elif task is "merge_aln_stats":
+        cmd = ' '.join(['join', '-j', '2', input_args['uniquemapped'], input_args['multimapped'], '|', 'join', '-1',
+                        '1', '-2', '2', '-', input_args['unmapped'], '>', output_args['aln_stats'], '&&',
+                        'echo', '\'Barcode Uniquemapped Multimapped Unmapped\'', '|',
+                        'cat', '-', output_args['aln_stats'], '>', output_args['tmp'], '&&',
+                        'mv', output_args['tmp'], output_args['aln_stats']])
 
     elif task is "featurecounts":
         cmd = ' '.join(['featureCounts', '-s', '1', '-a', genome_gtf, '-o', output_args['output'], '-R', 'BAM',
                         input_args['mapped'], '-T', num_thread])
-        # cmd = 'featureCounts -s 1 -a ' + genome_gtf + ' -o ' + output_args['output'] + \
-        #       ' -R BAM ' + input_args['mapped'] + ' -T ' + num_thread
+        # Example command:
+        # featureCounts -s 1 -a /media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23_extended/gencode...gtf
+        #               -o /path/to/map_result/YT013101_gene_assigned
+        #               -R BAM /path/to/map_result/YT013101_Aligned.sortedByCoord.out.bam
+        #               -T 32
 
     elif task is "samtools_sort":
         cmd = ' '.join(['samtools', 'sort', input_args['input'], '-o', output_args['output']])
-        # cmd = 'samtools sort ' + input_args['input'] + ' -o ' + output_args['output']
+        # Example command:
+        # samtools sort /path/to/map_result/YT013101_Aligned.sortedByCoord.out.bam.featureCounts.bam
+        #               -o /path/to/map_result/YT013101_assigned_sorted.bam
 
     elif task is "samtools_index":
         cmd = ' '.join(['samtools', 'index', input_args['input']])
-        # cmd = 'samtools index ' + input_args['input']
+        # Example command:
+        # samtools index /path/to/map_result/YT013101_assigned_sorted.bam
 
     elif task is "umitools_count":
         cmd = ' '.join(['umi_tools', 'count', '--per-gene', '--gene-tag=XT', '--per-cell', '-I', input_args['input'],
                         '-S', output_args['output']])
-        # cmd = 'umi_tools count --per-gene --gene-tag=XT --per-cell -I ' + input_args['input'] + \
-        #       ' -S ' + output_args['output']
-
-    elif task is "nuniquemapped":
-        cmd = ' '.join(['samtools', 'view', '-F4', input_args['input'], '|', 'cut', '-f', '2', '-d', '\'_\'', '|',
-                        'sort', '|', 'uniq', '-c', '>', output_args['output']])
-        # cmd = 'samtools view -F4 ' + input_args['input'] + ' | cut -f 2 -d \'_\' | sort | uniq -c > ' + \
-        #       output_args['output']
+        # Example command:
+        # umi_tools count --per-gene --gene-tag=XT --per-cell -I /path/to/map_result/YT013101_assigned_sorted.bam
+        #                 -S /path/to/map_result/YT013101_counts.tsv.gz
 
     return cmd
 
