@@ -198,6 +198,11 @@ def parse_command(input_args, output_args, task=None, num_thread=None, genome_in
                         'echo', '\'Barcode Uniquemapped Multimapped Unmapped\'', '|',
                         'cat', '-', output_args['aln_stats'], '>', output_args['tmp'], '&&',
                         'mv', output_args['tmp'], output_args['aln_stats']])
+        # Example command:
+        # join -j 2 YT013101_uniquemapped_by_cell.txt YT013101_multimapped_by_cell.txt | join -1 1 -2 2 -
+        # YT013101_unmapped_by_cell.txt > YT013101_aln_stats_by_cell.txt &&
+        # echo 'Barcode Uniquemapped Multimapped Unmapped' | cat - YT013101_aln_stats_by_cell.txt > tmp &&
+        # mv tmp YT013101_aln_stats_by_cell.txt
 
     elif task is "featurecounts":
         cmd = ' '.join(['featureCounts', '-s', '1', '-a', genome_gtf, '-o', output_args['output'], '-R', 'BAM',
@@ -262,6 +267,7 @@ def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=True, num_proce
     # Check idle status. If idle is True, proceed and set idle to False.
     proceed_if_idle()
 
+    # Initiate
     libs = get_libs(src_dir)
     cmd_all = []
     for lib in libs:
@@ -276,7 +282,7 @@ def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=True, num_proce
                                 genome_index=genome_index, genome_gtf=genome_gtf)
             cmd_all.append([(prefix, task), cmd])
         else:
-            if not os.path.exists(output_args['output']):
+            if not os.path.exists(output_args['output']):  # TODO: split_bam, alignment_stats, merge_aln_stats no output
                 cmd = parse_command(input_args, output_args, task=task, num_thread=num_thread,
                                     genome_index=genome_index, genome_gtf=genome_gtf)
                 cmd_all.append([(prefix, task), cmd])
@@ -372,22 +378,28 @@ def main():
     # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_extract", num_process=32)
 
     # STEP 4: STAR mapping
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
 
-    # STEP 5: featureCounts
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf_extended, num_thread=32)
+    # STEP 5: split aligned bam file into mapped and unmapped
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="split_bam", num_thread=32)
 
-    # STEP 6: samtools sort
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_sort", num_process=24)
+    # STEP 6: extract alignment statistics
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="alignment_stats", num_thread=32)
 
-    # STEP 7: samtools index
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_index", num_process=16)
+    # STEP 7: merge alignment statistics
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="merge_aln_stats", num_process=32)
 
-    # STEP 8: umitools count
+    # STEP 8: featureCounts
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf_extended, num_thread=32)
+
+    # STEP 9: samtools sort
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_sort", num_process=24)
+
+    # STEP 10: samtools index
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_index", num_process=16)
+
+    # STEP 11: umitools count
     do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="umitools_count", num_process=16, overwrite=False)
-
-    # STEP 9: N unique mapped
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="nuniquemapped", num_process=32, overwrite=False)
 
 
 if __name__ == '__main__':
