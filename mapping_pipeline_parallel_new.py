@@ -282,12 +282,15 @@ def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=True, num_proce
                                 genome_index=genome_index, genome_gtf=genome_gtf)
             cmd_all.append([(prefix, task), cmd])
         else:
-            if not os.path.exists(output_args['output']):  # TODO: split_bam, alignment_stats, merge_aln_stats no output
+            check_exists = []
+            for file, path in output_args.items():
+                check_exists.append(os.path.exists(path))
+            if any(check_exists):
+                print('Some or all of the output file already exists. Skipping since overwrite mode is inactivated.')
+            else:
                 cmd = parse_command(input_args, output_args, task=task, num_thread=num_thread,
                                     genome_index=genome_index, genome_gtf=genome_gtf)
                 cmd_all.append([(prefix, task), cmd])
-            else:
-                print(' '.join([output_args['output'], 'already exists, skipping.']))
 
     # Check process & thread number
     if num_process*num_thread > 47:
