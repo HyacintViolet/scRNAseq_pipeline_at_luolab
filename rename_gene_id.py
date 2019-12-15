@@ -19,7 +19,7 @@ def has_duplicates(list_of_values):
 
 # Set up working directories
 parent_wd = '/media/luolab/ZA1BT1ER/yanting/vM23_extended/'
-data_wd = '/media/luolab/ZA1BT1ER/yanting/vM23_extended/mapping/'
+# data_wd = '/media/luolab/ZA1BT1ER/yanting/vM23_extended/mapping/'
 os.chdir(parent_wd)
 
 # Load name table [ENSEMBL STABLE ID, gene name]
@@ -60,13 +60,15 @@ nametable_new.stable_id = ensmusg[0]
 # Convert nametable(df) to dict. Copied from stackOverflow. Works. Read later.
 dictionary = nametable_new.set_index('stable_id')['gene_name'].T.to_dict()
 
-# Load expression matrix (QC2)
-expression_mat = pd.read_csv('counts_stbid_Nreads_100000_Nuniq_.5.txt', sep=' ')
+# Load expression matrix
+expression_mat = pd.read_csv('counts_matrix_alnQCed_stbid.txt.gz', sep=' ')
 print(expression_mat.shape)
 
 expression_mat.id = expression_mat.id.map(dictionary)
+expression_mat_new = expression_mat.set_index('id')
 
-expression_mat.to_csv('counts_100000_.5_QC1_renamed.txt', sep=' ', index=False)
+expression_mat_new.to_csv('counts_matrix_alnQCed_renamed_test.txt.gz', sep=' ', compression="gzip",
+                          index=True, index_label=False)  # Use index_label=False for easier importing in R
 print('Finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------

@@ -6,11 +6,11 @@ scRNAseq reads mapping pipeline: modified based on umi_tools protocol
 
 3. add_suffix.py
 
-4. extract_mapping_stats.py
+*4. extract_mapping_stats.py
 
 5. concatenate_counts.py
 
-6. concatenate_mapping_stats.py
+*6. concatenate_mapping_stats.py
 
 # R pipeline starts here
 

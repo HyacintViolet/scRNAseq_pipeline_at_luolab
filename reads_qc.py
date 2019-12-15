@@ -36,7 +36,7 @@ def main():
     pool = mp.Pool(16)
     pool.map(work, cmd_fastqc)
 
-    # The build-in parallel functionality of fastQC runs very slowly, abandoned
+    # # The build-in parallel functionality of fastQC runs very slowly, abandoned
     # num_threads = 24
     # cmd = 'fastqc -t ' + str(num_threads) + ' ' + ' '.join(file_list)
     # subprocess.call(cmd, shell=True)
