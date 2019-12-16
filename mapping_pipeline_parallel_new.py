@@ -363,6 +363,8 @@ def main():
                             'annotation.gtf'
     genome_gtf_extended = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_scaff.' \
                           'annotation.extended.gtf'
+    genome_gtf_extended_clean = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_' \
+                                'scaff.annotation.extended.clean.gtf'
     genome_index = '/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM23_extended/'
 
     # Create output directory if not exist.barcode_ground_truth
@@ -381,25 +383,26 @@ def main():
     # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_extract", num_process=32)
 
     # STEP 4: STAR mapping
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
 
     # STEP 5: split aligned bam file into mapped and unmapped
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="split_bam", num_thread=32)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="split_bam", num_thread=32)
 
     # STEP 6: extract alignment statistics
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="alignment_stats", num_thread=32)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="alignment_stats", num_thread=32)
 
     # STEP 7: merge alignment statistics
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="merge_aln_stats", num_process=32)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="merge_aln_stats", num_process=32)
 
     # STEP 8: featureCounts
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf_extended, num_thread=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf_extended_clean,
+                num_thread=32)
 
     # STEP 9: samtools sort
     do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_sort", num_thread=32)
 
     # STEP 10: samtools index
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_index", num_process=16)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_index", num_process=32)
 
     # STEP 11: umitools count
     do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="umitools_count", num_process=24, overwrite=False)
