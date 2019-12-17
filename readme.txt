@@ -13,6 +13,8 @@ scRNAseq reads mapping pipeline: modified based on umi_tools protocol
 *6. concatenate_mapping_stats.py
 
 # R pipeline starts here
+- R1. pituitary_QC.R -> Count matrix -> 7
+- R2. seurat_pipeline.R
 
 7. rename_gene_id.py
 

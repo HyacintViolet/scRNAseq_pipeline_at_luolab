@@ -64,10 +64,10 @@ dictionary = nametable_new.set_index('stable_id')['gene_name'].T.to_dict()
 expression_mat = pd.read_csv('counts_matrix_alnQCed_stbid.txt.gz', sep=' ')
 print(expression_mat.shape)
 
-expression_mat.id = expression_mat.id.map(dictionary)
-expression_mat_new = expression_mat.set_index('id')
+expression_mat.index = expression_mat.index.map(dictionary)
 
-expression_mat_new.to_csv('counts_matrix_alnQCed_renamed_test.txt.gz', sep=' ', compression="gzip",
+
+expression_mat.to_csv('counts_matrix_alnQCed_renamed.txt.gz', sep=' ', compression="gzip",
                           index=True, index_label=False)  # Use index_label=False for easier importing in R
 print('Finished.')
 
