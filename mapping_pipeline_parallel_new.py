@@ -110,6 +110,14 @@ def parse_input_output(src_dir, dst_dir, lib, task=None, set_cell_number=80):
         input_args['input'] = os.path.join(in_dir, '_'.join([prefix, 'assigned_sorted.bam']))
         output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'counts.tsv.gz']))
 
+    elif task is "unassigned_ambiguity_summary":
+        input_args['input'] = os.path.join(in_dir, '_'.join([prefix, 'assigned_sorted.bam']))
+        output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'ambiguity.bam']))
+
+    elif task is "ambiguity_bam_to_bed":
+        input_args['input'] = os.path.join(in_dir, '_'.join([prefix, 'ambiguity.bam']))
+        output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'ambiguity.bed']))
+
     return input_args, output_args
 
 
@@ -230,6 +238,15 @@ def parse_command(input_args, output_args, task=None, num_thread=None, genome_in
         # Example command:
         # umi_tools count --per-gene --gene-tag=XT --per-cell -I /path/to/map_result/YT013101_assigned_sorted.bam
         #                 -S /path/to/map_result/YT013101_counts.tsv.gz
+
+    elif task is "unassigned_ambiguity_summary":
+        cmd = ' '.join(['samtools', 'view', '-h', input_args['input'], '-@', num_thread, '|', 'awk',
+                        '\'{if($1~"@"||$0~"Unassigned_Ambiguity"){print $0}}\'', '|', 'samtools', 'view', '-Shb',
+                        '-@', num_thread, '-', '>', output_args['output']])
+
+    elif task is "ambiguity_bam_to_bed":
+        cmd = ' '.join(['bam2bed', '<', input_args['input'], '|', 'awk',
+                        '\'BEGIN{FS="\\t";OFS="\\t""}{print $1,$2,$3}\'', '>', output_args['output']])
 
     return cmd
 
@@ -395,17 +412,24 @@ def main():
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="merge_aln_stats", num_process=32)
 
     # STEP 8: featureCounts
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf_extended_clean,
-                num_thread=32)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf_extended_clean,
+    #             num_thread=32)
 
     # STEP 9: samtools sort
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_sort", num_thread=32)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_sort", num_thread=32)
 
     # STEP 10: samtools index
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_index", num_process=32)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_index", num_process=32)
 
     # STEP 11: umitools count
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="umitools_count", num_process=24, overwrite=False)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="umitools_count", num_process=24, overwrite=False)
+
+    # OTHER FUNCTIONALITIES
+    # Summary of unassigned ambiguity reads from bam
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="unassigned_ambiguity_summary", num_thread=32)
+
+    # Convert ambiguity bam to bed
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="ambiguity_bam_to_bed")
 
 
 if __name__ == '__main__':
