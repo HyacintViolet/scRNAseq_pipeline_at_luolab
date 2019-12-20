@@ -246,7 +246,7 @@ def parse_command(input_args, output_args, task=None, num_thread=None, genome_in
 
     elif task is "ambiguity_bam_to_bed":
         cmd = ' '.join(['bam2bed', '<', input_args['input'], '|', 'awk',
-                        '\'BEGIN{FS="\\t";OFS="\\t""}{print $1,$2,$3}\'', '>', output_args['output']])
+                        '\'BEGIN{FS="\\t";OFS="\\t"}{print $1,$2,$3}\'', '>', output_args['output']])
 
     return cmd
 
@@ -426,7 +426,7 @@ def main():
 
     # OTHER FUNCTIONALITIES
     # Summary of unassigned ambiguity reads from bam
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="unassigned_ambiguity_summary", num_thread=32)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="unassigned_ambiguity_summary", num_thread=32)
 
     # Convert ambiguity bam to bed
     do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="ambiguity_bam_to_bed")
