@@ -365,25 +365,25 @@ def main():
 
     # Source dirs
     src_dir = '/media/luolab/ZA1BT1ER/scRNAseq/yanting_all/data/yanting/'
-    src_dir2 = '/media/luolab/ZA1BT1ER/yanting/vM21_extended/mapping/'
-    src_dir3 = '/media/luolab/ZA1BT1ER/yanting/vM21/mapping/'  # For unextended mapping
+    src_dir2 = '/media/luolab/ZA1BT1ER/yanting/vM21/mapping/'  # For unextended mapping
+    src_dir3 = '/media/luolab/ZA1BT1ER/yanting/vM21_extended/mapping/'
 
     # Destination dirs
-    dst_dir = '/media/luolab/ZA1BT1ER/yanting/vM21_extended/mapping/'  # Same as src_dir2
-    dst_dir2 = '/media/luolab/ZA1BT1ER/yanting/vM21/mapping/'  # For unextended mapping
+    dst_dir = '/media/luolab/ZA1BT1ER/yanting/vM21/mapping/'  # For unextended mapping
+    dst_dir2 = '/media/luolab/ZA1BT1ER/yanting/vM21_extended/mapping/'  # Same as src_dir2
 
     # Parent working dir
-    parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM21_extended/'
+    parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM21/'
 
     # Path to genome annotation and index
-    genome_gtf = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM21.chr_patch_hapl_scaff.' \
+    genome_gtf = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM21/gencode.vM21.chr_patch_hapl_scaff.' \
                  'annotation.gtf'
 
-    # genome_gtf_extended = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_scaff.' \
+    # genome_gtf_extended = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM21/gencode.vM21.chr_patch_hapl_scaff.' \
     #                       'annotation.extended.gtf'
     # 3'end extended gtf
 
-    # genome_gtf_extended_clean = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_' \
+    # genome_gtf_extended_clean = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM21/gencode.vM21.chr_patch_hapl_' \
     #                             'scaff.annotation.extended.clean.gtf'
     # Removed entries that could interfere with feature assignment
 
