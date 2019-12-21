@@ -223,7 +223,7 @@ def parse_command(input_args, output_args, task=None, num_thread=None, genome_in
 
     elif task is "samtools_sort":
         cmd = ' '.join(['samtools', 'sort', input_args['input'], '-o', output_args['output'], '-@', num_thread])
-        # Example command:
+        # Example command:samt
         # samtools sort /path/to/map_result/YT013101_Aligned.sortedByCoord.out.bam.featureCounts.bam
         #               -o /path/to/map_result/YT013101_assigned_sorted.bam -@ 32
 
@@ -373,7 +373,7 @@ def main():
     dst_dir2 = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'  # For unextended mapping
 
     # Parent working dir
-    parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM23/'
+    parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM23_extended/'
 
     # Path to genome annotation and index
     genome_gtf_unextended = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_scaff.' \
