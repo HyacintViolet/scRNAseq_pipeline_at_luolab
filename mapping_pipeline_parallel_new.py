@@ -365,24 +365,29 @@ def main():
 
     # Source dirs
     src_dir = '/media/luolab/ZA1BT1ER/scRNAseq/yanting_all/data/yanting/'
-    src_dir2 = '/media/luolab/ZA1BT1ER/yanting/vM23_extended/mapping/'
-    src_dir3 = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'  # For unextended mapping
+    src_dir2 = '/media/luolab/ZA1BT1ER/yanting/vM21_extended/mapping/'
+    src_dir3 = '/media/luolab/ZA1BT1ER/yanting/vM21/mapping/'  # For unextended mapping
 
     # Destination dirs
-    dst_dir = '/media/luolab/ZA1BT1ER/yanting/vM23_extended/mapping/'  # Same as src_dir2
-    dst_dir2 = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'  # For unextended mapping
+    dst_dir = '/media/luolab/ZA1BT1ER/yanting/vM21_extended/mapping/'  # Same as src_dir2
+    dst_dir2 = '/media/luolab/ZA1BT1ER/yanting/vM21/mapping/'  # For unextended mapping
 
     # Parent working dir
-    parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM23_extended/'
+    parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM21_extended/'
 
     # Path to genome annotation and index
-    genome_gtf_unextended = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_scaff.' \
-                            'annotation.gtf'
-    genome_gtf_extended = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_scaff.' \
-                          'annotation.extended.gtf'
-    genome_gtf_extended_clean = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_' \
-                                'scaff.annotation.extended.clean.gtf'
-    genome_index = '/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM23_extended/'
+    genome_gtf = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM21.chr_patch_hapl_scaff.' \
+                 'annotation.gtf'
+
+    # genome_gtf_extended = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_scaff.' \
+    #                       'annotation.extended.gtf'
+    # 3'end extended gtf
+
+    # genome_gtf_extended_clean = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM23/gencode.vM23.chr_patch_hapl_' \
+    #                             'scaff.annotation.extended.clean.gtf'
+    # Removed entries that could interfere with feature assignment
+
+    genome_index = '/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM21/'
 
     # Create output directory if not exist.barcode_ground_truth
     for out in get_libs(src_dir):
@@ -400,7 +405,7 @@ def main():
     # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_extract", num_process=32)
 
     # STEP 4: STAR mapping
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
 
     # STEP 5: split aligned bam file into mapped and unmapped
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="split_bam", num_thread=32)
@@ -412,7 +417,7 @@ def main():
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="merge_aln_stats", num_process=32)
 
     # STEP 8: featureCounts
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf_extended_clean,
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf,
     #             num_thread=32)
 
     # STEP 9: samtools sort
@@ -429,7 +434,7 @@ def main():
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="unassigned_ambiguity_summary", num_thread=32)
 
     # Convert ambiguity bam to bed
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="ambiguity_bam_to_bed")
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="ambiguity_bam_to_bed")
 
 
 if __name__ == '__main__':
