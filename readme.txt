@@ -13,8 +13,8 @@ scRNAseq reads mapping pipeline: modified based on umi_tools protocol
 *6. concatenate_mapping_stats.py
 
 # R pipeline starts here
-- R1. pituitary_QC.R -> Count matrix -> 7
-- R2. seurat_pipeline.R
+- R1. count matrix renamed: pituitary_QC.R -> Count matrix -> 7
+- R2. count matrix stable id: seurat_pipeline.R
 
 7. rename_gene_id.py
 
@@ -66,5 +66,9 @@ Fix annotation pipeline:
      distance_to_gene_20k.txt.gz
      zcat distance_to_gene_20k.txt.gz | awk 'BEGIN{FS="\t";OFS="\t"}$3=="protein_coding"{print $0}' | gzip -9c > \
      distance_to_gene_20k_protein_coding.txt.gz
+
+7. Go to R, run extension_length.R, acquire extension_profiles.txt
+
+8. Run extend_gtf_coordinates.py  # extend gtf files based on extension_profiles.txt
 
 TODO: distance to gene is extracted directly from the output of 'bedtools closest ...' command, which does not take strand into account.
