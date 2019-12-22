@@ -405,20 +405,20 @@ def main():
     # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_extract", num_process=32)
 
     # STEP 4: STAR mapping
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
 
     # STEP 5: split aligned bam file into mapped and unmapped
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="split_bam", num_thread=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="split_bam", num_thread=32)
 
     # STEP 6: extract alignment statistics
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="alignment_stats", num_thread=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="alignment_stats", num_thread=32)
 
     # STEP 7: merge alignment statistics
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="merge_aln_stats", num_process=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="merge_aln_stats", num_process=32)
 
     # STEP 8: featureCounts
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf,
-    #             num_thread=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf,
+                num_thread=32)
 
     # STEP 9: samtools sort
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_sort", num_thread=32)
