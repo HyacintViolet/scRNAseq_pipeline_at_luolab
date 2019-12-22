@@ -34,12 +34,12 @@ def get_prefix(lib):
 
 def awk_extract_part(libs, parent_dir, suffix_input, suffix_output):
     cmd_awk_extract_part_all = []
-    for l in libs:
+    for lib in libs:
 
         # Setting up working directory
-        wd = os.path.join(parent_dir, l)
+        wd = os.path.join(parent_dir, lib)
         # Grab folder name prefix
-        prefix = get_prefix(l)
+        prefix = get_prefix(lib)
 
         # Input file name
         filename_fixed_bed = '_'.join([prefix, suffix_input])  # 'fixed_closest.bed'
@@ -130,11 +130,11 @@ def remove_intermediate(libs, parent_dir, suffix_file_to_remove):
 
 def check_line(libs, parent_dir, suffix_file_to_check, suffix_file_ground_truth, num_lines_table):
     # Check line numbers are okay
-    for l in libs:
+    for lib in libs:
         # Setting up working directory
-        wd = os.path.join(parent_dir, l)
+        wd = os.path.join(parent_dir, lib)
         # Grab folder name prefix
-        prefix = get_prefix(l)
+        prefix = get_prefix(lib)
 
         # File to check
         filename_extracted_bed = '_'.join([prefix, suffix_file_to_check])

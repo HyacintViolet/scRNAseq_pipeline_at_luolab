@@ -26,6 +26,39 @@ def proceed_if_idle():
             break
 
 
+def get_libs(parent_dir):
+    # Input path to mapping dir. Output a list of library names.
+    libs = sorted(os.listdir(parent_dir))
+    return libs
+
+
+def get_prefix(lib):
+    # Input library folder name. Output library prefix.
+    match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', lib)
+    prefix = match.group(1)
+    return prefix
+
+
+def check_file_exists(path_to_file):
+    if not os.path.exists(path_to_file):
+        raise SystemExit(' '.join(['Aborting because', os.path.basename(path_to_file), 'was not found. Please prepare '
+                                   'the file before running the pipe. See readme.txt for detail.']))
+
+
+# def args_int2str(arg): TODO: check args in function calls, convert int to string
+#     if type(arg) is int:
+#         arg = str(arg)
+#     return arg
+
+
+def work(cmd_this):
+    lib = cmd_this[0][0]
+    task = cmd_this[0][1]
+    cmd = cmd_this[1]
+    print(' '.join([task, lib, '...\ncommand:', cmd]))
+    return subprocess.call(cmd, shell=True)
+
+
 def parse_input_output(src_dir, dst_dir, lib, task=None, set_cell_number=80):
     in_dir = os.path.join(src_dir, lib)
     out_dir = os.path.join(dst_dir, lib)
@@ -40,6 +73,7 @@ def parse_input_output(src_dir, dst_dir, lib, task=None, set_cell_number=80):
 
     if task is None:
         print("Error in parse_input_output: task not specified.")
+
     elif task is "umitools_whitelist":
         read1_filename = ''
         for file in os.listdir(in_dir):
@@ -251,33 +285,6 @@ def parse_command(input_args, output_args, task=None, num_thread=None, genome_in
     return cmd
 
 
-def get_libs(parent_dir):
-    # Input path to mapping dir. Output a list of library names.
-    libs = sorted(os.listdir(parent_dir))
-    return libs
-
-
-def get_prefix(lib):
-    # Input library folder name. Output library prefix.
-    match = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', lib)
-    prefix = match.group(1)
-    return prefix
-
-
-# def args_int2str(arg): TODO: check args in function calls, convert int to string
-#     if type(arg) is int:
-#         arg = str(arg)
-#     return arg
-
-
-def work(cmd_this):
-    lib = cmd_this[0][0]
-    task = cmd_this[0][1]
-    cmd = cmd_this[1]
-    print(' '.join([task, lib, '...\ncommand:', cmd]))
-    return subprocess.call(cmd, shell=True)
-
-
 def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=True, num_process=1, num_thread=1, genome_index=None,
                 genome_gtf=None):
 
@@ -407,6 +414,7 @@ def main():
     # STEP 4: STAR mapping
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
 
+    # STEPs 5, 6, 7 are involved in calculating alignment stats
     # STEP 5: split aligned bam file into mapped and unmapped
     do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="split_bam", num_thread=32)
 
@@ -416,6 +424,7 @@ def main():
     # STEP 7: merge alignment statistics
     do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="merge_aln_stats", num_process=32)
 
+    # STEP 8 follows STEP4
     # STEP 8: featureCounts
     do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf,
                 num_thread=32)

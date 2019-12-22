@@ -39,7 +39,11 @@ Fix annotation pipeline:
    c. Now convert with gtf2bed:
       gtf2bed < gencode.vM23.chr_primary.annotation.fixed.gtf > gencode.vM23.chr_primary.annotation.fixed.bed
 
-2. bedtools_intersect_closest.py # run pipe
+2. Run bedtools_intersect_closest.py
+    # - input intersect: ..._Aligned.sortedByCoord.out.bam
+      - output intersect: ..._stranded_nonoverlap.bam
+    # - input closest: ..._stranded_nonoverlap.bam
+      - output closest: ..._closest.bed
 
 3. fix_bedfiles.py # fix bed file errors
 

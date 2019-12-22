@@ -37,8 +37,8 @@ def get_prefix(lib):
 
 def get_idx(libs):
     idx = []
-    for l in libs:
-        i = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', l).group(1)
+    for lib in libs:
+        i = re.search('^([^_]*)_([^_]*)_([^_]*)_([^_]*)$', lib).group(1)
         idx.append(i)
     return idx
 
@@ -47,11 +47,11 @@ def count_files(file_to_count, parent_dir):
     libs = get_libs(parent_dir)
     idx = get_idx(libs)
     counts = pd.DataFrame(data=None, index=idx, columns=[file_to_count], dtype=int)
-    for l in libs:
+    for lib in libs:
         # Setting up working directory
-        wd = os.path.join(parent_dir, l)
+        wd = os.path.join(parent_dir, lib)
         # Grab folder name prefix
-        prefix = get_prefix(l)
+        prefix = get_prefix(lib)
 
         # File to count
         filename_count = '_'.join([prefix, file_to_count])
@@ -83,7 +83,7 @@ def count_files(file_to_count, parent_dir):
     return counts
 
 
-def count_file_type(ftype="", parent_dir='/media/luolab/ZA1BT1ER/yanting/vM23/mapping/',
+def count_file_type(ftype="", parent_dir='/media/luolab/ZA1BT1ER/yanting/vM21/mapping/',
                     num_lines_table=pd.DataFrame(data=None), do_count=True):
     # ftype: 0 = all; 1 = _closest.bed; 2 = _stranded_nonoverlap; 3 = fixed_closest.bed
     valid_types = {"closest.bed", "stranded_nonoverlap.bam", "fixed_closest.bed"}
@@ -111,11 +111,11 @@ def count_file_type(ftype="", parent_dir='/media/luolab/ZA1BT1ER/yanting/vM23/ma
 def trim_bed_tails(parent_dir, num_lines_table):
     libs = get_libs(parent_dir)
     cmd_all_head = []
-    for l in libs:
+    for lib in libs:
         # Setting up working directory
-        wd = os.path.join(parent_dir, l)
+        wd = os.path.join(parent_dir, lib)
         # Grab folder name prefix
-        prefix = get_prefix(l)
+        prefix = get_prefix(lib)
 
         # File to fix
         filename_input = '_'.join([prefix, 'closest.bed'])   # 'closest.bed'
@@ -141,11 +141,11 @@ def trim_bed_tails(parent_dir, num_lines_table):
 
 def remove_telomeric_reads(libs, parent_dir, suffix_input, suffix_output):
     cmd_all_awk = []
-    for l in libs:
+    for lib in libs:
         # Setting up working directory
-        wd = os.path.join(parent_dir, l)
+        wd = os.path.join(parent_dir, lib)
         # Grab folder name prefix
-        prefix = get_prefix(l)
+        prefix = get_prefix(lib)
 
         # File to fix
         filename_input = '_'.join([prefix, suffix_input])  # 'temp_closest.bed'
@@ -171,11 +171,11 @@ def remove_5_prime_upstream(libs, parent_dir, suffix_input, suffix_output):
     # We're only interested in reads mapped to downstream regions of 3'UTRs. Remove reads mapped to upstream regions
     # of 5'UTRs.
     cmd_all_awk = []
-    for l in libs:
+    for lib in libs:
         # Setting up working directory
-        wd = os.path.join(parent_dir, l)
+        wd = os.path.join(parent_dir, lib)
         # Grab folder name prefix
-        prefix = get_prefix(l)
+        prefix = get_prefix(lib)
 
         # File to fix
         filename_input = '_'.join([prefix, suffix_input])   # 'temp2_closest.bed'
@@ -226,8 +226,8 @@ def remove_intermediate(libs, parent_dir, suffix_file_to_remove):
 
 
 def main():
-    analysis_dir = '/media/luolab/ZA1BT1ER/yanting/vM23/'
-    parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
+    analysis_dir = '/media/luolab/ZA1BT1ER/yanting/vM21/'
+    parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM21/mapping/'
 
     libs = get_libs(parent_dir)
     path_to_num_lines_table = os.path.join(analysis_dir, "num_lines_table.csv")
@@ -244,15 +244,15 @@ def main():
 
     # Count YT..._closest.bed line numbers
     num_lines_new = count_file_type(ftype="closest.bed", parent_dir=parent_dir, num_lines_table=num_lines_table,
-                                    do_count=False)  # Don't count, ad interim.
+                                    do_count=True)  # Don't count, ad interim.
     num_lines_table.update(num_lines_new)
-    num_lines_table.to_csv('/media/luolab/ZA1BT1ER/yanting/vM23/num_lines_table.csv', index_label='library')
+    num_lines_table.to_csv('/media/luolab/ZA1BT1ER/yanting/vM21/num_lines_table.csv', index_label='library')
 
     # Count YT..._stranded_nonoverlap.bam line numbers
     num_lines_new = count_file_type(ftype="stranded_nonoverlap.bam", parent_dir=parent_dir,
-                                    num_lines_table=num_lines_table, do_count=False)  # Don't count, ad interim.
+                                    num_lines_table=num_lines_table, do_count=True)  # Don't count, ad interim.
     num_lines_table.update(num_lines_new)
-    num_lines_table.to_csv('/media/luolab/ZA1BT1ER/yanting/vM23/num_lines_table.csv', index_label='library')
+    num_lines_table.to_csv('/media/luolab/ZA1BT1ER/yanting/vM21/num_lines_table.csv', index_label='library')
 
     # Trim tail lines: YT..._closest.bed
     num_lines_table['tail_to_trim'] = num_lines_table['closest.bed'] - num_lines_table['stranded_nonoverlap.bam'] + 1
@@ -272,7 +272,7 @@ def main():
     num_lines_new = count_file_type(ftype="fixed_closest.bed", parent_dir=parent_dir, num_lines_table=num_lines_table)
     num_lines_table.update(num_lines_new)
     # Save to num_lines_table.csv
-    num_lines_table.to_csv('/media/luolab/ZA1BT1ER/yanting/vM23/num_lines_table.csv', index_label='library')
+    num_lines_table.to_csv('/media/luolab/ZA1BT1ER/yanting/vM21/num_lines_table.csv', index_label='library')
 
 
 if __name__ == '__main__':
