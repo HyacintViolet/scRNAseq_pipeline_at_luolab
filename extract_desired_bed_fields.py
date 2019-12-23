@@ -162,9 +162,9 @@ def check_line(libs, parent_dir, suffix_file_to_check, suffix_file_ground_truth,
 
 
 def main():
-    parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM23/mapping/'
+    parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM21/mapping/'
     libs = get_libs(parent_dir)
-    num_lines_table = pd.read_csv('/media/luolab/ZA1BT1ER/yanting/vM23/num_lines_table.csv', index_col='library')
+    num_lines_table = pd.read_csv('/media/luolab/ZA1BT1ER/yanting/vM21/num_lines_table.csv', index_col='library')
 
     awk_extract_part(libs, parent_dir, suffix_input='fixed_closest.bed', suffix_output='extracted_part.bed')
     awk_extract_paste(libs, parent_dir)
