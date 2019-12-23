@@ -39,7 +39,7 @@ Fix annotation pipeline:
    c. Now convert with gtf2bed:
       gtf2bed < gencode.vM21.chr_primary.annotation.fixed.gtf > gencode.vM21.chr_primary.annotation.fixed.bed
    d. The chromosome gencode.vM21.chr_primary.annotation.fixed.bed is not in desired order. Sort them so that they're
-      compatible to run with STAR aligned .bam files:
+      compatible to run with STAR aligned.bam files:
       bedtools sort -faidx /media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM21/chrName.txt -i gencode.vM21.chr_primary.
       annotation.fixed.bed > gencode.vM21.chr_primary.annotation.fixed.sortedByChrom.bed
 
@@ -75,7 +75,11 @@ Fix annotation pipeline:
      zcat distance_to_gene_20k.txt.gz | awk 'BEGIN{FS="\t";OFS="\t"}$3=="protein_coding"{print $0}' | gzip -9c > \
      distance_to_gene_20k_protein_coding.txt.gz
 
-7. Go to R, run extension_length.R, acquire extension_profiles.txt
+
+
+7. Prepare adjacent_profiles.txt
+
+   Go to R, run extension_length.R, acquire extension_profiles.txt
 
 8. Run extend_gtf_coordinates.py  # extend gtf files based on extension_profiles.txt
 
