@@ -1,5 +1,7 @@
 import os
 import re
+import shlex
+import warnings
 import multiprocessing as mp
 import subprocess
 import pandas as pd
@@ -20,9 +22,9 @@ def proceed_if_idle():
             break
 
 
-def get_libs(parent_dir):
+def get_libs(dir):
     # Input path to mapping dir. Output a list of library names.
-    libs = sorted(os.listdir(parent_dir))
+    libs = sorted(os.listdir(dir))
     return libs
 
 
@@ -150,6 +152,34 @@ def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=True, num_proce
     set_idle_status(True)
 
 
+def remove_intermediate(wd, suffix_file_to_remove):
+    # Remove intermediate files with 'find ... -delete'
+    # Check that file numbers match
+    libs = get_libs(wd)
+    num_libs = len(libs)
+    # Count file number with pipe
+    cmd_count_extracted_part_1 = 'find ' + wd + ' -name "*' + suffix_file_to_remove + '" -type f'
+    cmd_count_extracted_part_2 = 'wc -l'
+    # Open process
+    p1 = subprocess.Popen(shlex.split(cmd_count_extracted_part_1), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p2 = subprocess.Popen(shlex.split(cmd_count_extracted_part_2), stdin=p1.stdout, stdout=subprocess.PIPE)
+    p1.stdout.close()
+    while True:
+        output = p2.communicate()[0]
+        if p2.poll() is not None:
+            break
+    num_count = int(output.decode())
+    # Command to remove files
+    cmd_rm_intermediate = ['find ' + wd + ' -name "*' + suffix_file_to_remove + '" -type f -delete']
+    pool = mp.Pool(1)
+    if num_count == num_libs and len(cmd_rm_intermediate) is not 0:
+        pool.map(work, cmd_rm_intermediate)
+        print('Files ending with ' + suffix_file_to_remove + 'successfully removed.\n')
+    else:
+        warnings.warn('Trying to remove ..' + suffix_file_to_remove + ', but file number does not match with library '
+                      'number. Abort.\n')
+
+
 def main():
     # Source dirs
     src_dir = '/media/luolab/ZA1BT1ER/scRNAseq/yanting_all/data/yanting/'
@@ -163,7 +193,8 @@ def main():
 
     # Supplementary files
     gtf = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM21/gencode.vM21.chr_primary.annotation.gtf'
-    bed = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM21/gencode.vM21.chr_primary.annotation.fixed.bed'
+    bed = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM21/gencode.vM21.chr_primary.annotation.fixed.' \
+          'sortedByChrom.bed'
 
     # Create output directory if not exist.barcode_ground_truth
     for out in get_libs(src_dir):
@@ -171,7 +202,10 @@ def main():
             os.makedirs(os.path.join(dst_dir, out))
 
     # bedtools_intersect
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="bedtools_intersect", supplementary_file=gtf)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="bedtools_intersect", supplementary_file=gtf)
+
+    # remove stranded_nonoverlap.bam
+    # remove_intermediate(src_dir2, suffix_file_to_remove="stranded_nonoverlap.bam")
 
     # bedtools_closest
     do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="bedtools_closest", supplementary_file=bed)

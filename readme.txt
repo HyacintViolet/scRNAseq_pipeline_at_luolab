@@ -38,6 +38,10 @@ Fix annotation pipeline:
       > gencode.vM21.chr_primary.annotation.fixed.gtf
    c. Now convert with gtf2bed:
       gtf2bed < gencode.vM21.chr_primary.annotation.fixed.gtf > gencode.vM21.chr_primary.annotation.fixed.bed
+   d. The chromosome gencode.vM21.chr_primary.annotation.fixed.bed is not in desired order. Sort them so that they're
+      compatible to run with STAR aligned .bam files:
+      bedtools sort -faidx /media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM21/chrName.txt -i gencode.vM21.chr_primary.
+      annotation.fixed.bed > gencode.vM21.chr_primary.annotation.fixed.sortedByChrom.bed
 
 2. Run bedtools_intersect_closest.py
     # - input intersect: ..._Aligned.sortedByCoord.out.bam
