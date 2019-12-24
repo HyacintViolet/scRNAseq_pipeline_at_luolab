@@ -103,7 +103,8 @@ def parse_command(input_args, output_args, task=None, num_thread=None, genome_in
     elif task is "bedtools_closest":
         cmd = ' '.join(['bedtools', 'closest', '-s', '-D', 'a', '-io', '-t', 'first', '-a',
                         input_args['input_bam'], '-b', input_args['input_bed'], '>', output_args['output']])
-
+        # -D a: signed dist. w.r.t. bam's strand. Desired output: negative. Reversed sign in
+        # extract_desired_bed_files.py, awk_extract_part() function.
     return cmd
 
 

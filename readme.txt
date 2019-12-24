@@ -77,7 +77,7 @@ Fix annotation pipeline:
 
 
 
-7. Prepare adjacent_profiles.txt
+7. # Prepare adjacent_profiles.txt  # No longer required.
 
    Go to R, run extension_length.R, acquire extension_profiles.txt
 
