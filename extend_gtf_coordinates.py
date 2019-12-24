@@ -55,7 +55,7 @@ def extend_gtf_coordinates(parent_dir, filename_extension_profile, filename_gtf)
 
 
 def main():
-    parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM21/'
+    parent_dir = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM21/'
 
     filename_extension_profile = 'extension_profiles.txt'
 
