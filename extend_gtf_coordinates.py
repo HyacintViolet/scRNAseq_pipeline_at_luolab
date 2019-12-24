@@ -13,7 +13,7 @@ def work(cmd_this):
     gene_name = cmd_this[0][1]
     length_of_extension = cmd_this[0][2]
     cmd = cmd_this[1]
-    print(' '.join([index, 'Parsing', gene_name, '... Extend by', length_of_extension]))
+    print(' '.join([str(index), 'Parsing', gene_name, '... Extend by', str(length_of_extension)]))
     return subprocess.call(cmd, shell=True)
 
 
