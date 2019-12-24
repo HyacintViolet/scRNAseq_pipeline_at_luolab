@@ -8,7 +8,12 @@ import multiprocessing as mp
 import subprocess
 
 
-def work(cmd):
+def work(cmd_this):
+    index = cmd_this[0][0]
+    gene_name = cmd_this[0][1]
+    length_of_extension = cmd_this[0][2]
+    cmd = cmd_this[1]
+    print(' '.join([index, 'Parsing', gene_name, '... Extend by', length_of_extension]))
     return subprocess.call(cmd, shell=True)
 
 
@@ -22,7 +27,8 @@ def extend_gtf_coordinates(parent_dir, filename_extension_profile, filename_gtf)
     cmd_all = []
     for index, row in extension_profile.iterrows():
         gene_id = row['gene_id']
-        strand_this_gene = row['strand_this_gene']
+        gene_name = row['gene_name']
+        strand_this_gene = row['strand']
         coord_to_extend = int(row['coord_to_extend'])
         coord_after_extend = int(row['coord_after_extend'])
         length_of_extension = int(row['length_of_extension'])
@@ -34,12 +40,12 @@ def extend_gtf_coordinates(parent_dir, filename_extension_profile, filename_gtf)
                 cmd = 'awk \'BEGIN{FS="\\t";OFS="\\t"}{if($9~"' + gene_id + '" && ($3=="gene" || $3=="exon") &&' \
                            ' $5==' + str(coord_to_extend) + '){print $1,$2,$3,$4,' + str(coord_after_extend) + \
                            ',$6,$7,$8,$9}else{print $0}}\' ' + path_to_gtf + ' > tmp && mv tmp ' + path_to_gtf
-                cmd_all.append(cmd)
+                cmd_all.append([(index, gene_name, length_of_extension), cmd])
             elif strand_this_gene == "-":
                 cmd = 'awk \'BEGIN{FS="\\t";OFS="\\t"}{if($9~"' + gene_id + '" && ($3=="gene" || $3=="exon") &&' \
                            ' $4==' + str(coord_to_extend) + '){print $1,$2,$3,' + str(coord_after_extend) + \
                            ',$5,$6,$7,$8,$9}else{print $0}}\' ' + path_to_gtf + ' > tmp && mv tmp ' + path_to_gtf
-                cmd_all.append(cmd)
+                cmd_all.append([(index, gene_name, length_of_extension), cmd])
 
     # Parallel run by Pool
     pool = mp.Pool(1)
@@ -49,11 +55,11 @@ def extend_gtf_coordinates(parent_dir, filename_extension_profile, filename_gtf)
 
 
 def main():
-    parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM23_extended/'
+    parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM21/'
 
     filename_extension_profile = 'extension_profiles.txt'
 
-    filename_gtf = 'gencode.vM23.chr_patch_hapl_scaff.annotation.extended.gtf'
+    filename_gtf = 'gencode.vM21.chr_patch_hapl_scaff.annotation.extended.gtf'
 
     extend_gtf_coordinates(parent_dir, filename_extension_profile, filename_gtf)
 
