@@ -432,7 +432,7 @@ def main():
     # STEP 10: samtools index
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_index", num_process=32)
 
-    STEP 11: umitools count
+    # STEP 11: umitools count
     do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="umitools_count", num_process=24, overwrite=False)
 
     # OTHER FUNCTIONALITIES
