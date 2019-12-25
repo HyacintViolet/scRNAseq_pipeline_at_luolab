@@ -372,28 +372,25 @@ def main():
 
     # Source dirs
     src_dir = '/media/luolab/ZA1BT1ER/scRNAseq/yanting_all/data/yanting/'
-    src_dir2 = '/media/luolab/ZA1BT1ER/yanting/vM21/mapping/'  # For unextended mapping
-    src_dir3 = '/media/luolab/ZA1BT1ER/yanting/vM21_extended/mapping/'
+    src_dir2 = '/media/luolab/ZA1BT1ER/yanting/vM21/mapping/'  # For extended mapping
+    src_dir3 = '/media/luolab/ZA1BT1ER/yanting/vM21_old/mapping/'  # Old analysis directory
 
     # Destination dirs
-    dst_dir = '/media/luolab/ZA1BT1ER/yanting/vM21/mapping/'  # For unextended mapping
-    dst_dir2 = '/media/luolab/ZA1BT1ER/yanting/vM21_extended/mapping/'  # Same as src_dir2
+    dst_dir = '/media/luolab/ZA1BT1ER/yanting/vM21/mapping/'  # For extended mapping
+    dst_dir2 = '/media/luolab/ZA1BT1ER/yanting/vM21_old/mapping/'  # Old analysis directory
 
     # Parent working dir
     parent_dir = '/media/luolab/ZA1BT1ER/yanting/vM21/'
 
-    # Path to genome annotation and index
+    # Path to genome annotation
     genome_gtf = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM21/gencode.vM21.chr_patch_hapl_scaff.' \
                  'annotation.gtf'
 
-    # genome_gtf_extended = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM21/gencode.vM21.chr_patch_hapl_scaff.' \
-    #                       'annotation.extended.gtf'
     # 3'end extended gtf
+    genome_gtf_extended = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM21/gencode.vM21.chr_patch_hapl_scaff.' \
+                          'annotation.extended.gtf'
 
-    # genome_gtf_extended_clean = '/media/luolab/ZA1BT1ER/raywang/annotation/Mouse/vM21/gencode.vM21.chr_patch_hapl_' \
-    #                             'scaff.annotation.extended.clean.gtf'
-    # Removed entries that could interfere with feature assignment
-
+    # path to STAR generated genome index
     genome_index = '/media/luolab/ZA1BT1ER/raywang/STAR_index_mm10_vM21/'
 
     # Create output directory if not exist.barcode_ground_truth
@@ -416,17 +413,17 @@ def main():
 
     # STEPs 5, 6, 7 are involved in calculating alignment stats
     # STEP 5: split aligned bam file into mapped and unmapped
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="split_bam", num_thread=32)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="split_bam", num_thread=32)
 
     # STEP 6: extract alignment statistics
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="alignment_stats", num_thread=32)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="alignment_stats", num_thread=32)
 
     # STEP 7: merge alignment statistics
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="merge_aln_stats", num_process=32)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="merge_aln_stats", num_process=32)
 
     # STEP 8 follows STEP4
     # STEP 8: featureCounts
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf,
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf_extended,
                 num_thread=32)
 
     # STEP 9: samtools sort
