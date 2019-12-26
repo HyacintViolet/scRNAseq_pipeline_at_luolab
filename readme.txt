@@ -13,8 +13,12 @@ scRNAseq reads mapping pipeline: modified based on umi_tools protocol
 *6. concatenate_mapping_stats.py
 
 # R pipeline starts here
-- R1. count matrix renamed: pituitary_QC.R -> Count matrix -> 7
-- R2. count matrix stable id: seurat_pipeline.R
+    i.  Alignment QC: alignment_QC.R
+    ii. Cell QC:      cell_QC.R
+
+
+- R1 (Renamed) count matrix : pituitary_QC.R -> Count matrix -> 7
+- R2 (Stable id) count matrix : seurat_pipeline.R
 
 7. rename_gene_id.py
 

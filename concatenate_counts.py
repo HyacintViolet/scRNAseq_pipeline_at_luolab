@@ -9,8 +9,8 @@ import os
 import pandas as pd
 
 # Set up working directories
-parent_wd = '/media/luolab/ZA1BT1ER/yanting/vM23_extended/'
-data_wd = '/media/luolab/ZA1BT1ER/yanting/vM23_extended/mapping/'
+parent_wd = '/media/luolab/ZA1BT1ER/yanting/vM21/'
+data_wd = '/media/luolab/ZA1BT1ER/yanting/vM21/mapping/'
 os.chdir(parent_wd)
 counts_new = pd.DataFrame(columns=['gene', 'cell', 'count'])
 
@@ -48,7 +48,7 @@ ensmusg = counts_concatenated.gene.str.split(".", n=1, expand=True)
 counts_concatenated.gene = ensmusg[0]
 
 # Write out dot-less counts spread-sheet.
-counts_concatenated.to_csv('counts_stbid.txt', sep='\t', index=False)
+counts_concatenated.to_csv('counts_stbid.txt.gz', sep='\t', index=False, compression='gzip')
 
 
 # # --------------------------------------------------------------------------------------------------------------------
