@@ -18,12 +18,12 @@ def has_duplicates(list_of_values):
 
 
 # Set up working directories
-parent_wd = '/media/luolab/ZA1BT1ER/yanting/vM23_extended/'
-# data_wd = '/media/luolab/ZA1BT1ER/yanting/vM23_extended/mapping/'
+parent_wd = '/media/luolab/ZA1BT1ER/yanting/vM21/'
+# data_wd = '/media/luolab/ZA1BT1ER/yanting/vM21/mapping/'
 os.chdir(parent_wd)
 
 # Load name table [ENSEMBL STABLE ID, gene name]
-nametable = pd.read_table(os.path.join(parent_wd, 'gencode.vM23.annotation.tab'), sep="\t", names=["stable_id",
+nametable = pd.read_table(os.path.join(parent_wd, 'gencode.vM21.annotation.tab'), sep="\t", names=["stable_id",
                                                                                                    "gene_name"])
 # nametable = nametable.rename(columns={'Unnamed: 0': 'stable_id', 'Unnamed: 1': 'gene_name'})
 
