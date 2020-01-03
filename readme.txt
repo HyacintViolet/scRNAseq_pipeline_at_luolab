@@ -1,3 +1,4 @@
+************************************************************************************************************************
 scRNAseq reads mapping pipeline: modified based on umi_tools protocol
 
 1. Edit params (i.e. input/output dirs, parallel threads) in mapping_pipeline_parallel.py. Run.
@@ -24,8 +25,8 @@ scRNAseq reads mapping pipeline: modified based on umi_tools protocol
 
 
 
-
-Fix annotation pipeline:
+************************************************************************************************************************
+Fix (extend) annotation pipeline:
 
 1. Prepare fixed gtf and bed annotations:
    a. for gtf, remove non-primary assembly entries with the following bash line (first column not chrX, i.e. KZ28...):
@@ -85,6 +86,10 @@ Fix annotation pipeline:
 
    Go to R, run extension_length.R, acquire extension_profiles.txt
 
-8. Run extend_gtf_coordinates.py  # extend gtf files based on extension_profiles.txt
+8. Run extend_gtf_gffutils.py  # extend gtf files based on extension_profiles.txt
 
-TODO: distance to gene is extracted directly from the output of 'bedtools closest ...' command, which does not take strand into account.
+************************************************************************************************************************
+What's inside ...:
+    batch_process.py:
+        - samtools index
+        - md5-checksum

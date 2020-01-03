@@ -285,7 +285,7 @@ def parse_command(input_args, output_args, task=None, num_thread=None, genome_in
     return cmd
 
 
-def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=True, num_process=1, num_thread=1, genome_index=None,
+def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=False, num_process=1, num_thread=1, genome_index=None,
                 genome_gtf=None):
 
     # Check idle status. If idle is True, proceed and set idle to False.

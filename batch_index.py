@@ -81,7 +81,7 @@ def work(cmd_this):
     return subprocess.call(cmd, shell=True)
 
 
-def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=True, num_process=1, num_thread=1, genome_index=None,
+def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=False, num_process=1, num_thread=1, genome_index=None,
                 genome_gtf=None):
 
     # Check idle status. If idle is True, proceed and set idle to False.
@@ -144,6 +144,8 @@ def main():
 
     # Execute: samtools index
     do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_index", num_process=32)
+
+    #
 
 
 if __name__ == '__main__':
