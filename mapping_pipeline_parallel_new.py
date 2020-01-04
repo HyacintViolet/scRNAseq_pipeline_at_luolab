@@ -399,40 +399,40 @@ def main():
             os.makedirs(os.path.join(dst_dir, out))
 
     # STEP 1: umi_tools whitelist
-    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_whitelist", num_process=32)
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_whitelist", num_process=32)
 
     # STEP 2: wash whitelist
-    wash_whitelist(src_dir=src_dir2, dst_dir=dst_dir, parent_dir=parent_dir, task="wash_whitelist")
+    # wash_whitelist(src_dir=src_dir2, dst_dir=dst_dir, parent_dir=parent_dir, task="wash_whitelist")
 
     # STEP 3: umi_tools extract
-    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_extract", num_process=32)
+    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_extract", num_process=32)
 
     # STEP 4: STAR mapping
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
 
     # STEPs 5, 6, 7 are involved in calculating alignment stats
     # STEP 5: split aligned bam file into mapped and unmapped
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="split_bam", num_thread=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="split_bam", num_thread=32)
 
     # STEP 6: extract alignment statistics
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="alignment_stats", num_thread=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="alignment_stats", num_thread=32)
 
     # STEP 7: merge alignment statistics
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="merge_aln_stats", num_process=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="merge_aln_stats", num_process=32)
 
     # STEP 8 follows STEP4
     # STEP 8: featureCounts
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf_extended,
-    #             num_thread=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf_extended,
+                num_thread=32)
 
     # STEP 9: samtools sort
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_sort", num_thread=32, overwrite=False)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_sort", num_thread=32)
 
     # STEP 10: samtools index
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_index", num_process=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_index", num_process=32)
 
     # STEP 11: umitools count
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="umitools_count", num_process=24)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="umitools_count", num_process=24)
 
     # OTHER FUNCTIONALITIES
     # Summary of unassigned ambiguity reads from bam
