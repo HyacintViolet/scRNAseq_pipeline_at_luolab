@@ -420,7 +420,7 @@ def main():
     do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="alignment_stats", num_thread=32)
 
     # STEP 7: merge alignment statistics
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="merge_aln_stats", num_process=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="merge_aln_stats", num_process=32)
 
     # STEP 8 follows STEP4
     # STEP 8: featureCounts
