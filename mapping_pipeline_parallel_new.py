@@ -310,7 +310,8 @@ def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=False, num_proc
             for file, path in output_args.items():
                 check_exists.append(os.path.exists(path))
             if any(check_exists):
-                print('Some or all of the output file already exists. Skipping since overwrite mode is inactivated.')
+                print(' '.join([prefix, 'Some or all of the output file already exists. '
+                                        'Skipping since overwrite mode is inactivated.']))
             else:
                 cmd = parse_command(input_args, output_args, task=task, num_thread=num_thread,
                                     genome_index=genome_index, genome_gtf=genome_gtf)
