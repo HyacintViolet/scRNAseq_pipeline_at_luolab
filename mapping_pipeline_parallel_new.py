@@ -99,7 +99,7 @@ def parse_input_output(src_dir, dst_dir, lib, task=None, set_cell_number=80):
                 read2_filename = file
         input_args['path_to_read1'] = os.path.join(in_dir, read1_filename)
         input_args['path_to_read2'] = os.path.join(in_dir, read2_filename)
-        input_args['whitelist'] = os.path.join(out_dir, '_'.join([prefix, 'whitelist'+set_cell_number+'.txt']))
+        input_args['whitelist'] = os.path.join(out_dir, '_'.join([prefix, 'whitelist_washed.txt']))
         output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'extracted.fq.gz']))
 
     elif task is "STAR_mapping":
@@ -407,14 +407,14 @@ def main():
     # wash_whitelist(src_dir=src_dir2, dst_dir=dst_dir, parent_dir=parent_dir, task="wash_whitelist")
 
     # STEP 3: umi_tools extract
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_extract", num_process=32)
+    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_extract", num_process=32)
 
     # STEP 4: STAR mapping
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
 
     # STEPs 5, 6, 7 are involved in calculating alignment stats
     # STEP 5: split aligned bam file into mapped and unmapped
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="split_bam", num_thread=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="split_bam", num_thread=32)
 
     # STEP 6: extract alignment statistics
     do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="alignment_stats", num_thread=32)
@@ -424,8 +424,8 @@ def main():
 
     # STEP 8 follows STEP4
     # STEP 8: featureCounts
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf_extended,
-    #             num_thread=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf_extended,
+                num_thread=32)
 
     # STEP 9: samtools sort
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_sort", num_thread=32)
