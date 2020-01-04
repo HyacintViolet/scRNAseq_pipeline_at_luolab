@@ -111,7 +111,7 @@ def parse_input_output(src_dir, dst_dir, lib, task=None, set_cell_number=80):
         input_args['input'] = os.path.join(in_dir, '_'.join([prefix, 'Aligned.sortedByCoord.out.bam']))
         output_args['unmapped_output'] = os.path.join(in_dir, '_'.join([prefix, 'unmapped_sorted.bam']))
         output_args['tmp'] = os.path.join(in_dir, 'tmp')
-        output_args['mapped_output'] = input_args['input']
+        output_args['output_overwrite'] = input_args['input']
 
     elif task is "alignment_stats":
         input_args['mapped_input'] = os.path.join(in_dir, '_'.join([prefix, 'Aligned.sortedByCoord.out.bam']))
@@ -211,7 +211,7 @@ def parse_command(input_args, output_args, task=None, num_thread=None, genome_in
                         'samtools', 'sort', '-', '-o', output_args['unmapped_output'], '-@', num_thread, '&&',
                         'samtools', 'view', '-F4', '-bS', input_args['input'], '-@', num_thread, '|',
                         'samtools', 'sort', '-', '-o', output_args['tmp'], '-@', num_thread, '&&',
-                        'mv', output_args['tmp'], output_args['mapped_output']])
+                        'mv', output_args['tmp'], output_args['output_overwrite']])
         # Example command:
         # samtools view -f4 -bS YT013101_Aligned.sortedByCoord.out.bam -@ 32 | samtools sort - -o
         # YT013101_unmapped_sorted.bam -@ 32 && samtools view -F4 -bS YT013101_Aligned.sortedByCoord.out.bam -@ 32 |
@@ -308,7 +308,8 @@ def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=False, num_proc
         else:
             check_exists = []
             for file, path in output_args.items():
-                check_exists.append(os.path.exists(path))
+                if file is not 'output_overwrite':
+                    check_exists.append(os.path.exists(path))
             if any(check_exists):
                 print(' '.join([prefix, 'Some or all of the output file already exists. '
                                         'Skipping since overwrite mode is inactivated.']))
