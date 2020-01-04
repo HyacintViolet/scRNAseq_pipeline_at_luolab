@@ -39,7 +39,7 @@ def get_prefix(lib):
     return prefix
 
 
-def check_file_exists(path_to_file):
+def abort_if_file_not_exists(path_to_file):
     if not os.path.exists(path_to_file):
         raise SystemExit(' '.join(['Aborting because', os.path.basename(path_to_file), 'was not found. Please prepare '
                                    'the file before running the pipe. See readme.txt for detail.']))
@@ -306,11 +306,11 @@ def do_parallel(src_dir=None, dst_dir=None, task=None, overwrite=False, num_proc
                                 genome_index=genome_index, genome_gtf=genome_gtf)
             cmd_all.append([(prefix, task), cmd])
         else:
-            check_exists = []
+            file_exists = []
             for file, path in output_args.items():
                 if file is not 'output_overwrite':
-                    check_exists.append(os.path.exists(path))
-            if any(check_exists):
+                    file_exists.append(os.path.exists(path))
+            if any(file_exists):
                 print(' '.join([prefix, 'Some or all of the output file already exists. '
                                         'Skipping since overwrite mode is inactivated.']))
             else:
@@ -414,10 +414,10 @@ def main():
 
     # STEPs 5, 6, 7 are involved in calculating alignment stats
     # STEP 5: split aligned bam file into mapped and unmapped
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="split_bam", num_thread=32)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="split_bam", num_thread=32)
 
     # STEP 6: extract alignment statistics
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="alignment_stats", num_thread=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="alignment_stats", num_thread=32)
 
     # STEP 7: merge alignment statistics
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="merge_aln_stats", num_process=32)
