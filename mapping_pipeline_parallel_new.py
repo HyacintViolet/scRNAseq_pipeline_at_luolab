@@ -131,6 +131,11 @@ def parse_input_output(src_dir, dst_dir, lib, task=None, set_cell_number=80):
         input_args['mapped'] = os.path.join(in_dir, '_'.join([prefix, 'Aligned.sortedByCoord.out.bam']))
         output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'gene_assigned']))
 
+    elif task is "sambamba_sort":
+        input_args['input'] = os.path.join(in_dir,
+                                           '_'.join([prefix, 'Aligned.sortedByCoord.out.bam.featureCounts.bam']))
+        output_args['output'] = os.path.join(out_dir, '_'.join([prefix, 'assigned_sorted.bam']))
+
     elif task is "samtools_sort":
         input_args['input'] = os.path.join(in_dir,
                                            '_'.join([prefix, 'Aligned.sortedByCoord.out.bam.featureCounts.bam']))
@@ -255,9 +260,16 @@ def parse_command(input_args, output_args, task=None, num_thread=None, genome_in
         #               -R BAM /path/to/map_result/YT013101_Aligned.sortedByCoord.out.bam
         #               -T 32
 
+    elif task is "sambamba_sort":
+        cmd = ' '.join(['sambamba', 'sort', '-t', num_thread, '-m', '64G', '-o', output_args['output'],
+                        input_args['input']])
+        # Example command:
+        # sambamba sort -t 32 -m 64G -o /path/to/map_result/YT101021_assigned_sorted.bam
+        #          /path/to/map_result/YT101021_Aligned.sortedByCoord.out.bam.featureCounts.bam
+
     elif task is "samtools_sort":
         cmd = ' '.join(['samtools', 'sort', input_args['input'], '-o', output_args['output'], '-@', num_thread])
-        # Example command:samt
+        # Example command:
         # samtools sort /path/to/map_result/YT013101_Aligned.sortedByCoord.out.bam.featureCounts.bam
         #               -o /path/to/map_result/YT013101_assigned_sorted.bam -@ 32
 
@@ -427,8 +439,9 @@ def main():
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="featurecounts", genome_gtf=genome_gtf_extended,
     #             num_thread=32)
 
-    # STEP 9: samtools sort
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_sort", num_thread=32)
+    # STEP 9: sambamba/samtools sort
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="sambamba_sort", num_thread=32)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_sort", num_thread=32)
 
     # STEP 10: samtools index
     do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_index", num_process=32)

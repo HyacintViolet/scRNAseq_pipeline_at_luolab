@@ -6,6 +6,7 @@
       <w>fastqc</w>
       <w>filenames</w>
       <w>nuniqmapped</w>
+      <w>sambamba</w>
       <w>samtools</w>
       <w>whietlist</w>
     </words>
