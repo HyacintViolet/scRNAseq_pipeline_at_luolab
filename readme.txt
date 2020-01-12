@@ -89,6 +89,29 @@ Fix (extend) annotation pipeline:
 8. Run extend_gtf_gffutils.py  # extend gtf files based on extension_profiles.txt
 
 ************************************************************************************************************************
+Extract ambiguity reads
+
+1. Run mapping_pipeline_parallel_new.py:
+   do_parallel("unassigned_ambiguity_summary")
+   do_parallel("ambiguity_bam_to_bed")
+
+2. Go to mapping directory:
+   samtools merge all_ambiguity.bam `find mapping/ -name "*ambiguity.bam"` -@ 32
+   This merges all ambiguity reads into one BAM file for easier visualization in the future.
+
+3. Go to mapping directory:
+   find mapping/ -name "*ambiguity.bed" -type f -exec cat {} \; | bedtools sort -i - | uniq - > all_ambiguity_uniq_bed
+
+4. Process all_ambiguity_uniq.bed:
+   bedtools cluster -d 150 -i all_ambiguity_uniq.bed > all_ambiguity_uniq_clusters.bed
+
+   uniq -f1 -f2 -f3 -c all_ambiguity_uniq_clusters.bed | sed 's/^\s*//' | tr ' ' '\t' >
+   all_ambiguity_uniq_clusters_stats.bed
+
+   awk 'BEGIN{FS="\t";OFS="\t"} $1>60 {print $0}' all_ambiguity_uniq_clusters_stats.bed > all_ambiguity_final.bed
+
+
+************************************************************************************************************************
 What's inside ...:
     batch_process.py:
         - samtools index

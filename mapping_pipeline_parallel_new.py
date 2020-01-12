@@ -440,21 +440,21 @@ def main():
     #             num_thread=32)
 
     # STEP 9: sambamba/samtools sort
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="sambamba_sort", num_thread=32)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="sambamba_sort", num_thread=32)
     # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_sort", num_thread=32)
 
     # STEP 10: samtools index
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_index", num_process=32)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="samtools_index", num_process=32)
 
     # STEP 11: umitools count
-    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="umitools_count", num_process=24)
+    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="umitools_count", num_process=24)
 
     # OTHER FUNCTIONALITIES
     # Summary of unassigned ambiguity reads from bam
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="unassigned_ambiguity_summary", num_thread=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="unassigned_ambiguity_summary", num_thread=32)
 
     # Convert ambiguity bam to bed
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="ambiguity_bam_to_bed")
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="ambiguity_bam_to_bed")
 
 
 if __name__ == '__main__':
