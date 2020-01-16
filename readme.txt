@@ -7,11 +7,11 @@ scRNAseq reads mapping pipeline: modified based on umi_tools protocol
 
 3. add_suffix.py
 
-*4. extract_mapping_stats.py
+*4. extract_mapping_stats.py  # No longer required
 
 5. concatenate_counts.py
 
-*6. concatenate_mapping_stats.py
+*6. concatenate_mapping_stats.py  # No longer required
 
 # R pipeline starts here
     i.  Alignment QC: alignment_QC.R
@@ -82,7 +82,7 @@ Fix (extend) annotation pipeline:
 
 
 
-7. # Prepare adjacent_profiles.txt  # No longer required.
+*7. Prepare adjacent_profiles.txt  # No longer required.
 
    Go to R, run extension_length.R, acquire extension_profiles.txt
 
@@ -100,7 +100,7 @@ Extract ambiguity reads
    This merges all ambiguity reads into one BAM file for easier visualization in the future.
 
 3. Go to mapping directory:
-   find mapping/ -name "*ambiguity.bed" -type f -exec cat {} \; | bedtools sort -i - | uniq - > all_ambiguity_uniq_bed
+   find mapping/ -name "*ambiguity.bed" -type f -exec cat {} \; | bedtools sort -i - | uniq - > all_ambiguity_uniq.bed
 
 4. Process all_ambiguity_uniq.bed:
    bedtools cluster -d 150 -i all_ambiguity_uniq.bed > all_ambiguity_uniq_clusters.bed
@@ -112,7 +112,4 @@ Extract ambiguity reads
 
 
 ************************************************************************************************************************
-What's inside ...:
-    batch_process.py:
-        - samtools index
-        - md5-checksum
+

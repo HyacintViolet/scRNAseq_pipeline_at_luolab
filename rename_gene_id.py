@@ -68,7 +68,7 @@ expression_mat.index = expression_mat.index.map(dictionary)
 
 
 expression_mat.to_csv('counts_matrix_alnQCed_renamed.txt.gz', sep=' ', compression="gzip",
-                          index=True, index_label=False)  # Use index_label=False for easier importing in R
+                      index=True, index_label=False)  # Use index_label=False for easier importing in R
 print('Finished.')
 
 # ----------------------------------------------------------------------------------------------------------------------
