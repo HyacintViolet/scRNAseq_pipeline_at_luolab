@@ -244,8 +244,7 @@ def parse_command(input_args, output_args, task=None, num_thread=None, genome_in
                         '1', '-2', '2', '-', input_args['unmapped'], '>', output_args['aln_stats'], '&&',
                         'echo', '\'Barcode Uniquemapped Multimapped Unmapped\'', '|',
                         'cat', '-', output_args['aln_stats'], '>', output_args['tmp'], '&&',
-                        'mv', output_args['tmp'], output_args['aln_stats']])
-        # Example command:
+                        'mv', output_args['tmp'], output_args['aln_stats']])        # Example command:
         # join -j 2 YT013101_uniquemapped_by_cell.txt YT013101_multimapped_by_cell.txt | join -1 1 -2 2 -
         # YT013101_unmapped_by_cell.txt > YT013101_aln_stats_by_cell.txt &&
         # echo 'Barcode Uniquemapped Multimapped Unmapped' | cat - YT013101_aln_stats_by_cell.txt > tmp &&
@@ -413,16 +412,16 @@ def main():
             os.makedirs(os.path.join(dst_dir, out))
 
     # STEP 1: umi_tools whitelist
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_whitelist", num_process=32)
+    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_whitelist", num_process=32)
 
     # STEP 2: wash whitelist
-    # wash_whitelist(src_dir=src_dir2, dst_dir=dst_dir, parent_dir=parent_dir, task="wash_whitelist")
+    wash_whitelist(src_dir=src_dir2, dst_dir=dst_dir, parent_dir=parent_dir, task="wash_whitelist")
 
     # STEP 3: umi_tools extract
-    # do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_extract", num_process=32)
+    do_parallel(src_dir=src_dir, dst_dir=dst_dir, task="umitools_extract", num_process=32)
 
     # STEP 4: STAR mapping
-    # do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
+    do_parallel(src_dir=src_dir2, dst_dir=dst_dir, task="STAR_mapping", genome_index=genome_index, num_thread=32)
 
     # STEPs 5, 6, 7 are involved in calculating alignment stats
     # STEP 5: split aligned bam file into mapped and unmapped

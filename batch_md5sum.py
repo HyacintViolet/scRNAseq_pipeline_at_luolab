@@ -32,7 +32,7 @@ def fetch_file_list(wd, file_list=[]):
 if __name__ == "__main__":
 
     # Input
-    parent_dir = '/media/luolab/ZA1BT1ER/scRNAseq/yanting_all/data/yanting_200115/'
+    parent_dir = '/media/luolab/WKD0Q2WQ/linrui/data/linrui_data_200222'
     files = fetch_file_list(parent_dir)
 
     # Output
